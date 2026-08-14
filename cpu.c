@@ -156,8 +156,8 @@ void infer_overflow_flag(byte byte1, byte byte2) {
 	}
 }
 
-void infer_carry_flag(byte byte1, byte byte2, byte limit) {
-	if ((word)(byte1 + byte2) > limit) {
+void infer_carry_flag(word res) {
+	if (res > 0xFF) {
 		set_ps_bit(cpu->ps, CF);
 	} else {
 		clear_ps_bit(cpu->ps, CF);
@@ -201,33 +201,42 @@ void bit(word addr) { // Tenho de verificar esta função
 // Arithmetic
 
 void adc(word addr) {
-	byte vl = memory[addr] + get_ps_bit(cpu->ps, CF);
+	byte vl = memory[addr];
+	word res = cpu->acc + vl + get_ps_bit(cpu->ps, CF);
 	byte old_acc = cpu->acc;
 
-	cpu->acc += vl;
-	infer_carry_flag(old_acc, vl, 0xFF);
+	cpu->acc = (byte)res;
+	infer_carry_flag(res);
 	infer_overflow_flag(old_acc, vl);
 	infer_zero_flag(cpu->acc);
 	infer_negative_flag(cpu->acc);
 }
 
 void sbc(word addr) {
-	byte vl = ~(memory[addr]) + get_ps_bit(cpu->ps, CF);
+	byte vl = memory[addr] + (1 ^ get_ps_bit(cpu->ps, CF));
+	byte res = cpu->acc - vl;
 	byte old_acc = cpu->acc;
 
-	cpu->acc += vl;
-	infer_carry_flag(old_acc, vl, 0xFF);
+	cpu->acc = res;
+	if (old_acc >= vl) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
 	infer_overflow_flag(old_acc, vl);
 	infer_zero_flag(cpu->acc);
 	infer_negative_flag(cpu->acc);
 }
 
 void cmp(word addr) {
-	byte vl = 1 + ~(memory[addr]);
-	byte res = cpu->acc + vl;
+	byte vl = memory[addr];
+	byte res = cpu->acc - vl;
 
-	printf("Res: %d\n", res);
-	infer_carry_flag(cpu->acc, vl, 0xFF);
+	if (cpu->acc > vl) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
 	infer_zero_flag(res);
 	infer_negative_flag(res);
 }
