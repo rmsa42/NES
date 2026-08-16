@@ -1,20 +1,11 @@
 # Docs
 
-Everything from NES docs, current doubts and what's left to do
+Everything from NES docs and my docs
 
-## Current State & Doubts
+## My Docs
 
-### State
-
-- [X] Make a special carry flag cases depending on the arithemetic functions. Also stoped doing 2 complements because it was more dificult than helpful
-- [ ] Need to review all instructions to check if they alter the right flags from the Processor Status (PS)
-- [ ] Need to make all the illegal opcodes
-
-### Doubts
-
-- The 2 complement is done in compilation or is the cpu that does?
-
-R: No the 2 complement is done in the cpu. The compiler understands -5 as 5 and a subtract instruction
+1. [Development](./Development.md)
+2. [My-Goal](./Goal.md)
 
 ## NES Docs
 
