@@ -2,9 +2,14 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NMI_VECTOR 0xFFFA
 #define RES_VECTOR 0xFFFC
 #define IRQ_VECTOR 0xFFFE
+#define STACK_VECTOR 0xFF
 #define STACK_OFFSET 0x01
 
 #define get_ps_bit(ps, bit) ((ps >> bit) & 1)
@@ -48,6 +53,7 @@ typedef struct inst {
 extern byte memory[0xFFFF];
 
 int cpu_instance();
+void cpu_reset();
 void cpu_state();
 byte fetch_byte();
 word fetch_word();
@@ -227,4 +233,8 @@ typedef enum {
 	BRK_IMPL = 0x00,
 //
 } instr_type;
+
+#ifdef __cplusplus
+}
+#endif
 

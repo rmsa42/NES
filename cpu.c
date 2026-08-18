@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
-static struct cpu *cpu;
+struct cpu *cpu;
 inst insts[0xFF];
 void fill_insts();
 
@@ -17,12 +17,18 @@ int cpu_instance() {
 	memset(cpu, 0, sizeof(struct cpu));
 	memset(memory, 0, sizeof(memory));
 	fill_insts();
-	cpu->sp = 0xFF;
+	cpu->sp = STACK_VECTOR;
 	return (0);
+}
+
+void cpu_reset() {
+	memset(cpu, 0, sizeof(struct cpu));
+	cpu->sp = STACK_VECTOR;
 }
 
 void cpu_state() {
 	printf("CPU State\n");
+	printf("\tPC: %d\n", cpu->pc);
 	printf("\tACC: %d\n", cpu->acc);
 	printf("\tSP: %d\n", cpu->sp);
 	printf("Processor Status\n");
@@ -92,6 +98,22 @@ word abs_x_address_mode() {
 word abs_y_address_mode() {
 	word addr = fetch_word() + cpu->iy;
 	return (addr);
+}
+
+word ind_x_address_mode() {
+	byte ind_addr = fetch_byte();
+	return (make_word(memory[ind_addr + cpu->ix + 1], memory[ind_addr + cpu->ix]));
+}
+
+word ind_y_address_mode() {
+	byte ind_addr = fetch_byte();
+	byte lb = memory[ind_addr] + cpu->iy;
+	byte hb = memory[ind_addr + 1] + cpu->iy;
+
+	if (memory[ind_addr] + cpu->iy > 0xFF) {
+		hb += 1;
+	}
+	return (make_word(hb, lb));
 }
 
 //
@@ -188,12 +210,16 @@ void ora(word addr) {
 	infer_negative_flag(cpu->acc);
 }
 
-void bit(word addr) { // Tenho de verificar esta função
-	byte vl = memory[addr];
+void bit(word addr) {
+	byte res = cpu->acc & memory[addr];
 
-	//set_ps_bit(cpu->ps, ZF, ((cpu->acc & vl) == 0));
-	//set_ps_bit(cpu->ps, VF, check_bit(vl, VF));
-	//set_ps_bit(cpu->ps, NF, check_bit(vl, NF));
+	infer_zero_flag(res);
+	infer_negative_flag(memory[addr]);
+	if (check_bit(memory[addr], 6)) {
+		set_ps_bit(cpu->ps, VF);
+	} else {
+		clear_ps_bit(cpu->ps, VF);
+	}
 }
 
 //
@@ -241,6 +267,32 @@ void cmp(word addr) {
 	infer_negative_flag(res);
 }
 
+void cpx(word addr) {
+	byte vl = memory[addr];
+	byte res = cpu->ix - vl;
+
+	if (cpu->ix > vl) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	infer_zero_flag(res);
+	infer_negative_flag(res);
+}
+
+void cpy(word addr) {
+	byte vl = memory[addr];
+	byte res = cpu->iy - vl;
+
+	if (cpu->iy > vl) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	infer_zero_flag(res);
+	infer_negative_flag(res);
+}
+
 //
 
 // Load/Store
@@ -274,6 +326,8 @@ void sty(word addr) {
 void stx(word addr) {
 	memory[addr] = cpu->ix;
 }
+
+//
 
 // Transfers
 
@@ -311,6 +365,8 @@ void tya(word addr) {
 	infer_negative_flag(cpu->acc);
 }
 
+//
+
 // Stack
 
 void pha(word addr) {
@@ -331,7 +387,10 @@ void plp(word addr) {
 	cpu->ps = pop_byte();
 }
 
+//
+
 // Jumps
+
 void jmp(word addr) {
 	cpu->pc = addr;
 }
@@ -345,7 +404,10 @@ void rts(word addr) {
 	cpu->pc = pop_word();
 }
 
+//
+
 // Branches
+
 void bcc(word rdisp) {
 	if (!get_ps_bit(cpu->ps, CF)) {
 		cpu->pc += rdisp; 
@@ -394,7 +456,129 @@ void bvs(word rdisp) {
 	}
 }
 
+//
+
+// Increment/Decrement
+
+void inc(word addr) {
+	memory[addr] += 1;
+	infer_negative_flag(memory[addr]);
+	infer_zero_flag(memory[addr]);
+}
+
+void inx(word addr) {
+	cpu->ix += 1;
+	infer_negative_flag(cpu->ix);
+	infer_zero_flag(cpu->ix);
+}
+
+void iny(word addr) {
+	cpu->iy += 1;
+	infer_negative_flag(cpu->iy);
+	infer_zero_flag(cpu->iy);
+}
+
+void dec(word addr) {
+	memory[addr] -= 1;
+	infer_negative_flag(memory[addr]);
+	infer_zero_flag(memory[addr]);
+}
+
+void dex(word addr) {
+	cpu->ix -= 1;
+	infer_negative_flag(cpu->ix);
+	infer_zero_flag(cpu->ix);
+}
+
+void dey(word addr) {
+	cpu->iy -= 1;
+	infer_negative_flag(cpu->iy);
+	infer_zero_flag(cpu->iy);
+}
+
+//
+
+// Bit Shifts
+
+void asl(word addr) {
+	byte *vl = &memory[addr];
+	
+	if (check_bit(*vl, 7)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	*vl = *vl << 1;
+	infer_negative_flag(*vl);
+	infer_zero_flag(*vl);
+}
+
+void asl_acc(word z) {
+	if (check_bit(cpu->acc, 7)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	cpu->acc = cpu->acc << 1;
+	infer_negative_flag(cpu->acc);
+	infer_zero_flag(cpu->acc);
+}
+
+void lsr(word addr) {
+	byte *vl = &memory[addr];
+	
+	if (check_bit(*vl, 0)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	*vl = *vl >> 1;
+	infer_negative_flag(*vl);
+	infer_zero_flag(*vl);
+}
+
+void lsr_acc(word z) {
+	if (check_bit(cpu->acc, 0)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	cpu->acc = cpu->acc >> 1;
+	infer_negative_flag(cpu->acc);
+	infer_zero_flag(cpu->acc);
+}
+
+void rol(word addr) {
+	byte *vl = &memory[addr];
+	byte res = (memory[addr] << 1) + get_ps_bit(cpu->ps, CF);
+
+	if (check_bit(*vl, 7)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	*vl = res;
+	infer_negative_flag(*vl);
+	infer_zero_flag(*vl);
+}
+
+void rol_acc(word z) {
+	byte res = (cpu->acc << 1) + get_ps_bit(cpu->ps, CF);
+
+	if (check_bit(cpu->acc, 7)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	cpu->acc = res;
+	infer_negative_flag(cpu->acc);
+	infer_zero_flag(cpu->acc);
+}
+
+//
+
 // Status Flag Change
+
 void clc(word np) {
 	clear_ps_bit(cpu->ps, CF);
 }
@@ -423,6 +607,8 @@ void sei(word np) {
 	set_ps_bit(cpu->ps, IF);
 }
 
+//
+
 // System Functions
 
 void brk(word np) {
@@ -440,6 +626,8 @@ void rti(word np) {
 	cpu->pc = pop_word();
 }
 
+//
+
 void fill_insts() {
 	// Logical Instrucions
 
@@ -449,8 +637,8 @@ void fill_insts() {
 	insts[AND_ABSY] = (inst){ And, abs_y_address_mode };
 	insts[AND_ZPG] = (inst){ And, zp_address_mode };
 	insts[AND_ZPGX] = (inst){ And, zp_x_address_mode };
-    // insts[AND_INDX] = (inst){ and, ind_x_address_mode };
-    // insts[AND_INDY] = (inst){ and, ind_y_address_mode };
+    insts[AND_INDX] = (inst){ And, ind_x_address_mode };
+    insts[AND_INDY] = (inst){ And, ind_y_address_mode };
 
     insts[EOR_IMM]  = (inst){ eor, imm_address_mode };
     insts[EOR_ZPG]  = (inst){ eor, zp_address_mode };
@@ -472,14 +660,15 @@ void fill_insts() {
 	//
 
 	// Arithmetic Instructions
+
 	insts[ADC_IMM] = (inst){ adc, imm_address_mode };
 	insts[ADC_ZPG] = (inst){ adc, zp_address_mode };
 	insts[ADC_ZPGX] = (inst){ adc, zp_x_address_mode };
 	insts[ADC_ABS] = (inst){ adc, abs_address_mode };
 	insts[ADC_ABSX] = (inst){ adc, abs_x_address_mode };
 	insts[ADC_ABSY] = (inst){ adc, abs_y_address_mode };
-	//insts[ADC_INDX] = (inst){ adc, ind_x_address_mode };
-	//insts[ADC_INDY] = (inst){ adc, ind_y_address_mode };
+	insts[ADC_INDX] = (inst){ adc, ind_x_address_mode };
+	insts[ADC_INDY] = (inst){ adc, ind_y_address_mode };
 
 	insts[SBC_IMM] = (inst){ sbc, imm_address_mode };
 	insts[SBC_ZPG] = (inst){ sbc, zp_address_mode };
@@ -487,8 +676,8 @@ void fill_insts() {
 	insts[SBC_ABS] = (inst){ sbc, abs_address_mode };
 	insts[SBC_ABSX] = (inst){ sbc, abs_x_address_mode };
 	insts[SBC_ABSY] = (inst){ sbc, abs_y_address_mode };
-	//insts[SBC_INDX] = (inst){ sbc, ind_x_address_mode };
-	//insts[SBC_INDY] = (inst){ sbc, ind_y_address_mode };
+	insts[SBC_INDX] = (inst){ sbc, ind_x_address_mode };
+	insts[SBC_INDY] = (inst){ sbc, ind_y_address_mode };
 
 	insts[CMP_IMM] = (inst){ cmp, imm_address_mode };
 	insts[CMP_ZPG] = (inst){ cmp, zp_address_mode };
@@ -496,8 +685,16 @@ void fill_insts() {
 	insts[CMP_ABS] = (inst){ cmp, abs_address_mode };
 	insts[CMP_ABSX] = (inst){ cmp, abs_x_address_mode };
 	insts[CMP_ABSY] = (inst){ cmp, abs_y_address_mode };
-	//insts[CMP_INDX] = (inst){ cmp, ind_x_address_mode };
-	//insts[CMP_INDY] = (inst){ cmp, ind_y_address_mode };
+	insts[CMP_INDX] = (inst){ cmp, ind_x_address_mode };
+	insts[CMP_INDY] = (inst){ cmp, ind_y_address_mode };
+
+	insts[CPX_IMM] = (inst){ cpx, imm_address_mode };
+	insts[CPX_ZPG] = (inst){ cpx, zp_address_mode };
+	insts[CPX_ABS] = (inst){ cpx, abs_address_mode };
+
+	insts[CPY_IMM] = (inst){ cpy, imm_address_mode };
+	insts[CPY_ZPG] = (inst){ cpy, zp_address_mode };
+	insts[CPY_ABS] = (inst){ cpy, abs_address_mode };
 
 	// Load/Store Instructions
 
@@ -573,6 +770,53 @@ void fill_insts() {
     insts[BVC_RLT] = (inst){ bvc, rel_address_mode };
     insts[BVS_RLT] = (inst){ bvs, rel_address_mode };
 	
+	//
+
+	// Increment/Decrement
+
+    insts[INC_ABS] = (inst){ inc, rel_address_mode };
+    insts[INC_ABSX] = (inst){ inc, rel_address_mode };
+    insts[INC_ZPG] = (inst){ inc, rel_address_mode };
+    insts[INC_ZPGX] = (inst){ inc, rel_address_mode };
+
+    insts[DEC_ABS] = (inst){ dec, rel_address_mode };
+    insts[DEC_ABSX] = (inst){ dec, rel_address_mode };
+    insts[DEC_ZPG] = (inst){ dec, rel_address_mode };
+    insts[DEC_ZPGX] = (inst){ dec, rel_address_mode };
+
+    insts[INX_IMPL] = (inst){ inx, rel_address_mode };
+    insts[INY_IMPL] = (inst){ iny, rel_address_mode };
+    insts[DEX_IMPL] = (inst){ dex, rel_address_mode };
+    insts[DEY_IMPL] = (inst){ dey, rel_address_mode };
+
+	//
+
+	// Bit Shifts
+
+	insts[ASL_ACC] = (inst){ asl_acc, impl_address_mode };
+	insts[ASL_ABS] = (inst){ asl, abs_address_mode };
+	insts[ASL_ABSX] = (inst){ asl, abs_x_address_mode };
+	insts[ASL_ZPG] = (inst){ asl, zp_address_mode };
+	insts[ASL_ZPGX] = (inst){ asl, zp_x_address_mode };
+
+	insts[LSR_ACC] = (inst){ lsr_acc, impl_address_mode };
+	insts[LSR_ABS] = (inst){ lsr, abs_address_mode };
+	insts[LSR_ABSX] = (inst){ lsr, abs_x_address_mode };
+	insts[LSR_ZPG] = (inst){ lsr, zp_address_mode };
+	insts[LSR_ZPGX] = (inst){ lsr, zp_x_address_mode };
+
+	insts[ROL_ACC] = (inst){ rol_acc, impl_address_mode };
+	insts[ROL_ABS] = (inst){ rol, abs_address_mode };
+	insts[ROL_ABSX] = (inst){ rol, abs_x_address_mode };
+	insts[ROL_ZPG] = (inst){ rol, zp_address_mode };
+	insts[ROL_ZPGX] = (inst){ rol, zp_x_address_mode };
+
+	//insts[ROR_ACC] = (inst){ ror, acc_mode() };
+	//insts[ROR_ABS] = (inst){ ror, abs_address_mode() };
+	//insts[ROR_ABSX] = (inst){ ror, abs_x_address_mode() };
+	//insts[ROR_ZPG] = (inst){ ror, zp_address_mode() };
+	//insts[ROR_ZPGX] = (inst){ ror, zp_x_address_mode() };
+
 	//
 
     // Flags
