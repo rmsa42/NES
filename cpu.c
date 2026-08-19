@@ -5,6 +5,7 @@
 
 struct cpu *cpu;
 inst insts[0xFF];
+byte memory[0xFFFF];
 void fill_insts();
 
 int cpu_instance() {

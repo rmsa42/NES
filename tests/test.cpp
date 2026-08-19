@@ -3,7 +3,7 @@
 
 extern inst insts[0xFF];
 extern struct cpu *cpu;
-byte memory[0xFFFF] = {0};
+extern byte memory[0xFFFF];
 
 class cpu_test : public testing::Test {
 protected:

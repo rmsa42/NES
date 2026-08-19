@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 extern inst insts[0xFF];
-byte memory[0xFFFF] = {0};
+extern byte memory[0xFFFF];
 
 int main() {
 	int res;

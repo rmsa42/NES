@@ -50,8 +50,6 @@ typedef struct inst {
 	word (*mode)();
 } inst;
 
-extern byte memory[0xFFFF];
-
 int cpu_instance();
 void cpu_reset();
 void cpu_state();
