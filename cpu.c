@@ -575,9 +575,37 @@ void rol_acc(word z) {
 	infer_zero_flag(cpu->acc);
 }
 
+void ror(word addr) {
+	byte *vl = &memory[addr];
+	byte res = (memory[addr] >> 1) + (get_ps_bit(cpu->ps, CF) << 7);
+
+	if (check_bit(*vl, 0)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	*vl = res;
+	infer_negative_flag(*vl);
+	infer_zero_flag(*vl);
+
+}
+
+void ror_acc(word z) {
+	byte res = (cpu->acc >> 1) + (get_ps_bit(cpu->ps, CF) << 7);
+
+	if (check_bit(cpu->acc, 0)) {
+		set_ps_bit(cpu->ps, CF);
+	} else {
+		clear_ps_bit(cpu->ps, CF);
+	}
+	cpu->acc = res;
+	infer_negative_flag(cpu->acc);
+	infer_zero_flag(cpu->acc);
+}
+
 //
 
-// Status Flag Change
+// Status Flag
 
 void clc(word np) {
 	clear_ps_bit(cpu->ps, CF);
@@ -609,7 +637,7 @@ void sei(word np) {
 
 //
 
-// System Functions
+// System
 
 void brk(word np) {
 	push_word(cpu->pc);
@@ -811,15 +839,15 @@ void fill_insts() {
 	insts[ROL_ZPG] = (inst){ rol, zp_address_mode };
 	insts[ROL_ZPGX] = (inst){ rol, zp_x_address_mode };
 
-	//insts[ROR_ACC] = (inst){ ror, acc_mode() };
-	//insts[ROR_ABS] = (inst){ ror, abs_address_mode() };
-	//insts[ROR_ABSX] = (inst){ ror, abs_x_address_mode() };
-	//insts[ROR_ZPG] = (inst){ ror, zp_address_mode() };
-	//insts[ROR_ZPGX] = (inst){ ror, zp_x_address_mode() };
+	insts[ROR_ACC] = (inst){ ror_acc, impl_address_mode };
+	insts[ROR_ABS] = (inst){ ror, abs_address_mode };
+	insts[ROR_ABSX] = (inst){ ror, abs_x_address_mode };
+	insts[ROR_ZPG] = (inst){ ror, zp_address_mode };
+	insts[ROR_ZPGX] = (inst){ ror, zp_x_address_mode };
 
 	//
 
-    // Flags
+    // Status Flags
 
     insts[CLC_IMPL] = (inst){ clc, impl_address_mode };
     insts[SEC_IMPL] = (inst){ sec, impl_address_mode };

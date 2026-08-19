@@ -8,10 +8,13 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Make special carry flag cases depending on the arithemetic functions.
 > R: Also stoped doing 2 complements because it was more dificult than helpful
 
+**18/08/2026**
+- [X] Need to review all instructions to check if they alter the right flags from the Processor Status (PS)
+> R: Checked every instruction, all of them check the right flags
+
 - [ ] Make tests for all algorithm instructions. Also need to find a structure for the tests (encapsulation of the cpu or total public)
 - [ ] Need to review the PS flags functions, mostly the carry flag function
 - [ ] Need to review the overflow flag in the SBC instruction
-- [ ] Need to review all instructions to check if they alter the right flags from the Processor Status (PS)
 - [ ] Need to make all the illegal opcodes
 - [ ] Need to rearrange the test cmake file whenever i structure the project into one or multiple libraries 
 
