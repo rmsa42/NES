@@ -16,9 +16,8 @@ int main() {
 	}
 
 	int i = 0;
-	memory[i++] = LDA_IMM;
+	memory[i++] = ADC_IMM;
 	memory[i++] = 0x01;
-	memory[i++] = ROR_ACC;
 
 	printf("Running CPU\n");
 	for (int i = 0; i < 3; i++) {
