@@ -24,4 +24,6 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 The 2 complement is done in compilation or is the cpu that does?
 > R: No the 2 complement is done in the cpu. The compiler understands -5 as 5 and a subtract instruction
 
+**22/08/2026**
 Does the ROL instructions add the carry first and then shift or the other way around? Also does it set bit0 or adds the carry?
+> R: The ROL and ROR instruction **sets** the bit with the old carry flag, so doesn't add. And the set part is the last part of the instruction

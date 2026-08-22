@@ -551,8 +551,9 @@ void lsr_acc(word z) {
 
 void rol(word addr) {
 	byte *vl = &memory[addr];
-	byte res = (memory[addr] << 1) + get_ps_bit(cpu->ps, CF);
+	byte res = (memory[addr] << 1);
 
+	set_bit_to(res, 0, get_ps_bit(cpu->ps, CF));
 	if (check_bit(*vl, 7)) {
 		set_ps_bit(cpu->ps, CF);
 	} else {
@@ -564,8 +565,9 @@ void rol(word addr) {
 }
 
 void rol_acc(word z) {
-	byte res = (cpu->acc << 1) + get_ps_bit(cpu->ps, CF);
+	byte res = (cpu->acc << 1);
 
+	set_bit_to(res, 0, get_ps_bit(cpu->ps, CF));
 	if (check_bit(cpu->acc, 7)) {
 		set_ps_bit(cpu->ps, CF);
 	} else {
@@ -578,8 +580,9 @@ void rol_acc(word z) {
 
 void ror(word addr) {
 	byte *vl = &memory[addr];
-	byte res = (memory[addr] >> 1) + (get_ps_bit(cpu->ps, CF) << 7);
+	byte res = (memory[addr] >> 1);
 
+	set_bit_to(res, 7, get_ps_bit(cpu->ps, CF));
 	if (check_bit(*vl, 0)) {
 		set_ps_bit(cpu->ps, CF);
 	} else {
@@ -592,8 +595,9 @@ void ror(word addr) {
 }
 
 void ror_acc(word z) {
-	byte res = (cpu->acc >> 1) + (get_ps_bit(cpu->ps, CF) << 7);
+	byte res = (cpu->acc >> 1);
 
+	set_bit_to(res, 7, get_ps_bit(cpu->ps, CF));
 	if (check_bit(cpu->acc, 0)) {
 		set_ps_bit(cpu->ps, CF);
 	} else {
