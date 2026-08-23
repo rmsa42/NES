@@ -172,6 +172,7 @@ void infer_overflow_flag(byte byte1, byte byte2) {
 	byte bit2 = check_bit(byte2, 7);
 	byte carry6 = check_bit(((byte1 & CARRY_6_MASK) + (byte2 & CARRY_6_MASK)), 7);
 
+	printf("Byte2: %x\n", byte2);
 	if ((bit1 && bit2 && !carry6) || (!bit1 && !bit2 && carry6)) {
 		set_ps_bit(cpu->ps, VF);
 	} else {
@@ -250,7 +251,7 @@ void sbc(word addr) {
 	} else {
 		clear_ps_bit(cpu->ps, CF);
 	}
-	infer_overflow_flag(old_acc, vl);
+	infer_overflow_flag(old_acc, ~(memory[addr]));
 	infer_zero_flag(cpu->acc);
 	infer_negative_flag(cpu->acc);
 }

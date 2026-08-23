@@ -17,9 +17,10 @@ int main() {
 
 	int i = 0;
 	memory[i++] = LDA_IMM;
-	memory[i++] = 0xFF;
+	memory[i++] = 0x50;
 	memory[i++] = SEC_IMPL;
-	memory[i++] = ROR_ACC;
+	memory[i++] = SBC_IMM;
+	memory[i++] = 0xb0;
 
 	printf("Running CPU\n");
 	for (int i = 0; i < 3; i++) {

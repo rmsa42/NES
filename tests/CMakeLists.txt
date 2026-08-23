@@ -9,7 +9,7 @@ set(BUILD_GMOCK 0)
 set(SOURCES 
 	../cpu.c
 	../cpu.h
-	test.cpp
+	arithmetic_tests.cpp
 )
 
 add_subdirectory(googletest)
