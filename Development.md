@@ -24,6 +24,9 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Need to review the PS flags functions and macros, mostly the carry flag function
 > R: I am not altering the PS flags functions for now, I will stay with what works. Just altered the macro names
 
+- [ ] Start with the APU (Audio Processing Unit) part
+- [ ] Need to implement the decimal calculations from arithmetic instructions
+- [ ] Review and possible implement what's left from the system vectors
 - [ ] Need to make all the illegal opcodes
 - [ ] Need to rearrange the test cmake file whenever i structure the project into one or multiple libraries 
 

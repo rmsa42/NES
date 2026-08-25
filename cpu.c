@@ -730,6 +730,8 @@ void fill_insts() {
 	insts[CPY_ZPG] = (inst){ cpy, zp_address_mode };
 	insts[CPY_ABS] = (inst){ cpy, abs_address_mode };
 
+	//
+
 	// Load/Store Instructions
 
     insts[LDA_IMM]  = (inst){ lda, imm_address_mode };
@@ -779,10 +781,13 @@ void fill_insts() {
 	//
 
     // Stack
+
     insts[PHA_IMPL] = (inst){ pha, impl_address_mode };
     insts[PHP_IMPL] = (inst){ php, impl_address_mode };
     insts[PLA_IMPL] = (inst){ pla, impl_address_mode };
     insts[PLP_IMPL] = (inst){ plp, impl_address_mode };
+
+	//
 
     // Jumps
 
