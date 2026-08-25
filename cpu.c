@@ -33,14 +33,14 @@ void cpu_state() {
 	printf("\tACC: %d\n", cpu->acc);
 	printf("\tSP: %d\n", cpu->sp);
 	printf("Processor Status\n");
-	printf("\tNegative: %d\n", get_ps_bit(cpu->ps, NF));
-	printf("\tOverflow: %d\n", get_ps_bit(cpu->ps, VF));
+	printf("\tNegative: %d\n", get_bit(cpu->ps, NF));
+	printf("\tOverflow: %d\n", get_bit(cpu->ps, VF));
 	printf("\tUnused: 0\n");
-	printf("\tBreak: %d\n", get_ps_bit(cpu->ps, BF));
-	printf("\tDecimal: %d\n", get_ps_bit(cpu->ps, DF));
-	printf("\tInterrupt: %d\n", get_ps_bit(cpu->ps, IF));
-	printf("\tZero: %d\n", get_ps_bit(cpu->ps, ZF));
-	printf("\tCarry: %d\n", get_ps_bit(cpu->ps, CF));
+	printf("\tBreak: %d\n", get_bit(cpu->ps, BF));
+	printf("\tDecimal: %d\n", get_bit(cpu->ps, DF));
+	printf("\tInterrupt: %d\n", get_bit(cpu->ps, IF));
+	printf("\tZero: %d\n", get_bit(cpu->ps, ZF));
+	printf("\tCarry: %d\n", get_bit(cpu->ps, CF));
 }
 
 byte fetch_byte() {
@@ -153,17 +153,17 @@ word pop_word() {
 
 void infer_zero_flag(byte byte) {
 	if (!byte) {
-		set_ps_bit(cpu->ps, ZF);
+		set_bit(cpu->ps, ZF);
 	} else {
-		clear_ps_bit(cpu->ps, ZF);
+		clear_bit(cpu->ps, ZF);
 	}
 }
 
 void infer_negative_flag(byte byte) {
 	if (check_bit(byte, 7)) {
-		set_ps_bit(cpu->ps, NF);
+		set_bit(cpu->ps, NF);
 	} else {
-		clear_ps_bit(cpu->ps, NF);
+		clear_bit(cpu->ps, NF);
 	}
 }
 
@@ -174,17 +174,17 @@ void infer_overflow_flag(byte byte1, byte byte2) {
 
 	printf("Byte2: %x\n", byte2);
 	if ((bit1 && bit2 && !carry6) || (!bit1 && !bit2 && carry6)) {
-		set_ps_bit(cpu->ps, VF);
+		set_bit(cpu->ps, VF);
 	} else {
-		clear_ps_bit(cpu->ps, VF);
+		clear_bit(cpu->ps, VF);
 	}
 }
 
 void infer_carry_flag(word res) {
 	if (res > 0xFF) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 }
 
@@ -218,9 +218,9 @@ void bit(word addr) {
 	infer_zero_flag(res);
 	infer_negative_flag(memory[addr]);
 	if (check_bit(memory[addr], 6)) {
-		set_ps_bit(cpu->ps, VF);
+		set_bit(cpu->ps, VF);
 	} else {
-		clear_ps_bit(cpu->ps, VF);
+		clear_bit(cpu->ps, VF);
 	}
 }
 
@@ -230,7 +230,7 @@ void bit(word addr) {
 
 void adc(word addr) {
 	byte vl = memory[addr];
-	word res = cpu->acc + vl + get_ps_bit(cpu->ps, CF);
+	word res = cpu->acc + vl + get_bit(cpu->ps, CF);
 	byte old_acc = cpu->acc;
 
 	cpu->acc = (byte)res;
@@ -241,15 +241,15 @@ void adc(word addr) {
 }
 
 void sbc(word addr) {
-	byte vl = memory[addr] + (1 ^ get_ps_bit(cpu->ps, CF));
+	byte vl = memory[addr] + (1 ^ get_bit(cpu->ps, CF));
 	byte res = cpu->acc - vl;
 	byte old_acc = cpu->acc;
 
 	cpu->acc = res;
 	if (old_acc >= vl) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	infer_overflow_flag(old_acc, ~(memory[addr]));
 	infer_zero_flag(cpu->acc);
@@ -261,9 +261,9 @@ void cmp(word addr) {
 	byte res = cpu->acc - vl;
 
 	if (cpu->acc > vl) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	infer_zero_flag(res);
 	infer_negative_flag(res);
@@ -274,9 +274,9 @@ void cpx(word addr) {
 	byte res = cpu->ix - vl;
 
 	if (cpu->ix > vl) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	infer_zero_flag(res);
 	infer_negative_flag(res);
@@ -287,9 +287,9 @@ void cpy(word addr) {
 	byte res = cpu->iy - vl;
 
 	if (cpu->iy > vl) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	infer_zero_flag(res);
 	infer_negative_flag(res);
@@ -411,49 +411,49 @@ void rts(word addr) {
 // Branches
 
 void bcc(word rdisp) {
-	if (!get_ps_bit(cpu->ps, CF)) {
+	if (!get_bit(cpu->ps, CF)) {
 		cpu->pc += rdisp; 
 	}
 }
 
 void bcs(word rdisp) {
-	if (get_ps_bit(cpu->ps, CF)) {
+	if (get_bit(cpu->ps, CF)) {
 		cpu->pc += rdisp;
 	}
 }
 
 void beq(word rdisp) {
-	if (get_ps_bit(cpu->ps, ZF)) {
+	if (get_bit(cpu->ps, ZF)) {
 		cpu->pc += rdisp;
 	}
 }
 
 void bmi(word rdisp) {
-	if (get_ps_bit(cpu->ps, NF)) {
+	if (get_bit(cpu->ps, NF)) {
 		cpu->pc += rdisp;
 	}
 }
 
 void bne(word rdisp) {
-	if (!get_ps_bit(cpu->ps, ZF)) {
+	if (!get_bit(cpu->ps, ZF)) {
 		cpu->pc += rdisp;
 	}
 }
 
 void bpl(word rdisp) {
-	if (!get_ps_bit(cpu->ps, NF)) {
+	if (!get_bit(cpu->ps, NF)) {
 		cpu->pc += rdisp;
 	}
 }
 
 void bvc(word rdisp) {
-	if (!get_ps_bit(cpu->ps, VF)) {
+	if (!get_bit(cpu->ps, VF)) {
 		cpu->pc += rdisp;
 	}
 }
 
 void bvs(word rdisp) {
-	if (get_ps_bit(cpu->ps, VF)) {
+	if (get_bit(cpu->ps, VF)) {
 		cpu->pc += rdisp;
 	}
 }
@@ -506,9 +506,9 @@ void asl(word addr) {
 	byte *vl = &memory[addr];
 	
 	if (check_bit(*vl, 7)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	*vl = *vl << 1;
 	infer_negative_flag(*vl);
@@ -517,9 +517,9 @@ void asl(word addr) {
 
 void asl_acc(word z) {
 	if (check_bit(cpu->acc, 7)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	cpu->acc = cpu->acc << 1;
 	infer_negative_flag(cpu->acc);
@@ -530,9 +530,9 @@ void lsr(word addr) {
 	byte *vl = &memory[addr];
 	
 	if (check_bit(*vl, 0)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	*vl = *vl >> 1;
 	infer_negative_flag(*vl);
@@ -541,9 +541,9 @@ void lsr(word addr) {
 
 void lsr_acc(word z) {
 	if (check_bit(cpu->acc, 0)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	cpu->acc = cpu->acc >> 1;
 	infer_negative_flag(cpu->acc);
@@ -554,11 +554,11 @@ void rol(word addr) {
 	byte *vl = &memory[addr];
 	byte res = (memory[addr] << 1);
 
-	set_bit_to(res, 0, get_ps_bit(cpu->ps, CF));
+	set_bit_to(res, 0, get_bit(cpu->ps, CF));
 	if (check_bit(*vl, 7)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	*vl = res;
 	infer_negative_flag(*vl);
@@ -568,11 +568,11 @@ void rol(word addr) {
 void rol_acc(word z) {
 	byte res = (cpu->acc << 1);
 
-	set_bit_to(res, 0, get_ps_bit(cpu->ps, CF));
+	set_bit_to(res, 0, get_bit(cpu->ps, CF));
 	if (check_bit(cpu->acc, 7)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	cpu->acc = res;
 	infer_negative_flag(cpu->acc);
@@ -583,11 +583,11 @@ void ror(word addr) {
 	byte *vl = &memory[addr];
 	byte res = (memory[addr] >> 1);
 
-	set_bit_to(res, 7, get_ps_bit(cpu->ps, CF));
+	set_bit_to(res, 7, get_bit(cpu->ps, CF));
 	if (check_bit(*vl, 0)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	*vl = res;
 	infer_negative_flag(*vl);
@@ -598,11 +598,11 @@ void ror(word addr) {
 void ror_acc(word z) {
 	byte res = (cpu->acc >> 1);
 
-	set_bit_to(res, 7, get_ps_bit(cpu->ps, CF));
+	set_bit_to(res, 7, get_bit(cpu->ps, CF));
 	if (check_bit(cpu->acc, 0)) {
-		set_ps_bit(cpu->ps, CF);
+		set_bit(cpu->ps, CF);
 	} else {
-		clear_ps_bit(cpu->ps, CF);
+		clear_bit(cpu->ps, CF);
 	}
 	cpu->acc = res;
 	infer_negative_flag(cpu->acc);
@@ -614,31 +614,31 @@ void ror_acc(word z) {
 // Status Flag
 
 void clc(word np) {
-	clear_ps_bit(cpu->ps, CF);
+	clear_bit(cpu->ps, CF);
 }
 
 void cld(word np) {
-	clear_ps_bit(cpu->ps, DF);
+	clear_bit(cpu->ps, DF);
 }
 
 void cli(word np) {
-	clear_ps_bit(cpu->ps, IF);
+	clear_bit(cpu->ps, IF);
 }
 
 void clv(word np) {
-	clear_ps_bit(cpu->ps, VF);
+	clear_bit(cpu->ps, VF);
 }
 
 void sec(word np) {
-	set_ps_bit(cpu->ps, CF);
+	set_bit(cpu->ps, CF);
 }
 
 void sed(word np) {
-	set_ps_bit(cpu->ps, DF);
+	set_bit(cpu->ps, DF);
 }
 
 void sei(word np) {
-	set_ps_bit(cpu->ps, IF);
+	set_bit(cpu->ps, IF);
 }
 
 //
@@ -647,7 +647,7 @@ void sei(word np) {
 
 void brk(word np) {
 	push_word(cpu->pc);
-	set_ps_bit(cpu->ps, BF);
+	set_bit(cpu->ps, BF);
 	push_byte(cpu->ps);
 	cpu->pc = IRQ_VECTOR;
 	cpu->pc = fetch_word();

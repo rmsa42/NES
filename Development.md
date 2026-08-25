@@ -20,7 +20,10 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Need to review the overflow flag in the SBC instruction
 > R: The implementation was wrong, i nedded to pass the number ones-complemented (without adding the carry) to my overflow check function
 
-- [ ] Need to review the PS flags functions, mostly the carry flag function
+**25/08/2026**
+- [X] Need to review the PS flags functions and macros, mostly the carry flag function
+> R: I am not altering the PS flags functions for now, I will stay with what works. Just altered the macro names
+
 - [ ] Need to make all the illegal opcodes
 - [ ] Need to rearrange the test cmake file whenever i structure the project into one or multiple libraries 
 
@@ -32,4 +35,4 @@ The 2 complement is done in compilation or is the cpu that does?
 
 **22/08/2026**
 Does the ROL instructions add the carry first and then shift or the other way around? Also does it set bit0 or adds the carry?
-> R: The ROL and ROR instruction **sets** the bit with the old carry flag, so doesn't add. And the set part is the last part of the instruction
+> R: The ROL and ROR instruction **sets** the bit with the old carry flag, so it doesn't add. And the **set** part is the last part of the instruction
