@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,18 +12,9 @@ extern "C" {
 #define STACK_VECTOR 0xFF
 #define STACK_OFFSET 0x01
 
-#define set_bit_to(byte, bit, vl) (byte = ((vl << bit) | byte))
-#define get_bit(byte, bit) ((byte >> bit) & 1)
-#define set_bit(byte, bit) (byte = ((1 << bit) | byte))
-#define clear_bit(byte, bit) (byte = (~(1 << bit) & byte))
-#define check_bit(byte, shift) ((byte >> shift) & 1)
-#define make_word(hb, lb) ((hb << 8) | lb)
 #define high_byte(word) (word >> 8)
 #define low_byte(word) (word)
 #define CARRY_6_MASK 0x7F
-
-typedef uint8_t byte;
-typedef uint16_t word;
 
 struct cpu {
 	word pc;

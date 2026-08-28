@@ -24,7 +24,10 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Need to review the PS flags functions and macros, mostly the carry flag function
 > R: I am not altering the PS flags functions for now, I will stay with what works. Just altered the macro names
 
-- [ ] Start with the APU (Audio Processing Unit) part
+**28/08/2026**
+- [X] Start with the APU (Audio Processing Unit) part
+> R: After researching, i figured that the apu files will be more of a bridge between SDL and the memory values. I am still not sure about this so this could change in the future
+
 - [ ] Need to implement the decimal calculations from arithmetic instructions
 - [ ] Review and possible implement what's left from the system vectors
 - [ ] Need to make all the illegal opcodes
