@@ -11,6 +11,8 @@ set(SOURCES
 	cpu.h
 )
 
+add_subdirectory(SDL)
+
 add_executable(cpu ${SOURCES})
 target_include_directories(cpu PUBLIC ${CMAKE_CURRENT_DIR})
 

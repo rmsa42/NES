@@ -1,3 +1,7 @@
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = https://github.com/google/googletest
+[submodule "SDL"]
+	path = SDL
+	url = git@github.com:libsdl-org/SDL.git
+	branch = release-3.4.x
