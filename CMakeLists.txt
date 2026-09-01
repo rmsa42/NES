@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 project(cpu)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-parameter")
 
 set(SOURCES 
 	main.c
@@ -14,7 +14,8 @@ set(SOURCES
 add_subdirectory(SDL)
 
 add_executable(cpu ${SOURCES})
-target_include_directories(cpu PUBLIC ${CMAKE_CURRENT_DIR})
+target_link_libraries(cpu PRIVATE SDL3::SDL3)
+target_include_directories(cpu PRIVATE ${CMAKE_CURRENT_DIR})
 
 if(TESTS)
 	add_subdirectory(tests)

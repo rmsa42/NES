@@ -28,6 +28,10 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Start with the APU (Audio Processing Unit) part
 > R: After researching, i figured that the apu files will be more of a bridge between SDL and the memory values. I am still not sure about this so this could change in the future
 
+**29/08/2026**
+- [X] Migrated the development to Windows instead of WSL, because of SDL3 graphical parts
+> R: This migration is explained in this [doc](Migration_to_windows.md)
+
 - [ ] Need to implement the decimal calculations from arithmetic instructions
 - [ ] Review and possible implement what's left from the system vectors
 - [ ] Need to make all the illegal opcodes
