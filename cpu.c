@@ -172,7 +172,6 @@ void infer_overflow_flag(byte byte1, byte byte2) {
 	byte bit2 = check_bit(byte2, 7);
 	byte carry6 = check_bit(((byte1 & CARRY_6_MASK) + (byte2 & CARRY_6_MASK)), 7);
 
-	printf("Byte2: %x\n", byte2);
 	if ((bit1 && bit2 && !carry6) || (!bit1 && !bit2 && carry6)) {
 		set_bit(cpu->ps, VF);
 	} else {
