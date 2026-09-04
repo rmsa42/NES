@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "SDL3/SDL.h"
+#include "apu.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -9,11 +10,15 @@ extern struct cpu *cpu;
 
 SDL_Renderer *renderer;
 SDL_Window *window;
+SDL_AudioStream *stream;
 int window_width = 640;
 int window_height = 480;
+int current_sine_sample = 0;
 bool nes_run = false;
 
 int init_SDL() {
+	SDL_AudioSpec spec;
+
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		printf("SDL Init error\n");
 		return (1);
@@ -23,10 +28,20 @@ int init_SDL() {
 		return (1);
 	}
 	SDL_SetRenderLogicalPresentation(renderer, window_width, window_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+	spec.channels = 1;
+	spec.format = SDL_AUDIO_F32;
+	spec.freq = SAMPLE_RATE;
+	stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+	if (!stream) {
+		printf("SDL Audio Stream error\n");
+		return (1);
+	}
+	SDL_ResumeAudioStreamDevice(stream);
 	return (0);
 }
 
 int clean_SDL() {
+	SDL_DestroyAudioStream(stream);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -108,6 +123,23 @@ void update_SDL() {
 		}
 	}
 	cpu_debug_SDL();
+
+		//static float samples[512];  /* this will feed 512 samples each frame until we get to our maximum. */
+		//int i;
+
+		///* generate a 440Hz pure tone */
+		//for (i = 0; i < SDL_arraysize(samples); i++) {
+		//	const int freq = 440;
+		//	const float phase = current_sine_sample * freq / 8000.0f;
+		//	samples[i] = SDL_sinf(phase * 2 * SDL_PI_F);
+		//	current_sine_sample++;
+		//}
+
+		///* wrapping around to avoid floating-point errors */
+		//current_sine_sample %= 8000;
+
+		///* feed the new data to the stream. It will queue at the end, and trickle out as the hardware needs more data. */
+		//SDL_PutAudioStreamData(stream, samples, sizeof (samples));
 	
 	SDL_RenderPresent(renderer);
 }
@@ -126,28 +158,21 @@ int main() {
 
 	int i = 0;
 	memory[i++] = LDA_IMM;
-	memory[i++] = 0x50;
-	memory[i++] = SEC_IMPL;
-	memory[i++] = SBC_IMM;
-	memory[i++] = 0xb0;
+	memory[i++] = 0x00;
+	memory[i++] = STA_ABS;
+	memory[i++] = 0x03;
+	memory[i++] = 0x40;
+	memory[i++] = LDA_IMM;
+	memory[i++] = 0xA0;
+	memory[i++] = STA_ABS;
+	memory[i++] = 0x02;
+	memory[i++] = 0x40;
 
 	printf("Running CPU\n");
 	nes_run = true;
 	while (nes_run) {
-
-		byte byte = fetch_byte();
-
-		// Get the instruction
-		inst instr = insts[byte];
-
-		// Apply the address mode
-		word vls = instr.mode();
-
-		// Run the instruction
-		instr.run(vls);
-		
-		printf("Inst %d runned\n", byte);
-		cpu_state();
+		clock_cpu();
+		clock_apu(stream);
 
 		update_SDL();
 	}

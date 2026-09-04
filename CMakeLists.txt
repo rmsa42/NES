@@ -9,6 +9,8 @@ set(SOURCES
 	main.c
 	cpu.c
 	cpu.h
+	apu.c
+	apu.h
 )
 
 add_subdirectory(SDL)

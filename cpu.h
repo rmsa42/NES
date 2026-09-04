@@ -12,6 +12,8 @@ extern "C" {
 #define STACK_VECTOR 0xFF
 #define STACK_OFFSET 0x01
 
+#define CPU_FREQ 1789773 // Hz
+
 #define high_byte(word) (word >> 8)
 #define low_byte(word) (word)
 #define CARRY_6_MASK 0x7F
@@ -43,6 +45,7 @@ typedef struct inst {
 
 int cpu_instance();
 void cpu_reset();
+void clock_cpu();
 void cpu_state();
 byte fetch_byte();
 word fetch_word();

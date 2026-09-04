@@ -33,6 +33,7 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 > R: This migration is explained in this [doc](Migration_to_windows.md)
 
 - [ ] Organize Debug tools into their own file
+- [ ] Pass the cpu global variable to the stack rather than malloc it
 - [ ] Need to implement the decimal calculations from arithmetic instructions
 - [ ] Review and possible implement what's left from the system vectors
 - [ ] Need to make all the illegal opcodes
@@ -47,3 +48,5 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 **22/08/2026**
 - [X] Does the ROL instructions add the carry first and then shift or the other way around? Also does it set bit0 or adds the carry?
 > R: The ROL and ROR instruction **sets** the bit with the old carry flag, so it doesn't add. And the **set** part is the last part of the instruction
+
+- [ ] Does the timer low and timer high ($4002-$4003) update the APU timer every cycle or when the current timer reaches 0?

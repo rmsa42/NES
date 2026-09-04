@@ -27,6 +27,15 @@ void cpu_reset() {
 	cpu->sp = STACK_VECTOR;
 }
 
+void clock_cpu() {
+	byte byte = fetch_byte();
+	inst instr = insts[byte];
+	word data = instr.mode();
+	instr.run(data);
+	//printf("Inst %d runned\n", byte);
+	//cpu_state();
+}
+
 void cpu_state() {
 	printf("CPU State\n");
 	printf("\tPC: %d\n", cpu->pc);
