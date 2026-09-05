@@ -15,13 +15,21 @@ extern "C" {
 #define NOISE_VECTOR 0x400C
 #define DMC_VECTOR 0x4010
 
-#define get_timer_bits(tl, lth) (((0x07 & lth) << 8) | tl)
+#define get_timer(tl, lth) (((0x07 & lth) << 8) | tl)
+#define get_duty(dlcv) (dlcv >> 6)
+#define get_evelope_loop(dlcv) (dlcv >> 5)
 
 typedef struct pulse {
-	byte dlcv;
-	byte epns;
-	byte tl;
-	byte lth;
+	float duty;
+	byte env_loop;
+	byte const_volume;
+	byte volume;
+	byte sweep;
+	byte sweep_period;
+	byte sweep_negate;
+	byte sweep_shift;
+	word timer;
+	byte len_counter_load;
 } pulse;
 
 typedef struct triangle {

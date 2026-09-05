@@ -163,9 +163,14 @@ int main() {
 	memory[i++] = 0x03;
 	memory[i++] = 0x40;
 	memory[i++] = LDA_IMM;
-	memory[i++] = 0xA0;
+	memory[i++] = 0xFD;
 	memory[i++] = STA_ABS;
 	memory[i++] = 0x02;
+	memory[i++] = 0x40;
+	memory[i++] = LDA_IMM;
+	memory[i++] = 0x80;
+	memory[i++] = STA_ABS;
+	memory[i++] = 0x00;
 	memory[i++] = 0x40;
 
 	printf("Running CPU\n");
