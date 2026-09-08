@@ -158,20 +158,20 @@ int main() {
 
 	int i = 0;
 	memory[i++] = LDA_IMM;
-	memory[i++] = 0x00;
+	memory[i++] = 0xB9;
 	memory[i++] = STA_ABS;
-	memory[i++] = 0x03;
+	memory[i++] = 0x0A;
 	memory[i++] = 0x40;
 	memory[i++] = LDA_IMM;
-	memory[i++] = 0xFD;
-	memory[i++] = STA_ABS;
-	memory[i++] = 0x02;
-	memory[i++] = 0x40;
-	memory[i++] = LDA_IMM;
-	memory[i++] = 0x80;
-	memory[i++] = STA_ABS;
 	memory[i++] = 0x00;
+	memory[i++] = STA_ABS;
+	memory[i++] = 0x0B;
 	memory[i++] = 0x40;
+	//memory[i++] = LDA_IMM;
+	//memory[i++] = 0x80;
+	//memory[i++] = STA_ABS;
+	//memory[i++] = 0x00;
+	//memory[i++] = 0x40;
 
 	printf("Running CPU\n");
 	nes_run = true;

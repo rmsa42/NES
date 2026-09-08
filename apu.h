@@ -18,6 +18,8 @@ extern "C" {
 #define get_timer(tl, lth) (((0x07 & lth) << 8) | tl)
 #define get_duty(dlcv) (dlcv >> 6)
 #define get_evelope_loop(dlcv) (dlcv >> 5)
+#define get_len_counter_load(lth) ((lth & 0xF8) >> 3)
+#define get_lin_counter_load(cr) (cr & 0x7F)
 
 typedef struct pulse {
 	float duty;
@@ -33,10 +35,12 @@ typedef struct pulse {
 } pulse;
 
 typedef struct triangle {
-	byte cr;
+	byte control_flag; // Also is the length_counter_flag
+	byte lin_reload_flag;
+	byte lin_counter_load;
+	word timer;
+	byte len_counter_load;
 	byte unused;
-	byte tl;
-	byte lth;
 } triangle;
 
 typedef struct noise {

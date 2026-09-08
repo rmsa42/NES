@@ -32,6 +32,8 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Migrated the development to Windows instead of WSL, because of SDL3 graphical parts
 > R: This migration is explained in this [doc](Migration_to_windows.md)
 
+- [ ] Need to make the Sweep, envelope loop, const volume, volume and length counter load in apu for the pulses
+- [ ] Find a way to set the lin_reload_flag in the triangule wave in apu
 - [ ] Organize Debug tools into their own file
 - [ ] Pass the cpu global variable to the stack rather than malloc it
 - [ ] Need to implement the decimal calculations from arithmetic instructions
