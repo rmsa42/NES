@@ -152,21 +152,22 @@ int main() {
 		printf("Error Init CPU\n");
 		return (res);
 	}
+	apu_init();
 	if (init_SDL()) {
 		return (1);
 	}
 
 	int i = 0;
 	memory[i++] = LDA_IMM;
-	memory[i++] = 0xB9;
+	memory[i++] = 0x0F;
 	memory[i++] = STA_ABS;
-	memory[i++] = 0x0A;
+	memory[i++] = 0x0E;
 	memory[i++] = 0x40;
-	memory[i++] = LDA_IMM;
-	memory[i++] = 0x00;
-	memory[i++] = STA_ABS;
-	memory[i++] = 0x0B;
-	memory[i++] = 0x40;
+	//memory[i++] = LDA_IMM;
+	//memory[i++] = 0x00;
+	//memory[i++] = STA_ABS;
+	//memory[i++] = 0x0B;
+	//memory[i++] = 0x40;
 	//memory[i++] = LDA_IMM;
 	//memory[i++] = 0x80;
 	//memory[i++] = STA_ABS;
