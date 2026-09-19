@@ -14,8 +14,6 @@ extern "C" {
 
 #define CPU_FREQ 1789773 // Hz
 
-#define high_byte(word) (word >> 8)
-#define low_byte(word) (word)
 #define CARRY_6_MASK 0x7F
 
 struct cpu {

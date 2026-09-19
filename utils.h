@@ -12,6 +12,8 @@ extern "C" {
 #define clear_bit(byte, bit) (byte = (~(1 << bit) & byte))
 #define check_bit(byte, shift) ((byte >> shift) & 1)
 #define make_word(hb, lb) ((hb << 8) | lb)
+#define high_byte(word) (word >> 8)
+#define low_byte(word) (word)
 
 typedef uint8_t byte;
 typedef uint16_t word;

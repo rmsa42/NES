@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "SDL3/SDL.h"
 #include "apu.h"
+#include "rom.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -144,7 +145,7 @@ void update_SDL() {
 	SDL_RenderPresent(renderer);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	int res;
 
 	res = cpu_instance();
@@ -157,16 +158,16 @@ int main() {
 	}
 
 	int i = 0;
-	memory[i++] = LDA_IMM;
-	memory[i++] = 0xB9;
-	memory[i++] = STA_ABS;
-	memory[i++] = 0x0A;
-	memory[i++] = 0x40;
-	memory[i++] = LDA_IMM;
-	memory[i++] = 0x00;
-	memory[i++] = STA_ABS;
-	memory[i++] = 0x0B;
-	memory[i++] = 0x40;
+	//memory[i++] = LDA_IMM;
+	//memory[i++] = 0xFD;
+	//memory[i++] = STA_ABS;
+	//memory[i++] = 0x02;
+	//memory[i++] = 0x40;
+	//memory[i++] = LDA_IMM;
+	//memory[i++] = 0x00;
+	//memory[i++] = STA_ABS;
+	//memory[i++] = 0x03;
+	//memory[i++] = 0x40;
 	//memory[i++] = LDA_IMM;
 	//memory[i++] = 0x80;
 	//memory[i++] = STA_ABS;
@@ -174,10 +175,11 @@ int main() {
 	//memory[i++] = 0x40;
 
 	printf("Running CPU\n");
+	read_rom(argv[1]);
 	nes_run = true;
 	while (nes_run) {
 		clock_cpu();
-		clock_apu(stream);
+		//clock_apu(stream);
 
 		update_SDL();
 	}

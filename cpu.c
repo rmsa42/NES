@@ -19,6 +19,7 @@ int cpu_instance() {
 	memset(memory, 0, sizeof(memory));
 	fill_insts();
 	cpu->sp = STACK_VECTOR;
+	cpu->pc = 0x8000;
 	return (0);
 }
 
@@ -29,10 +30,10 @@ void cpu_reset() {
 
 void clock_cpu() {
 	byte byte = fetch_byte();
+	printf("Inst %x running\n", byte);
 	inst instr = insts[byte];
 	word data = instr.mode();
 	instr.run(data);
-	//printf("Inst %d runned\n", byte);
 	//cpu_state();
 }
 
@@ -766,6 +767,8 @@ void fill_insts() {
     insts[STA_ABS]  = (inst){ sta, abs_address_mode };
     insts[STA_ABSX] = (inst){ sta, abs_x_address_mode };
     insts[STA_ABSY] = (inst){ sta, abs_y_address_mode };
+    insts[STA_INDX] = (inst){ sta, ind_x_address_mode };
+    insts[STA_INDY] = (inst){ sta, ind_y_address_mode };
 
     insts[STX_ZPG]  = (inst){ stx, zp_address_mode };
     insts[STX_ZPGY] = (inst){ stx, zp_y_address_mode };

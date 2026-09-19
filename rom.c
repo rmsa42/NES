@@ -1,0 +1,71 @@
+#include "rom.h"
+#include <stdio.h>
+#include <string.h>
+
+extern byte memory[0xFFFF];
+
+static void print_buff(byte *buff, const size_t size) {
+	for (size_t i = 0; i < size; i++) {
+		printf("%zu: %x\n", i, buff[i]);
+	}
+}
+
+static void debug_header(struct nes_header *hd) {
+	printf("INES format: %d\n", hd->ines_format);
+	printf("NES2 format: %d\n", hd->nes2_format);
+	printf("Trainer flag: %d\n", hd->trainer_area_flag);
+	printf("PRG-ROM size: %d\n", hd->prg_rom_size);
+	printf("CHR-ROM size: %d\n", hd->chr_rom_size);
+}
+
+static void parse_header(FILE *rom, struct nes_header *hd) {
+	byte header[16];
+
+	memset(header, 0, sizeof(header));
+	fread(header, sizeof(header), 1, rom);
+	if (header[0] == 'N' && header[1] == 'E' && header[2] == 'S' && header[3] == NES_EOF) {
+		hd->ines_format = true;
+	}
+	if (hd->ines_format == true && (check_bit(header[7], 3) && !check_bit(header[7], 2))) {
+		hd->nes2_format = true;
+	}
+	hd->trainer_area_flag = check_bit(header[6], 2);
+	// Need to alter the low_byte and high_byte
+	hd->prg_rom_size = make_word(low_byte(header[9]), header[4]);
+	hd->chr_rom_size = make_word(high_byte(header[9]), header[5]);
+	print_buff(header, sizeof(header));
+}
+
+static void parse_trainer_area(FILE *rom, struct nes_header *hd) {}
+
+static void parse_prg_rom(FILE *rom, size_t prg_size) {
+	size_t rsize = 0;
+	size_t size = 16384;
+
+	rsize = fread(&memory[0x8000], size, 1, rom);
+	printf("RSize: %zu\n", rsize);
+	rsize = fread(&memory[0xC000], size - 1, 1, rom);
+	//print_buff(&memory[0x8000], 20);
+}
+
+static void parse_chr_rom(FILE *rom, size_t chr_size) {}
+
+int read_rom(const char *rom_name) {
+	FILE *rom = NULL;
+	struct nes_header hd;
+
+	printf("Rom Name: %s\n", rom_name);
+	if (strcmp((rom_name + strlen(rom_name) - 4), ".nes")) {
+		return (1);
+	}
+	memset(&hd, 0, sizeof(hd));
+	rom = fopen(rom_name, "rb");
+	parse_header(rom, &hd);
+	debug_header(&hd);
+	if (hd.trainer_area_flag == true) {
+		parse_trainer_area(rom, &hd);
+	}
+	parse_prg_rom(rom, hd.prg_rom_size);
+	parse_chr_rom(rom, hd.chr_rom_size);
+	return (0);
+}
