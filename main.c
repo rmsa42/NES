@@ -14,8 +14,8 @@ SDL_Window *window;
 SDL_AudioStream *stream;
 int window_width = 640;
 int window_height = 480;
-int current_sine_sample = 0;
 bool nes_run = false;
+bool advance = false;
 
 int init_SDL() {
 	SDL_AudioSpec spec;
@@ -24,7 +24,7 @@ int init_SDL() {
 		printf("SDL Init error\n");
 		return (1);
 	}
-	if (!SDL_CreateWindowAndRenderer("NES", window_width, window_height, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+	if (!SDL_CreateWindowAndRenderer("DebugNes", window_width, window_height, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
 		printf("SDL Window and Renderer error\n");
 		return (1);
 	}
@@ -50,7 +50,7 @@ int clean_SDL() {
 }
 
 void cpu_debug_SDL() {
-	char buff[14][50] = {0};
+	char buff[17][50] = {0};
 	int i = 0;
 
 	memset(buff, 0, sizeof(buff));
@@ -60,53 +60,75 @@ void cpu_debug_SDL() {
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 10, buff[i++]);
 
-	sprintf(buff[i], "PC: %d", cpu->pc);
+	sprintf(buff[i], "PC: %x", cpu->pc);
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 20, buff[i++]);
 
-	sprintf(buff[i], "ACC: %d", cpu->acc);
+	sprintf(buff[i], "ACC: %x", cpu->acc);
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 30, buff[i++]);
 
-	sprintf(buff[i], "SP: %d", cpu->sp);
+	sprintf(buff[i], "IX: %x", cpu->ix);
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 40, buff[i++]);
 
-	sprintf(buff[i], "Processor Status");
+	sprintf(buff[i], "IY: %x", cpu->iy);
+	SDL_SetRenderScale(renderer, 2, 2);
+	SDL_RenderDebugText(renderer, 0, 50, buff[i++]);
+
+	sprintf(buff[i], "SP: %x", cpu->sp);
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 60, buff[i++]);
 
-	sprintf(buff[i], "Negative: %d", get_bit(cpu->ps, NF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 70, buff[i++]);
-
-	sprintf(buff[i], "Overflow: %d", get_bit(cpu->ps, VF));
+	sprintf(buff[i], "Processor Status");
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 80, buff[i++]);
 
-	sprintf(buff[i], "Unused: 0");
+	sprintf(buff[i], "Negative: %d", get_bit(cpu->ps, NF));
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 90, buff[i++]);
 
-	sprintf(buff[i], "Break: %d", get_bit(cpu->ps, BF));
+	sprintf(buff[i], "Overflow: %d", get_bit(cpu->ps, VF));
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 100, buff[i++]);
 
-	sprintf(buff[i], "Decimal: %d", get_bit(cpu->ps, DF));
+	sprintf(buff[i], "Unused: 0");
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 110, buff[i++]);
 
-	sprintf(buff[i], "Interrupt: %d", get_bit(cpu->ps, IF));
+	sprintf(buff[i], "Break: %d", get_bit(cpu->ps, BF));
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 120, buff[i++]);
 
-	sprintf(buff[i], "Zero: %d", get_bit(cpu->ps, ZF));
+	sprintf(buff[i], "Decimal: %d", get_bit(cpu->ps, DF));
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 130, buff[i++]);
 
-	sprintf(buff[i], "Carry: %d", get_bit(cpu->ps, CF));
+	sprintf(buff[i], "Interrupt: %d", get_bit(cpu->ps, IF));
 	SDL_SetRenderScale(renderer, 2, 2);
 	SDL_RenderDebugText(renderer, 0, 140, buff[i++]);
+
+	sprintf(buff[i], "Zero: %d", get_bit(cpu->ps, ZF));
+	SDL_SetRenderScale(renderer, 2, 2);
+	SDL_RenderDebugText(renderer, 0, 150, buff[i++]);
+
+	sprintf(buff[i], "Carry: %d", get_bit(cpu->ps, CF));
+	SDL_SetRenderScale(renderer, 2, 2);
+	SDL_RenderDebugText(renderer, 0, 160, buff[i++]);
+
+	// Memory
+
+	SDL_SetRenderScale(renderer, 2, 2);
+	SDL_RenderDebugText(renderer, 130, 180, "Memory");
+
+	for (int k = 0; k < 4; k++) {
+		if (cpu->pc + k >= 0xFFFF) {
+			break;
+		}
+		sprintf(buff[i], "%x", memory[cpu->pc + k]);
+		SDL_SetRenderScale(renderer, 2, 2);
+		SDL_RenderDebugText(renderer, 100 + (k * 30), 190, buff[i++]);
+	}
 }
 
 void update_SDL() {
@@ -121,27 +143,13 @@ void update_SDL() {
 			if (e.key.scancode == SDL_SCANCODE_Q) {
 				nes_run = false;
 			}
+			if (e.key.scancode == SDL_SCANCODE_RETURN) {
+				advance = true;
+			}
+		} else if (e.type == SDL_EVENT_KEY_UP) {
 		}
 	}
 	cpu_debug_SDL();
-
-		//static float samples[512];  /* this will feed 512 samples each frame until we get to our maximum. */
-		//int i;
-
-		///* generate a 440Hz pure tone */
-		//for (i = 0; i < SDL_arraysize(samples); i++) {
-		//	const int freq = 440;
-		//	const float phase = current_sine_sample * freq / 8000.0f;
-		//	samples[i] = SDL_sinf(phase * 2 * SDL_PI_F);
-		//	current_sine_sample++;
-		//}
-
-		///* wrapping around to avoid floating-point errors */
-		//current_sine_sample %= 8000;
-
-		///* feed the new data to the stream. It will queue at the end, and trickle out as the hardware needs more data. */
-		//SDL_PutAudioStreamData(stream, samples, sizeof (samples));
-	
 	SDL_RenderPresent(renderer);
 }
 
@@ -160,8 +168,8 @@ int main(int argc, char *argv[]) {
 	int i = 0;
 	//memory[i++] = LDA_IMM;
 	//memory[i++] = 0xFD;
-	//memory[i++] = STA_ABS;
-	//memory[i++] = 0x02;
+	//memory[i++] = BNE_RLT;
+	//memory[i++] = 0xFE;
 	//memory[i++] = 0x40;
 	//memory[i++] = LDA_IMM;
 	//memory[i++] = 0x00;
@@ -177,11 +185,16 @@ int main(int argc, char *argv[]) {
 	printf("Running CPU\n");
 	read_rom(argv[1]);
 	nes_run = true;
+	cpu->pc = 0x8000; // This is here for now. The prg-rom is loaded in the 0x8000 addr
 	while (nes_run) {
+		while (advance == false) {
+			update_SDL();
+		}
 		clock_cpu();
 		//clock_apu(stream);
 
 		update_SDL();
+		advance = true;
 	}
 
 	clean_SDL();

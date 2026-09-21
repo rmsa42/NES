@@ -19,7 +19,6 @@ int cpu_instance() {
 	memset(memory, 0, sizeof(memory));
 	fill_insts();
 	cpu->sp = STACK_VECTOR;
-	cpu->pc = 0x8000;
 	return (0);
 }
 
@@ -119,7 +118,7 @@ word ind_x_address_mode() {
 word ind_y_address_mode() {
 	byte ind_addr = fetch_byte();
 	byte lb = memory[ind_addr] + cpu->iy;
-	byte hb = memory[ind_addr + 1] + cpu->iy;
+	byte hb = memory[ind_addr + 1];
 
 	if (memory[ind_addr] + cpu->iy > 0xFF) {
 		hb += 1;
@@ -145,10 +144,8 @@ void push_word(word vl) {
 }
 
 byte pop_byte() {
-	byte ret = memory[make_word(STACK_OFFSET, cpu->sp)];
-
 	cpu->sp++;
-	return (ret);
+	return (memory[make_word(STACK_OFFSET, cpu->sp)]);
 }
 
 word pop_word() {
@@ -421,49 +418,49 @@ void rts(word addr) {
 
 void bcc(word rdisp) {
 	if (!get_bit(cpu->ps, CF)) {
-		cpu->pc += rdisp; 
+		cpu->pc += (int8_t)rdisp; 
 	}
 }
 
 void bcs(word rdisp) {
 	if (get_bit(cpu->ps, CF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
 void beq(word rdisp) {
 	if (get_bit(cpu->ps, ZF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
 void bmi(word rdisp) {
 	if (get_bit(cpu->ps, NF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
 void bne(word rdisp) {
 	if (!get_bit(cpu->ps, ZF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
 void bpl(word rdisp) {
 	if (!get_bit(cpu->ps, NF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
 void bvc(word rdisp) {
 	if (!get_bit(cpu->ps, VF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
 void bvs(word rdisp) {
 	if (get_bit(cpu->ps, VF)) {
-		cpu->pc += rdisp;
+		cpu->pc += (int8_t)rdisp;
 	}
 }
 
@@ -829,15 +826,15 @@ void fill_insts() {
     insts[INC_ZPG] = (inst){ inc, rel_address_mode };
     insts[INC_ZPGX] = (inst){ inc, rel_address_mode };
 
-    insts[DEC_ABS] = (inst){ dec, rel_address_mode };
-    insts[DEC_ABSX] = (inst){ dec, rel_address_mode };
-    insts[DEC_ZPG] = (inst){ dec, rel_address_mode };
-    insts[DEC_ZPGX] = (inst){ dec, rel_address_mode };
+    insts[DEC_ABS] = (inst){ dec, abs_address_mode };
+    insts[DEC_ABSX] = (inst){ dec, abs_x_address_mode };
+	insts[DEC_ZPG] = (inst){ dec, zp_address_mode };
+    insts[DEC_ZPGX] = (inst){ dec, zp_x_address_mode };
 
-    insts[INX_IMPL] = (inst){ inx, rel_address_mode };
-    insts[INY_IMPL] = (inst){ iny, rel_address_mode };
-    insts[DEX_IMPL] = (inst){ dex, rel_address_mode };
-    insts[DEY_IMPL] = (inst){ dey, rel_address_mode };
+    insts[INX_IMPL] = (inst){ inx, impl_address_mode };
+    insts[INY_IMPL] = (inst){ iny, impl_address_mode };
+    insts[DEX_IMPL] = (inst){ dex, impl_address_mode };
+    insts[DEY_IMPL] = (inst){ dey, impl_address_mode };
 
 	//
 
