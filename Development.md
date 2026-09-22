@@ -36,9 +36,16 @@ Here's a complete overview of everything i'm doing or have doubt. Whenever somet
 - [X] Pass the cpu global variable to the stack rather than malloc it
 > R: There's no need to malloc the cpu global. Just put it on the stack
 
-- [ ] Organize Debug tools into their own file
+**22/09/2026**
+- [X] Make a debug screen which can run an instruction at a time with debug info
+> R: Made a super simple debug window just to catch cpu instruction bugs.
+I fumbled a lot, so the code is super messy
+
+**22/09/2026**
+- [X] Organize Debug tools into their own file
+> R: It's all in the **debug_tools** file
+
 - [ ] Need to study and make NMI interrupts
-- [ ] Make a debug screen which can run an instruction at a time with debug info
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable
 - [ ] Need to make the Sweep, envelope loop, const volume, volume and length counter load in apu for the pulses
 - [ ] Need to finish the noise wave
