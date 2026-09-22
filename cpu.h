@@ -41,7 +41,7 @@ typedef struct inst {
 	word (*mode)();
 } inst;
 
-int cpu_instance();
+void cpu_init();
 void cpu_reset();
 void clock_cpu();
 void cpu_state();

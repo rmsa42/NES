@@ -8,7 +8,7 @@
 
 extern inst insts[0xFF];
 extern byte memory[0xFFFF];
-extern struct cpu *cpu;
+extern struct cpu cpu;
 
 SDL_Renderer *renderer;
 SDL_Window *window;
@@ -71,38 +71,15 @@ void update_SDL() {
 }
 
 int main(int argc, char *argv[]) {
-	int res;
-
-	res = cpu_instance();
-	if (res) {
-		printf("Error Init CPU\n");
-		return (res);
-	}
+	cpu_init();
 	if (init_SDL()) {
 		return (1);
 	}
 
-	int i = 0;
-	//memory[i++] = LDA_IMM;
-	//memory[i++] = 0xFD;
-	//memory[i++] = BNE_RLT;
-	//memory[i++] = 0xFE;
-	//memory[i++] = 0x40;
-	//memory[i++] = LDA_IMM;
-	//memory[i++] = 0x00;
-	//memory[i++] = STA_ABS;
-	//memory[i++] = 0x03;
-	//memory[i++] = 0x40;
-	//memory[i++] = LDA_IMM;
-	//memory[i++] = 0x80;
-	//memory[i++] = STA_ABS;
-	//memory[i++] = 0x00;
-	//memory[i++] = 0x40;
-
 	printf("Running CPU\n");
 	read_rom(argv[1]);
 	nes_run = true;
-	cpu->pc = 0x8000; // This is here for now. The prg-rom is loaded in the 0x8000 addr
+	cpu.pc = 0x8000; // This is here for now. The prg-rom is loaded in the 0x8000 addr
 	while (nes_run) {
 		while (advance == false) {
 			update_SDL();
