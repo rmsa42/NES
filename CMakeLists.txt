@@ -13,6 +13,8 @@ set(SOURCES
 	apu.h
 	rom.c
 	rom.h
+	debug_tools.c
+	debug_tools.h
 )
 
 add_subdirectory(SDL)

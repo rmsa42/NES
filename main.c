@@ -1,7 +1,8 @@
 #include "cpu.h"
-#include "SDL3/SDL.h"
 #include "apu.h"
 #include "rom.h"
+#include "debug_tools.h"
+#include "SDL3/SDL.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -41,94 +42,11 @@ int init_SDL() {
 	return (0);
 }
 
-int clean_SDL() {
+void clean_SDL() {
 	SDL_DestroyAudioStream(stream);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	return (0);
-}
-
-void cpu_debug_SDL() {
-	char buff[17][50] = {0};
-	int i = 0;
-
-	memset(buff, 0, sizeof(buff));
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-
-	sprintf(buff[i], "CPU State");
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 10, buff[i++]);
-
-	sprintf(buff[i], "PC: %x", cpu->pc);
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 20, buff[i++]);
-
-	sprintf(buff[i], "ACC: %x", cpu->acc);
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 30, buff[i++]);
-
-	sprintf(buff[i], "IX: %x", cpu->ix);
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 40, buff[i++]);
-
-	sprintf(buff[i], "IY: %x", cpu->iy);
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 50, buff[i++]);
-
-	sprintf(buff[i], "SP: %x", cpu->sp);
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 60, buff[i++]);
-
-	sprintf(buff[i], "Processor Status");
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 80, buff[i++]);
-
-	sprintf(buff[i], "Negative: %d", get_bit(cpu->ps, NF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 90, buff[i++]);
-
-	sprintf(buff[i], "Overflow: %d", get_bit(cpu->ps, VF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 100, buff[i++]);
-
-	sprintf(buff[i], "Unused: 0");
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 110, buff[i++]);
-
-	sprintf(buff[i], "Break: %d", get_bit(cpu->ps, BF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 120, buff[i++]);
-
-	sprintf(buff[i], "Decimal: %d", get_bit(cpu->ps, DF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 130, buff[i++]);
-
-	sprintf(buff[i], "Interrupt: %d", get_bit(cpu->ps, IF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 140, buff[i++]);
-
-	sprintf(buff[i], "Zero: %d", get_bit(cpu->ps, ZF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 150, buff[i++]);
-
-	sprintf(buff[i], "Carry: %d", get_bit(cpu->ps, CF));
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 0, 160, buff[i++]);
-
-	// Memory
-
-	SDL_SetRenderScale(renderer, 2, 2);
-	SDL_RenderDebugText(renderer, 130, 180, "Memory");
-
-	for (int k = 0; k < 4; k++) {
-		if (cpu->pc + k >= 0xFFFF) {
-			break;
-		}
-		sprintf(buff[i], "%x", memory[cpu->pc + k]);
-		SDL_SetRenderScale(renderer, 2, 2);
-		SDL_RenderDebugText(renderer, 100 + (k * 30), 190, buff[i++]);
-	}
 }
 
 void update_SDL() {
@@ -146,10 +64,9 @@ void update_SDL() {
 			if (e.key.scancode == SDL_SCANCODE_RETURN) {
 				advance = true;
 			}
-		} else if (e.type == SDL_EVENT_KEY_UP) {
 		}
 	}
-	cpu_debug_SDL();
+	cpu_debug();
 	SDL_RenderPresent(renderer);
 }
 
@@ -194,7 +111,7 @@ int main(int argc, char *argv[]) {
 		//clock_apu(stream);
 
 		update_SDL();
-		advance = true;
+		advance = false;
 	}
 
 	clean_SDL();
