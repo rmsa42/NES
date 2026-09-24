@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "apu.h"
+#include "ppu.h"
 #include "rom.h"
 #include "debug_tools.h"
 #include "sdl_utils.h"
@@ -29,6 +30,9 @@ void update_nes(struct display *nes_dp) {
 			}
 		}
 	}
+	clock_cpu();
+	clock_ppu(nes_dp);
+	//clock_apu(stream);
 	SDL_RenderPresent(nes_dp->renderer);
 }
 
@@ -37,6 +41,7 @@ int nes_init(const char *rom, struct display *nes_dp) {
 		return (1);
 	}
 	cpu_init();
+	ppu_init();
 	read_rom(rom);
 	nes_dp->run = true;
 	cpu.pc = 0x8000; // This is here for now. The prg-rom is loaded in the 0x8000 addr
@@ -68,15 +73,16 @@ int main(int argc, char *argv[]) {
 	struct display debug_dp;
 	struct display nes_dp;
 
+	memset(&debug_dp, 0, sizeof(struct display));
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		printf("SDL Init error\n");
 		return (1);
 	}
 
-	nes_init(argv[1], &nes_dp);
 	if (aux_tools_init(argv[2], &debug_dp)) {
 		return (1);
 	}
+	nes_init(argv[1], &nes_dp);
 
 	printf("Running CPU\n");
 	while (nes_dp.run && debug_dp.run) {
@@ -85,13 +91,10 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 		}
-		clock_cpu();
-		//clock_apu(stream);
-
 		update_nes(&nes_dp);
 	}
 
-	//clean_SDL_display(&debug_dp);
+	clean_SDL_display(&debug_dp);
 	clean_SDL_display(&nes_dp);
 	//SDL_DestroyAudioStream(stream);
 	SDL_Quit();

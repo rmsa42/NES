@@ -3,10 +3,11 @@
 #include <string.h>
 
 extern byte memory[0xFFFF];
+extern byte ppu_mem[0x3FFFF];
 
 static void print_buff(byte *buff, const size_t size) {
 	for (size_t i = 0; i < size; i++) {
-		printf("%zu: %x\n", i, buff[i]);
+		printf("%x: %x\n", i, buff[i]);
 	}
 }
 
@@ -43,12 +44,19 @@ static void parse_prg_rom(FILE *rom, size_t prg_size) {
 	size_t size = 16384;
 
 	rsize = fread(&memory[0x8000], size, 1, rom);
-	printf("RSize: %zu\n", rsize);
+	//printf("RSize: %zu\n", rsize);
 	rsize = fread(&memory[0xC000], size - 1, 1, rom);
 	//print_buff(&memory[0x8000], 20);
 }
 
-static void parse_chr_rom(FILE *rom, size_t chr_size) {}
+static void parse_chr_rom(FILE *rom, size_t chr_size) {
+	size_t rsize = 0;
+	size_t size = 8192;
+
+	rsize = fread(&ppu_mem[0x0000], size, 1, rom);
+	//printf("RSize: %zu\n", rsize);
+	//print_buff(&ppu_mem[0x0000], size);
+}
 
 int read_rom(const char *rom_name) {
 	FILE *rom = NULL;

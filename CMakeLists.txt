@@ -11,6 +11,8 @@ set(SOURCES
 	cpu.h
 	apu.c
 	apu.h
+	ppu.c
+	ppu.h
 	rom.c
 	rom.h
 	debug_tools.c

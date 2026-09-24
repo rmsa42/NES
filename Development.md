@@ -45,7 +45,11 @@ I fumbled a lot, so the code is super messy
 - [X] Organize Debug tools into their own file
 > R: It's all in the **debug_tools** file
 
-- [ ] Need to study and make NMI interrupts
+**22/09/2026**
+- [X] Need to study and make NMI interrupts
+> R: Studying it i found the NMI line is connected from the CPU to the PPU only, so i will make the PPU first and then the NMI.
+This is mostly used to detected vertical blanking, so visual glitches don't happen and the CPU can safely write to VRAM
+
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable
 - [ ] Need to make the Sweep, envelope loop, const volume, volume and length counter load in apu for the pulses
 - [ ] Need to finish the noise wave
