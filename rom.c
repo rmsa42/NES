@@ -36,7 +36,7 @@ static void parse_header(FILE *rom, struct nes_header *hd) {
 	// Need to alter the low_byte and high_byte
 	hd->prg_rom_size = make_word(low_byte(header[9]), header[4]);
 	hd->chr_rom_size = make_word(high_byte(header[9]), header[5]);
-	print_buff(header, sizeof(header));
+	//print_buff(header, sizeof(header));
 }
 
 static void parse_trainer_area(FILE *rom, struct nes_header *hd) {}
@@ -64,18 +64,19 @@ int read_rom(const char *rom_name) {
 	FILE *rom = NULL;
 	struct nes_header hd;
 
-	printf("Rom Name: %s\n", rom_name);
+	printf("Parsing Rom Name: %s\n", rom_name);
 	if (strcmp((rom_name + strlen(rom_name) - 4), ".nes")) {
 		return (1);
 	}
 	memset(&hd, 0, sizeof(hd));
 	rom = fopen(rom_name, "rb");
 	parse_header(rom, &hd);
-	debug_header(&hd);
+	//debug_header(&hd);
 	if (hd.trainer_area_flag == true) {
 		parse_trainer_area(rom, &hd);
 	}
 	parse_prg_rom(rom, hd.prg_rom_size);
 	parse_chr_rom(rom, hd.chr_rom_size);
+	printf("Parsed Rom\n");
 	return (0);
 }

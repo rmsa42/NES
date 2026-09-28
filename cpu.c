@@ -21,7 +21,6 @@ void cpu_reset() {
 
 void clock_cpu() {
 	byte byte = fetch_byte();
-	printf("Inst %x running\n", byte);
 	inst instr = insts[byte];
 	word data = instr.mode();
 	instr.run(data);

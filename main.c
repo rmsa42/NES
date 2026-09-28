@@ -27,20 +27,20 @@ void update_nes(struct display *nes_dp) {
 		}
 	}
 	clock_cpu();
-	clock_ppu(nes_dp);
+	//clock_ppu(nes_dp);
 	//clock_apu(stream);
 	SDL_RenderPresent(nes_dp->renderer);
 }
 
-int nes_init(const char *rom, struct display *nes_dp) {
+int nes_init(struct display *nes_dp) {
 	if (create_SDL_display("NES", window_width, window_height, nes_dp)) {
 		return (1);
 	}
 	cpu_init();
 	ppu_init();
-	read_rom(rom);
 	nes_dp->run = true;
 	cpu.pc = 0x8000; // This is here for now. The prg-rom is loaded in the 0x8000 addr
+	printf("Nes Init\n");
 	return (0);
 }
 
@@ -62,6 +62,7 @@ int aux_tools_init(const char *bp, struct display *debug_dp) {
 		return (1);
 	}
 	debug_dp->run = true;
+	printf("Debugger Init\n");
 	return (0);
 }
 
@@ -78,9 +79,9 @@ int main(int argc, char *argv[]) {
 	if (aux_tools_init(argv[2], &debug_dp)) {
 		return (1);
 	}
-	nes_init(argv[1], &nes_dp);
+	nes_init(&nes_dp);
+	read_rom(argv[1]);
 
-	printf("Running CPU\n");
 	while (nes_dp.run && debug_dp.run) {
 		while (debug_dp.run) {
 			if (update_debugger(&debug_dp)) {

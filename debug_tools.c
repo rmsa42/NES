@@ -160,6 +160,7 @@ void cpu_debug(struct display *dp) {
 	int win_height;
 	int cpu_info_x;
 	
+	//printf("Inst %s running\n", instr_enum_to_str(memory[cpu.pc])); // Running Instruction
 	SDL_GetWindowSize(dp->window, &win_width, &win_height);
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	SDL_SetRenderScale(dp->renderer, 2, 2);
