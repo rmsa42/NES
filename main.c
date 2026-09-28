@@ -27,7 +27,7 @@ void update_nes(struct display *nes_dp) {
 		}
 	}
 	clock_cpu();
-	//clock_ppu(nes_dp);
+	clock_ppu(nes_dp);
 	//clock_apu(stream);
 	SDL_RenderPresent(nes_dp->renderer);
 }

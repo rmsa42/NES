@@ -10,48 +10,49 @@ void ppu_init() {
 	memset(ppu_mem, 0, sizeof(ppu_mem));
 }
 
-void clock_ppu(struct display *nes_dp) {
-	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
-	int padding_w = 7;
-	int padding_h = 0;
-	int ct = 0;
-	for (size_t l = 0x00; l < 0x1000; l += 0x10) {
-		int h = 0;
-		for (size_t k = 0; k < 8; k++) {
-			byte plane1 = ppu_mem[l + k];
-			byte plane2 = ppu_mem[l + k + 8];
-			for (int i = 7; i >= 0; i--) {
-				byte pl1bit = check_bit(plane1, i);
-				byte pl2bit = check_bit(plane2, i);
-				byte pixel = (pl2bit << 1) | pl1bit;
-				SDL_FRect rect;
-				if (pixel >= 1) {
-					rect.h = rect.w = 3;
-					rect.x = (padding_w - i) * rect.w;
-					rect.y = (h + padding_h) * rect.h;
-					if (pixel == 3) {
-						SDL_SetRenderDrawColor(nes_dp->renderer, 192, 192, 192, SDL_ALPHA_OPAQUE);
-					} else if (pixel == 2) {
-						SDL_SetRenderDrawColor(nes_dp->renderer, 255, 222, 173, SDL_ALPHA_OPAQUE);
-					} else {
-						SDL_SetRenderDrawColor(nes_dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-					}
-					SDL_RenderFillRect(nes_dp->renderer, &rect);
+void render_pattern_table_tile(const int tile_x, const int tile_y, struct display *nes_dp) {
+	const size_t addr = (tile_y * 16 + tile_x) * 16;
+	const size_t dp_row = tile_x * 8 + 7;
+	const size_t dp_height = (tile_y % 16) * 8;
+
+	for (size_t i = 0; i < 8; i++) {
+		byte plane1 = ppu_mem[addr + i];
+		byte plane2 = ppu_mem[addr + i + 8];
+		for (int k = 7; k >= 0; k--) {
+			byte pl1bit = check_bit(plane1, k);
+			byte pl2bit = check_bit(plane2, k);
+			byte pixel = (pl2bit << 1) | pl1bit;
+			SDL_FRect rect;
+			if (pixel >= 1) {
+				rect.h = rect.w = 3;
+				rect.x = (dp_row - k) * rect.w;
+				rect.y = (i + dp_height) * rect.h;
+				if (pixel == 3) {
+					SDL_SetRenderDrawColor(nes_dp->renderer, 192, 192, 192, SDL_ALPHA_OPAQUE);
+				} else if (pixel == 2) {
+					SDL_SetRenderDrawColor(nes_dp->renderer, 255, 222, 173, SDL_ALPHA_OPAQUE);
+				} else {
+					SDL_SetRenderDrawColor(nes_dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 				}
-				printf("%d", pixel);
+				SDL_RenderFillRect(nes_dp->renderer, &rect);
 			}
-			printf("\t%x %x", l + k, l + k + 8);
-			h++;
-			printf("\n");
+			printf("%d", pixel);
 		}
-		padding_w += 8;
-		ct++;
 		printf("\n");
-		if (ct == 16) {
-			ct = 0;
-			padding_h += 8;
-			padding_w = 7;
+	}
+	printf("\n");
+}
+
+void render_pattern_table(const int table_nbr, struct display *nes_dp) {
+	for (size_t tile_y = 0; tile_y < 16; tile_y++) {
+		for (size_t tile_x = 0; tile_x < 16; tile_x++) {
+			render_pattern_table_tile(tile_x, tile_y + (table_nbr * 16), nes_dp);
 		}
 	}
+}
+
+void clock_ppu(struct display *nes_dp) {
+	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
+	render_pattern_table(1, nes_dp);
 }
 
