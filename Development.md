@@ -50,6 +50,10 @@ I fumbled a lot, so the code is super messy
 > R: Studying it i found the NMI line is connected from the CPU to the PPU only, so i will make the PPU first and then the NMI.
 This is mostly used to detected vertical blanking, so visual glitches don't happen and the CPU can safely write to VRAM
 
+**28/09/2026**
+- [X] Need to sort out the git stash thing
+
+- [ ] Need to make a file to handle memory. Also remove memory varaibles from being global in other files than the *unit* they pertence
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable
 - [ ] Need to make the Sweep, envelope loop, const volume, volume and length counter load in apu for the pulses
 - [ ] Need to finish the noise wave

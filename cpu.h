@@ -13,6 +13,8 @@ extern "C" {
 #define STACK_OFFSET 0x01
 
 #define CPU_FREQ 1789773 // Hz
+#define CPU_MEM_SIZE 65536 // Bytes
+#define INSTS_NBR 256
 
 #define CARRY_6_MASK 0x7F
 

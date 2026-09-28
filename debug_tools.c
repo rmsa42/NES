@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 extern struct cpu cpu;
-extern byte memory[0xFFFF];
+extern byte memory[CPU_MEM_SIZE];
 
 word bp = 0;
 bool run_until_bp = false;

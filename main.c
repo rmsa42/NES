@@ -7,12 +7,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-extern inst insts[0xFF];
-extern byte memory[0xFFFF];
 extern struct cpu cpu;
 
-
-SDL_AudioStream *stream;
 int window_width = 640;
 int window_height = 480;
 
@@ -49,7 +45,7 @@ int nes_init(const char *rom, struct display *nes_dp) {
 }
 
 int aux_tools_init(const char *bp, struct display *debug_dp) {
-	SDL_AudioSpec spec;
+	//SDL_AudioSpec spec;
 
 	// Need to make this start in the display function
 	//spec.channels = 1;

@@ -2,7 +2,7 @@
 #include "cpu.h"
 #include <stdio.h>
 
-extern byte memory[0xFFFF];
+extern byte memory[CPU_MEM_SIZE];
 
 struct apu apu;
 float wave_phase = 0;

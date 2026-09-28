@@ -1,11 +1,10 @@
 #include "cpu.h"
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
 struct cpu cpu;
-inst insts[0xFF];
-byte memory[0xFFFF];
+inst insts[INSTS_NBR];
+byte memory[CPU_MEM_SIZE];
 void fill_insts();
 
 void cpu_init() {

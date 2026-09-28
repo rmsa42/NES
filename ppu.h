@@ -17,6 +17,8 @@ extern "C" {
 #define PPUDATA 0x2007
 #define OAMDMA_VECTOR 0x4014
 
+#define PPU_MEM_SIZE 16384 // bytes
+
 struct ppu {
 	byte ppu_ctrl;
 	byte ppu_mask;

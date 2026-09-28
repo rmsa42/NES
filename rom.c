@@ -1,9 +1,11 @@
 #include "rom.h"
+#include "cpu.h"
+#include "ppu.h"
 #include <stdio.h>
 #include <string.h>
 
-extern byte memory[0xFFFF];
-extern byte ppu_mem[0x3FFFF];
+extern byte memory[CPU_MEM_SIZE];
+extern byte ppu_mem[PPU_MEM_SIZE];
 
 static void print_buff(byte *buff, const size_t size) {
 	for (size_t i = 0; i < size; i++) {
@@ -15,8 +17,8 @@ static void debug_header(struct nes_header *hd) {
 	printf("INES format: %d\n", hd->ines_format);
 	printf("NES2 format: %d\n", hd->nes2_format);
 	printf("Trainer flag: %d\n", hd->trainer_area_flag);
-	printf("PRG-ROM size: %d\n", hd->prg_rom_size);
-	printf("CHR-ROM size: %d\n", hd->chr_rom_size);
+	printf("PRG-ROM size: %dKiB\n", hd->prg_rom_size * 16);
+	printf("CHR-ROM size: %dKiB\n", hd->chr_rom_size * 8);
 }
 
 static void parse_header(FILE *rom, struct nes_header *hd) {
@@ -45,7 +47,7 @@ static void parse_prg_rom(FILE *rom, size_t prg_size) {
 
 	rsize = fread(&memory[0x8000], size, 1, rom);
 	//printf("RSize: %zu\n", rsize);
-	rsize = fread(&memory[0xC000], size - 1, 1, rom);
+	rsize = fread(&memory[0xC000], size, 1, rom);
 	//print_buff(&memory[0x8000], 20);
 }
 
