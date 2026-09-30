@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
-extern byte memory[CPU_MEM_SIZE];
+extern byte cpu_mem[CPU_MEM_SIZE];
 
 struct ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
@@ -57,9 +57,9 @@ void render_pattern_table(const int table_nbr, struct display *nes_dp) {
 void clock_ppu(struct display *nes_dp) {
 	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
 	//render_pattern_table(0, nes_dp);
-	printf("2000: %d\n", memory[PPUCTRL_VECTOR]);
-	printf("2001: %d\n", memory[PPUMASK_VECTOR]);
-	printf("2005: %d\n", memory[PPUSCROLL_VECTOR]);
-	printf("2007: %d\n", memory[PPUDATA_VECTOR]);
+	printf("2000: %d\n", cpu_mem[PPUCTRL_VECTOR]);
+	printf("2001: %d\n", cpu_mem[PPUMASK_VECTOR]);
+	printf("2005: %d\n", cpu_mem[PPUSCROLL_VECTOR]);
+	printf("2007: %d\n", cpu_mem[PPUDATA_VECTOR]);
 }
 

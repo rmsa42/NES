@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-extern byte memory[CPU_MEM_SIZE];
+extern byte cpu_mem[CPU_MEM_SIZE];
 extern byte ppu_mem[PPU_MEM_SIZE];
 
 static void print_buff(byte *buff, const size_t size) {
@@ -45,10 +45,10 @@ static void parse_prg_rom(FILE *rom, size_t prg_size) {
 	size_t rsize = 0;
 	size_t size = 16384;
 
-	rsize = fread(&memory[0x8000], size, 1, rom);
+	rsize = fread(&cpu_mem[0x8000], size, 1, rom);
 	//printf("RSize: %zu\n", rsize);
-	rsize = fread(&memory[0xC000], size, 1, rom);
-	//print_buff(&memory[0x8000], 20);
+	rsize = fread(&cpu_mem[0xC000], size, 1, rom);
+	//print_buff(&cpu_mem[0x8000], 20);
 }
 
 static void parse_chr_rom(FILE *rom, size_t chr_size) {

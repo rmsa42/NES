@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 extern struct cpu cpu;
-extern byte memory[CPU_MEM_SIZE];
+extern byte cpu_mem[CPU_MEM_SIZE];
 
 word bp = 0;
 bool run_until_bp = false;
@@ -223,7 +223,7 @@ void cpu_debug(struct display *dp) {
 	int win_height;
 	int cpu_info_x;
 	
-	//printf("Inst %s running\n", instr_enum_to_str(memory[cpu.pc])); // Running Instruction
+	//printf("Inst %s running\n", instr_enum_to_str(cpu_mem[cpu.pc])); // Running Instruction
 	SDL_GetWindowSize(dp->window, &win_width, &win_height);
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	SDL_SetRenderScale(dp->renderer, 2, 2);
@@ -247,7 +247,7 @@ void cpu_debug(struct display *dp) {
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 180, "Breakpoint: %x", bp);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "Stack");
 	for (size_t i = cpu.sp + 1; i < 0xFF; i++) {
-		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 200, "%x", memory[make_word(STACK_OFFSET, (byte)i)]);
+		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 200, "%x", cpu_mem[make_word(STACK_OFFSET, (byte)i)]);
 		cpu_info_x += 20;
 	}
 
@@ -259,7 +259,7 @@ void cpu_debug(struct display *dp) {
 	SDL_RenderRect(dp->renderer, &rect);
 	SDL_SetRenderScale(dp->renderer, 2, 2);
 	for (unsigned int i = 0; i < 23; i++) {
-		const byte memvl = memory[cpu.pc + i];
+		const byte memvl = cpu_mem[cpu.pc + i];
 		SDL_RenderDebugTextFormat(dp->renderer, 6, 6 + (i * 10), "%x: %x", cpu.pc + i, memvl);
 		SDL_RenderDebugTextFormat(dp->renderer, 80, 6 + (i * 10), "%s", instr_enum_to_str(memvl));
 	}

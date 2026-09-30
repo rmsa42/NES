@@ -2,7 +2,7 @@
 #include "cpu.h"
 #include <stdio.h>
 
-extern byte memory[CPU_MEM_SIZE];
+extern byte cpu_mem[CPU_MEM_SIZE];
 
 struct apu apu;
 float wave_phase = 0;
@@ -13,10 +13,10 @@ int triangle_phases[32] = {
 };
 
 void read_pulse_data(pulse *square, word addr) {
-	byte dlcv = memory[addr++];
-	byte epns = memory[addr++];
-	byte tl = memory[addr++];
-	byte lth = memory[addr];
+	byte dlcv = cpu_mem[addr++];
+	byte epns = cpu_mem[addr++];
+	byte tl = cpu_mem[addr++];
+	byte lth = cpu_mem[addr];
 
 	square->duty = duty_table[get_duty(dlcv)];
 	square->env_loop = get_evelope_loop(dlcv);
@@ -25,10 +25,10 @@ void read_pulse_data(pulse *square, word addr) {
 }
 
 void read_triangle_data(word addr) {
-	byte cr = memory[addr++];
-	byte unused = memory[addr++];
-	byte tl = memory[addr++];
-	byte lth = memory[addr];
+	byte cr = cpu_mem[addr++];
+	byte unused = cpu_mem[addr++];
+	byte tl = cpu_mem[addr++];
+	byte lth = cpu_mem[addr];
 
 	apu.triangle.control_flag = check_bit(cr, 7);
 	apu.triangle.lin_counter_load = get_lin_counter_load(cr);

@@ -4,12 +4,12 @@
 
 struct cpu cpu;
 inst insts[INSTS_NBR];
-byte memory[CPU_MEM_SIZE];
+byte cpu_mem[CPU_MEM_SIZE];
 void fill_insts();
 
 void cpu_init() {
 	memset(&cpu, 0, sizeof(struct cpu));
-	memset(memory, 0, sizeof(memory));
+	memset(cpu_mem, 0, sizeof(cpu_mem));
 	fill_insts();
 	cpu.sp = STACK_VECTOR;
 }
@@ -44,7 +44,7 @@ void cpu_state() {
 }
 
 byte fetch_byte() {
-	return (memory[cpu.pc++]);
+	return (cpu_mem[cpu.pc++]);
 }
 
 word fetch_word() {
@@ -63,7 +63,7 @@ word acc_address_mode() { return (cpu.acc); }
 
 word ind_address_mode() {
 	word addr = fetch_word();
-	return (make_word(memory[addr + 1], memory[addr]));
+	return (make_word(cpu_mem[addr + 1], cpu_mem[addr]));
 }
 
 word rel_address_mode() {
@@ -103,15 +103,15 @@ word abs_y_address_mode() {
 
 word ind_x_address_mode() {
 	byte ind_addr = fetch_byte();
-	return (make_word(memory[ind_addr + cpu.ix + 1], memory[ind_addr + cpu.ix]));
+	return (make_word(cpu_mem[ind_addr + cpu.ix + 1], cpu_mem[ind_addr + cpu.ix]));
 }
 
 word ind_y_address_mode() {
 	byte ind_addr = fetch_byte();
-	byte lb = memory[ind_addr] + cpu.iy;
-	byte hb = memory[ind_addr + 1];
+	byte lb = cpu_mem[ind_addr] + cpu.iy;
+	byte hb = cpu_mem[ind_addr + 1];
 
-	if (memory[ind_addr] + cpu.iy > 0xFF) {
+	if (cpu_mem[ind_addr] + cpu.iy > 0xFF) {
 		hb += 1;
 	}
 	return (make_word(hb, lb));
@@ -122,7 +122,7 @@ word ind_y_address_mode() {
 // Stack Operations
 
 void push_byte(byte vl) {
-	memory[make_word(STACK_OFFSET, cpu.sp)] = vl;
+	cpu_mem[make_word(STACK_OFFSET, cpu.sp)] = vl;
 	cpu.sp--;
 }
 
@@ -136,7 +136,7 @@ void push_word(word vl) {
 
 byte pop_byte() {
 	cpu.sp++;
-	return (memory[make_word(STACK_OFFSET, cpu.sp)]);
+	return (cpu_mem[make_word(STACK_OFFSET, cpu.sp)]);
 }
 
 word pop_word() {
@@ -191,7 +191,7 @@ void nmi() {
 	push_word(0xAA69);
 	clear_bit(cpu.ps, BF);
 	push_byte(cpu.ps);
-	cpu.pc = make_word(memory[NMI_VECTOR + 1], memory[NMI_VECTOR]);
+	cpu.pc = make_word(cpu_mem[NMI_VECTOR + 1], cpu_mem[NMI_VECTOR]);
 	printf("NMI Called into %x\n", cpu.pc);
 }
 
@@ -200,29 +200,29 @@ void nmi() {
 // Logical
 
 void And(word addr) {
-	cpu.acc = cpu.acc & memory[addr];
+	cpu.acc = cpu.acc & cpu_mem[addr];
 	infer_zero_flag(cpu.acc);
 	infer_negative_flag(cpu.acc);
 }
 
 void eor(word addr) {
-	cpu.acc = cpu.acc ^ memory[addr];
+	cpu.acc = cpu.acc ^ cpu_mem[addr];
 	infer_zero_flag(cpu.acc);
 	infer_negative_flag(cpu.acc);
 }
 
 void ora(word addr) {
-	cpu.acc = cpu.acc | memory[addr];
+	cpu.acc = cpu.acc | cpu_mem[addr];
 	infer_zero_flag(cpu.acc);
 	infer_negative_flag(cpu.acc);
 }
 
 void bit(word addr) {
-	byte res = cpu.acc & memory[addr];
+	byte res = cpu.acc & cpu_mem[addr];
 
 	infer_zero_flag(res);
-	infer_negative_flag(memory[addr]);
-	if (check_bit(memory[addr], 6)) {
+	infer_negative_flag(cpu_mem[addr]);
+	if (check_bit(cpu_mem[addr], 6)) {
 		set_bit(cpu.ps, VF);
 	} else {
 		clear_bit(cpu.ps, VF);
@@ -234,7 +234,7 @@ void bit(word addr) {
 // Arithmetic
 
 void adc(word addr) {
-	byte vl = memory[addr];
+	byte vl = cpu_mem[addr];
 	word res = cpu.acc + vl + get_bit(cpu.ps, CF);
 	byte old_acc = cpu.acc;
 
@@ -246,7 +246,7 @@ void adc(word addr) {
 }
 
 void sbc(word addr) {
-	byte vl = memory[addr] + (1 ^ get_bit(cpu.ps, CF));
+	byte vl = cpu_mem[addr] + (1 ^ get_bit(cpu.ps, CF));
 	byte res = cpu.acc - vl;
 	byte old_acc = cpu.acc;
 
@@ -256,13 +256,13 @@ void sbc(word addr) {
 	} else {
 		clear_bit(cpu.ps, CF);
 	}
-	infer_overflow_flag(old_acc, ~(memory[addr]));
+	infer_overflow_flag(old_acc, ~(cpu_mem[addr]));
 	infer_zero_flag(cpu.acc);
 	infer_negative_flag(cpu.acc);
 }
 
 void cmp(word addr) {
-	byte vl = memory[addr];
+	byte vl = cpu_mem[addr];
 	byte res = cpu.acc - vl;
 
 	if (cpu.acc >= vl) {
@@ -275,7 +275,7 @@ void cmp(word addr) {
 }
 
 void cpx(word addr) {
-	byte vl = memory[addr];
+	byte vl = cpu_mem[addr];
 	byte res = cpu.ix - vl;
 
 	if (cpu.ix >= vl) {
@@ -288,7 +288,7 @@ void cpx(word addr) {
 }
 
 void cpy(word addr) {
-	byte vl = memory[addr];
+	byte vl = cpu_mem[addr];
 	byte res = cpu.iy - vl;
 
 	if (cpu.iy >= vl) {
@@ -305,33 +305,33 @@ void cpy(word addr) {
 // Load/Store
 
 void lda(word addr) {
-	cpu.acc = memory[addr];
+	cpu.acc = cpu_mem[addr];
 	infer_zero_flag(cpu.acc);
 	infer_negative_flag(cpu.acc);
 }
 
 void ldy(word addr) {
-	cpu.iy = memory[addr];
+	cpu.iy = cpu_mem[addr];
 	infer_zero_flag(cpu.iy);
 	infer_negative_flag(cpu.iy);
 }
 
 void ldx(word addr) {
-	cpu.ix = memory[addr];
+	cpu.ix = cpu_mem[addr];
 	infer_zero_flag(cpu.ix);
 	infer_negative_flag(cpu.ix);
 }
 
 void sta(word addr) {
-	memory[addr] = cpu.acc;
+	cpu_mem[addr] = cpu.acc;
 }
 
 void sty(word addr) {
-	memory[addr] = cpu.iy;
+	cpu_mem[addr] = cpu.iy;
 }
 
 void stx(word addr) {
-	memory[addr] = cpu.ix;
+	cpu_mem[addr] = cpu.ix;
 }
 
 //
@@ -469,9 +469,9 @@ void bvs(word rdisp) {
 // Increment/Decrement
 
 void inc(word addr) {
-	memory[addr] += 1;
-	infer_negative_flag(memory[addr]);
-	infer_zero_flag(memory[addr]);
+	cpu_mem[addr] += 1;
+	infer_negative_flag(cpu_mem[addr]);
+	infer_zero_flag(cpu_mem[addr]);
 }
 
 void inx(word addr) {
@@ -487,9 +487,9 @@ void iny(word addr) {
 }
 
 void dec(word addr) {
-	memory[addr] -= 1;
-	infer_negative_flag(memory[addr]);
-	infer_zero_flag(memory[addr]);
+	cpu_mem[addr] -= 1;
+	infer_negative_flag(cpu_mem[addr]);
+	infer_zero_flag(cpu_mem[addr]);
 }
 
 void dex(word addr) {
@@ -509,7 +509,7 @@ void dey(word addr) {
 // Bit Shifts
 
 void asl(word addr) {
-	byte *vl = &memory[addr];
+	byte *vl = &cpu_mem[addr];
 	
 	if (check_bit(*vl, 7)) {
 		set_bit(cpu.ps, CF);
@@ -533,7 +533,7 @@ void asl_acc(word z) {
 }
 
 void lsr(word addr) {
-	byte *vl = &memory[addr];
+	byte *vl = &cpu_mem[addr];
 	
 	if (check_bit(*vl, 0)) {
 		set_bit(cpu.ps, CF);
@@ -557,8 +557,8 @@ void lsr_acc(word z) {
 }
 
 void rol(word addr) {
-	byte *vl = &memory[addr];
-	byte res = (memory[addr] << 1);
+	byte *vl = &cpu_mem[addr];
+	byte res = (cpu_mem[addr] << 1);
 
 	set_bit_to(res, 0, get_bit(cpu.ps, CF));
 	if (check_bit(*vl, 7)) {
@@ -586,8 +586,8 @@ void rol_acc(word z) {
 }
 
 void ror(word addr) {
-	byte *vl = &memory[addr];
-	byte res = (memory[addr] >> 1);
+	byte *vl = &cpu_mem[addr];
+	byte res = (cpu_mem[addr] >> 1);
 
 	set_bit_to(res, 7, get_bit(cpu.ps, CF));
 	if (check_bit(*vl, 0)) {

@@ -3,7 +3,7 @@
 
 extern inst insts[0xFF];
 extern struct cpu cpu;
-extern byte memory[0xFFFF];
+extern byte cpu_mem[0xFFFF];
 
 class cpu_test : public testing::Test {
 protected:
@@ -25,8 +25,8 @@ protected:
 	void set_inst(byte inst, word vl) {
 		struct inst instr = insts[inst];
 
-		memory[i++] = inst;
-		memory[i++] = vl;
+		cpu_mem[i++] = inst;
+		cpu_mem[i++] = vl;
 		fetch_byte();
 		instr.run(instr.mode());
 		cpu_state();
