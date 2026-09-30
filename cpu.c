@@ -187,6 +187,14 @@ void infer_carry_flag(word res) {
 
 //
 
+void nmi() {
+	push_word(0xAA69);
+	clear_bit(cpu.ps, BF);
+	push_byte(cpu.ps);
+	cpu.pc = make_word(memory[NMI_VECTOR + 1], memory[NMI_VECTOR]);
+	printf("NMI Called into %x\n", cpu.pc);
+}
+
 // Instructions
 
 // Logical
@@ -257,7 +265,7 @@ void cmp(word addr) {
 	byte vl = memory[addr];
 	byte res = cpu.acc - vl;
 
-	if (cpu.acc > vl) {
+	if (cpu.acc >= vl) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
@@ -270,7 +278,7 @@ void cpx(word addr) {
 	byte vl = memory[addr];
 	byte res = cpu.ix - vl;
 
-	if (cpu.ix > vl) {
+	if (cpu.ix >= vl) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
@@ -283,7 +291,7 @@ void cpy(word addr) {
 	byte vl = memory[addr];
 	byte res = cpu.iy - vl;
 
-	if (cpu.iy > vl) {
+	if (cpu.iy >= vl) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
@@ -395,12 +403,13 @@ void jmp(word addr) {
 }
 
 void jsr(word addr) {
-	push_word(cpu.pc);
+	push_word(cpu.pc - 1);
 	cpu.pc = addr;
 }
 
 void rts(word addr) {
 	cpu.pc = pop_word();
+	cpu.pc++;
 }
 
 //
@@ -737,6 +746,8 @@ void fill_insts() {
     insts[LDA_ABS]  = (inst){ lda, abs_address_mode };
     insts[LDA_ABSX] = (inst){ lda, abs_x_address_mode };
     insts[LDA_ABSY] = (inst){ lda, abs_y_address_mode };
+    insts[LDA_INDX] = (inst){ lda, ind_x_address_mode };
+    insts[LDA_INDY] = (inst){ lda, ind_y_address_mode };
 
     insts[LDY_IMM]  = (inst){ ldy, imm_address_mode };
     insts[LDY_ZPG]  = (inst){ ldy, zp_address_mode };

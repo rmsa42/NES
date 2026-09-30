@@ -1,6 +1,9 @@
 #include "ppu.h"
+#include "cpu.h"
 #include <string.h>
 #include <stdio.h>
+
+extern byte memory[CPU_MEM_SIZE];
 
 struct ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
@@ -36,11 +39,11 @@ void render_pattern_table_tile(const int tile_x, const int tile_y, struct displa
 				}
 				SDL_RenderFillRect(nes_dp->renderer, &rect);
 			}
-			printf("%d", pixel);
+			//printf("%d", pixel);
 		}
-		printf("\n");
+		//printf("\n");
 	}
-	printf("\n");
+	//printf("\n");
 }
 
 void render_pattern_table(const int table_nbr, struct display *nes_dp) {
@@ -53,6 +56,10 @@ void render_pattern_table(const int table_nbr, struct display *nes_dp) {
 
 void clock_ppu(struct display *nes_dp) {
 	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
-	render_pattern_table(1, nes_dp);
+	//render_pattern_table(0, nes_dp);
+	printf("2000: %d\n", memory[PPUCTRL_VECTOR]);
+	printf("2001: %d\n", memory[PPUMASK_VECTOR]);
+	printf("2005: %d\n", memory[PPUSCROLL_VECTOR]);
+	printf("2007: %d\n", memory[PPUDATA_VECTOR]);
 }
 

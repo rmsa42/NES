@@ -10,12 +10,75 @@ bool run_until_bp = false;
 
 const char *instr_enum_to_str(const byte instr) {
 	switch (instr) {
+		case AND_IMM:
+		case AND_ABS:
+		case AND_ABSX:
+		case AND_ABSY:
+		case AND_ZPG:
+		case AND_ZPGX:
+		case AND_INDX:
+		case AND_INDY:
+			return ("AND");
+		case EOR_IMM:
+		case EOR_ZPG:
+		case EOR_ZPGX:
+		case EOR_ABS:
+		case EOR_ABSX:
+		case EOR_ABSY:
+			return ("EOR");
+		case ORA_IMM:
+		case ORA_ZPG:
+		case ORA_ZPGX:
+		case ORA_ABS:
+		case ORA_ABSX:
+		case ORA_ABSY:
+			return ("ORA");
+		case BIT_ZPG:
+		case BIT_ABS:
+			return ("BIT");
+		case ADC_IMM:
+		case ADC_ZPG:
+		case ADC_ZPGX:
+		case ADC_ABS:
+		case ADC_ABSX:
+		case ADC_ABSY:
+		case ADC_INDX:
+		case ADC_INDY:
+			return ("ADC");
+		case SBC_IMM:
+		case SBC_ZPG:
+		case SBC_ZPGX:
+		case SBC_ABS:
+		case SBC_ABSX:
+		case SBC_ABSY:
+		case SBC_INDX:
+		case SBC_INDY:
+			return ("SBC");
+		case CMP_IMM:
+		case CMP_ZPG:
+		case CMP_ZPGX:
+		case CMP_ABS:
+		case CMP_ABSX:
+		case CMP_ABSY:
+		case CMP_INDX:
+		case CMP_INDY:
+			return ("CMP");
+		case CPX_IMM:
+		case CPX_ZPG:
+		case CPX_ABS:
+			return ("CPX");
+		case CPY_IMM:
+		case CPY_ZPG:
+		case CPY_ABS:
+			return ("CPY");
 		case LDA_IMM:
 		case LDA_ZPG:
 		case LDA_ZPGX:
 		case LDA_ABS:
 		case LDA_ABSX:
 		case LDA_ABSY:
+		case LDA_INDX:
+		case LDA_INDY:
 			return ("LDA");
 		case LDY_IMM:
 		case LDY_ZPG:
@@ -182,6 +245,11 @@ void cpu_debug(struct display *dp) {
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 150, "Zero: %d", get_bit(cpu.ps, ZF));
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 160, "Carry: %d", get_bit(cpu.ps, CF));
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 180, "Breakpoint: %x", bp);
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "Stack");
+	for (size_t i = cpu.sp + 1; i < 0xFF; i++) {
+		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 200, "%x", memory[make_word(STACK_OFFSET, (byte)i)]);
+		cpu_info_x += 20;
+	}
 
 	SDL_SetRenderScale(dp->renderer, 1, 1);
 	rect.y = 5;
@@ -233,6 +301,9 @@ bool update_debugger(struct display *dp) {
 		advance = true;
 	} else if (cpu.pc == bp) {
 		run_until_bp = false;
+	}
+	if (cpu.pc == 0xAA66) {
+		nmi();
 	}
 	return (advance);
 }

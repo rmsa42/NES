@@ -14,7 +14,7 @@ extern "C" {
 #define OAMDATA_VECTOR 0x2004
 #define PPUSCROLL_VECTOR 0x2005
 #define PPUADDR_VECTOR 0x2006
-#define PPUDATA 0x2007
+#define PPUDATA_VECTOR 0x2007
 #define OAMDMA_VECTOR 0x4014
 
 #define PPU_MEM_SIZE 16384 // bytes

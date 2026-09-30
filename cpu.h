@@ -49,6 +49,7 @@ void clock_cpu();
 void cpu_state();
 byte fetch_byte();
 word fetch_word();
+void nmi();
 
 typedef enum {
 // Load/Store Instrutions
