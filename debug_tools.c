@@ -1,12 +1,16 @@
 #include "debug_tools.h"
 #include "cpu.h"
+#include "ppu.h"
+#include "bus.h"
 #include <stdio.h>
 
 extern struct cpu cpu;
-extern byte cpu_mem[CPU_MEM_SIZE];
+extern struct ppu ppu;
+extern byte ppu_mem[PPU_MEM_SIZE];
 
 word bp = 0;
 bool run_until_bp = false;
+int debug_panel = 0;
 
 const char *instr_enum_to_str(const byte instr) {
 	switch (instr) {
@@ -217,13 +221,25 @@ const char *instr_enum_to_str(const byte instr) {
 	}
 }
 
-void cpu_debug(struct display *dp) {
+int debugger_init(const char *bp_str, struct display *dp) {
+	if (create_SDL_display("DebuggerNes", 640, 480, dp)) {
+		return (1);
+	}
+	run_until_bp = false;
+	if (bp_str != NULL) {
+		bp = strtoul(bp_str, NULL, 16);
+		run_until_bp = true;
+	}
+	return (0);
+}
+
+void general_debug_info(struct display *dp) {
 	SDL_FRect rect;
 	int win_width;
 	int win_height;
 	int cpu_info_x;
 	
-	//printf("Inst %s running\n", instr_enum_to_str(cpu_mem[cpu.pc])); // Running Instruction
+	//printf("Inst %s running\n", instr_enum_to_str(bus_read(cpu.pc))); // Running Instruction
 	SDL_GetWindowSize(dp->window, &win_width, &win_height);
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	SDL_SetRenderScale(dp->renderer, 2, 2);
@@ -245,9 +261,10 @@ void cpu_debug(struct display *dp) {
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 150, "Zero: %d", get_bit(cpu.ps, ZF));
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 160, "Carry: %d", get_bit(cpu.ps, CF));
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 180, "Breakpoint: %x", bp);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "Stack");
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "PPU VRAM: %x", ppu.v);
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 200, "Stack");
 	for (size_t i = cpu.sp + 1; i < 0xFF; i++) {
-		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 200, "%x", cpu_mem[make_word(STACK_OFFSET, (byte)i)]);
+		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 210, "%x", bus_read(make_word(STACK_OFFSET, (byte)i)));
 		cpu_info_x += 20;
 	}
 
@@ -259,7 +276,7 @@ void cpu_debug(struct display *dp) {
 	SDL_RenderRect(dp->renderer, &rect);
 	SDL_SetRenderScale(dp->renderer, 2, 2);
 	for (unsigned int i = 0; i < 23; i++) {
-		const byte memvl = cpu_mem[cpu.pc + i];
+		const byte memvl = bus_read(cpu.pc + i);
 		SDL_RenderDebugTextFormat(dp->renderer, 6, 6 + (i * 10), "%x: %x", cpu.pc + i, memvl);
 		SDL_RenderDebugTextFormat(dp->renderer, 80, 6 + (i * 10), "%s", instr_enum_to_str(memvl));
 	}
@@ -268,16 +285,17 @@ void cpu_debug(struct display *dp) {
 	SDL_RenderLine(dp->renderer, 120, 9, 130, 4);
 }
 
-int debugger_init(const char *bp_str, struct display *dp) {
-	if (create_SDL_display("DebuggerNes", 640, 480, dp)) {
-		return (1);
+void memory_debug(struct display *dp) {
+	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderScale(dp->renderer, 2, 2);
+
+	SDL_RenderDebugText(dp->renderer, 40, 0, "PPU Memory");
+	word addr = ppu.v - 10;
+	for (unsigned int i = 0; i < 21; i++) {
+		SDL_RenderDebugTextFormat(dp->renderer, 10, 20 + (i * 10), "%02x:  %02x   %02x   %02x   %02x", addr,
+			ppu_mem[addr], ppu_mem[addr + 1], ppu_mem[addr + 2], ppu_mem[addr + 3]);
+		addr += 4;
 	}
-	run_until_bp = false;
-	if (bp_str != NULL) {
-		bp = strtoul(bp_str, NULL, 16);
-		run_until_bp = true;
-	}
-	return (0);
 }
 
 bool update_debugger(struct display *dp) {
@@ -292,10 +310,17 @@ bool update_debugger(struct display *dp) {
 				advance = true;
 			} else if (e.key.scancode == SDL_SCANCODE_Q) {
 				dp->run = false;
+			} else if (e.key.scancode == SDL_SCANCODE_M) {
+				debug_panel++;
+				debug_panel = debug_panel % 2;
 			}
 		}
 	}
-	cpu_debug(dp);
+	if (debug_panel == 0) {
+		general_debug_info(dp);
+	} else {
+		memory_debug(dp);
+	}
 	SDL_RenderPresent(dp->renderer);
 	if (run_until_bp == true && cpu.pc != bp) {
 		advance = true;

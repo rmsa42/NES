@@ -47,6 +47,8 @@ void cpu_init();
 void cpu_reset();
 void clock_cpu();
 void cpu_state();
+void cpu_write(word addr, byte value);
+byte cpu_read(word addr);
 byte fetch_byte();
 word fetch_word();
 void nmi();

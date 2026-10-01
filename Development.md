@@ -53,7 +53,16 @@ This is mostly used to detected vertical blanking, so visual glitches don't happ
 **28/09/2026**
 - [X] Need to sort out the git stash thing
 
-- [ ] Need to make a file to handle memory. Also remove memory varaibles from being global in other files than the *unit* they pertence
+**01/10/2026**
+- [X] Need to make a file to handle memory. Also remove memory varaibles from being global in other files than the *unit* they pertence
+> R: Now the memory is handled via **bus**. This made possible to remove the memory global variable from other files, except the **rom.c**.
+Now the memory-mapped registers are right
+
+- [ ] Implement the *bus* in the asl, lsr, rol and ror after making tests for the instructions
+- [ ] Fully refactor **debug_tools** with a new GUI library or just try to make a GUI with SDL3 :)
+- [ ] Need to finish the **apu_write** function to integrate the apu with the bus
+- [ ] Need to make the memory *mirroring*
+- [ ] Fix the **tests** CMake file. Bug: Include the SDL library to compile the files
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable
 - [ ] Need to make the Sweep, envelope loop, const volume, volume and length counter load in apu for the pulses
 - [ ] Need to finish the noise wave

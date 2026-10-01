@@ -15,6 +15,8 @@ set(SOURCES
 	ppu.h
 	rom.c
 	rom.h
+	bus.c
+	bus.h
 	debug_tools.c
 	debug_tools.h
 	sdl_utils.c

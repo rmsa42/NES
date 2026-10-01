@@ -13,6 +13,58 @@ void ppu_init() {
 	memset(ppu_mem, 0, sizeof(ppu_mem));
 }
 
+void ppu_internal_write(byte value) {
+	ppu_mem[ppu.v] = value;
+	ppu.v += check_bit(ppu.ppu_ctrl, 2) ? 32 : 1;
+}
+
+byte ppu_internal_read() {
+	byte ret = ppu_mem[ppu.v];
+
+	ppu.v += check_bit(ppu.ppu_ctrl, 2) ? 32 : 1;
+	return (ret);
+}
+
+void ppu_write(word addr, byte value) {
+	switch (addr) {
+		case PPUCTRL_VECTOR:
+			ppu.ppu_ctrl = value;
+			//printf("$2000: %x\n", ppu.ppu_ctrl);
+			//printf("Increment: %x\n", check_bit(ppu.ppu_ctrl, 2));
+			break;
+		case PPUMASK_VECTOR:
+			ppu.ppu_mask = value;
+			//printf("$2001: %x\n", ppu.ppu_mask);
+			break;
+		case PPUADDR_VECTOR:
+			if (!ppu.w) {
+				ppu.v = value;
+			} else {
+				ppu.v = (ppu.v << 8) | value;
+			}
+			ppu.w = !ppu.w;
+			break;
+		case PPUDATA_VECTOR:
+			ppu_internal_write(value);
+			break;
+		
+		default:
+			break;
+	}
+}
+
+byte ppu_read(word addr) {
+	switch (addr) {
+		case PPUSTATUS_VECTOR:
+			return (ppu.ppu_status);
+		case PPUDATA_VECTOR:
+			return (ppu_internal_read());
+
+		default:
+			return (0);
+	}
+}
+
 void render_pattern_table_tile(const int tile_x, const int tile_y, struct display *nes_dp) {
 	const size_t addr = (tile_y * 16 + tile_x) * 16;
 	const size_t dp_row = tile_x * 8 + 7;
@@ -57,9 +109,6 @@ void render_pattern_table(const int table_nbr, struct display *nes_dp) {
 void clock_ppu(struct display *nes_dp) {
 	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
 	//render_pattern_table(0, nes_dp);
-	printf("2000: %d\n", cpu_mem[PPUCTRL_VECTOR]);
-	printf("2001: %d\n", cpu_mem[PPUMASK_VECTOR]);
-	printf("2005: %d\n", cpu_mem[PPUSCROLL_VECTOR]);
-	printf("2007: %d\n", cpu_mem[PPUDATA_VECTOR]);
+	//printf("2006: %x\n", ppu.v);
 }
 

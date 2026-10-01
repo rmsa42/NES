@@ -29,9 +29,16 @@ struct ppu {
 	byte ppu_addr;
 	byte ppu_data;
 	byte oam_dma;
+
+	word v;
+	word t;
+	byte x;
+	bool w;
 };
 
 void ppu_init();
+void ppu_write(word addr, byte value);
+byte ppu_read(word addr);
 void clock_ppu(struct display *nes_dp);
 
 #ifdef __cplusplus

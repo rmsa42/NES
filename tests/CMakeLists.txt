@@ -9,6 +9,8 @@ set(BUILD_GMOCK 0)
 set(SOURCES 
 	../cpu.c
 	../cpu.h
+	../bus.c
+	../bus.h
 	arithmetic_tests.cpp
 )
 

@@ -12,6 +12,8 @@ int triangle_phases[32] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 };
 
+void apu_write(word addr, byte value) {}
+
 void read_pulse_data(pulse *square, word addr) {
 	byte dlcv = cpu_mem[addr++];
 	byte epns = cpu_mem[addr++];
