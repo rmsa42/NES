@@ -19,6 +19,17 @@ extern "C" {
 
 #define PPU_MEM_SIZE 16384 // bytes
 
+typedef enum {
+	GREY,
+	BG_LFM,
+	SP_LFM,
+	BG_RND,
+	SP_RND,
+	RED,
+	GREEN,
+	BLUE
+} mask;
+
 struct ppu {
 	byte ppu_ctrl;
 	byte ppu_mask;

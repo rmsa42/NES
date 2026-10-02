@@ -11,6 +11,7 @@ extern byte ppu_mem[PPU_MEM_SIZE];
 word bp = 0;
 bool run_until_bp = false;
 int debug_panel = 0;
+int ct = 34;
 
 const char *instr_enum_to_str(const byte instr) {
 	switch (instr) {
@@ -263,7 +264,7 @@ void general_debug_info(struct display *dp) {
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 180, "Breakpoint: %x", bp);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "PPU VRAM: %x", ppu.v);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 200, "Stack");
-	for (size_t i = cpu.sp + 1; i < 0xFF; i++) {
+	for (size_t i = cpu.sp + 1; i <= 0xFF; i++) {
 		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 210, "%x", bus_read(make_word(STACK_OFFSET, (byte)i)));
 		cpu_info_x += 20;
 	}
@@ -322,13 +323,20 @@ bool update_debugger(struct display *dp) {
 		memory_debug(dp);
 	}
 	SDL_RenderPresent(dp->renderer);
-	if (run_until_bp == true && cpu.pc != bp) {
+	if (cpu.pc == bp) {
+		ct -= 1;
+		if (ct == 0) {
+			run_until_bp = false;
+		} else {
+			advance = true;
+		}
+	} else if (run_until_bp == true) {
 		advance = true;
-	} else if (cpu.pc == bp) {
-		run_until_bp = false;
 	}
 	if (cpu.pc == 0xAA66) {
-		nmi();
+		nmi(0xAA69);
+	} else if (cpu.pc == 0xAA50) {
+		nmi(0xAA53);
 	}
 	return (advance);
 }

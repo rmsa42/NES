@@ -51,7 +51,7 @@ void cpu_write(word addr, byte value);
 byte cpu_read(word addr);
 byte fetch_byte();
 word fetch_word();
-void nmi();
+void nmi(word addr);
 
 typedef enum {
 // Load/Store Instrutions

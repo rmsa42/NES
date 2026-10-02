@@ -196,12 +196,12 @@ void infer_carry_flag(word res) {
 
 //
 
-void nmi() {
-	push_word(0xAA69);
+void nmi(word addr) {
+	push_word(addr);
 	clear_bit(cpu.ps, BF);
 	push_byte(cpu.ps);
 	cpu.pc = make_word(cpu_mem[NMI_VECTOR + 1], cpu_mem[NMI_VECTOR]);
-	printf("NMI Called into %x\n", cpu.pc);
+	printf("NMI $%x Called into %x\n", addr, cpu.pc);
 }
 
 // Instructions

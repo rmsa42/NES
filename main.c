@@ -9,7 +9,7 @@
 
 extern struct cpu cpu;
 
-int window_width = 640;
+int window_width = 512;
 int window_height = 480;
 
 void update_nes(struct display *nes_dp) {
