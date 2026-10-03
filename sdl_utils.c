@@ -7,7 +7,7 @@ int create_SDL_display(const char *win_name, const int width, const int height, 
 		printf("Can't create window or renderer\n");
 		return (1);
 	}
-	if (!SDL_SetRenderLogicalPresentation(dp->renderer, 640, 480, SDL_LOGICAL_PRESENTATION_DISABLED)) {
+	if (!SDL_SetRenderLogicalPresentation(dp->renderer, width, height, SDL_LOGICAL_PRESENTATION_DISABLED)) {
 		printf("Can't change renderer presentation\n");
 		return (1);
 	}

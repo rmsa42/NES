@@ -65,6 +65,9 @@ int read_rom(const char *rom_name) {
 	struct nes_header hd;
 
 	printf("Parsing Rom Name: %s\n", rom_name);
+	if (rom_name == NULL) {
+		return (1);
+	}
 	if (strcmp((rom_name + strlen(rom_name) - 4), ".nes")) {
 		return (1);
 	}

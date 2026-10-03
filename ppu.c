@@ -4,6 +4,7 @@
 
 struct ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
+bool stop = false;
 
 void ppu_init() {
 	memset(&ppu, 0, sizeof(struct ppu));
@@ -26,11 +27,16 @@ void ppu_write(word addr, byte value) {
 	switch (addr) {
 		case PPUCTRL_VECTOR:
 			ppu.ppu_ctrl = value;
+			set_bit_to(ppu.t, 10, check_bit(ppu.ppu_ctrl, 0));
+			set_bit_to(ppu.t, 11, check_bit(ppu.ppu_ctrl, 1));
 			printf("$2000: %x\n", ppu.ppu_ctrl);
 			//printf("Increment: %x\n", check_bit(ppu.ppu_ctrl, 2));
 			break;
 		case PPUMASK_VECTOR:
 			ppu.ppu_mask = value;
+			if (check_bit(ppu.ppu_mask, BG_RND)) {
+				stop = true;
+			}
 			printf("$2001: %x\n", ppu.ppu_mask);
 			printf("Rendering Background: %x\n", check_bit(ppu.ppu_mask, BG_RND));
 			break;
@@ -39,13 +45,21 @@ void ppu_write(word addr, byte value) {
 			printf("$2003: %x\n", ppu.oam_addr);
 			break;
 		case PPUSCROLL_VECTOR:
-			ppu.ppu_scroll = value;
+			if (!ppu.w) {
+				ppu.x = get_pixel_offset(value);
+				set_coarse_x(ppu.t, get_coarse(value));
+			} else {
+				set_fine_y(ppu.t, get_pixel_offset(value));
+				set_coarse_y(ppu.t, get_coarse(value));
+			}
+			ppu.w = !ppu.w;
 			break;
 		case PPUADDR_VECTOR:
 			if (!ppu.w) {
-				ppu.v = value;
+				ppu.t = value;
 			} else {
-				ppu.v = (ppu.v << 8) | value;
+				ppu.t = (ppu.t << 8) | value;
+				ppu.v = ppu.t;
 			}
 			ppu.w = !ppu.w;
 			break;
@@ -62,6 +76,7 @@ void ppu_write(word addr, byte value) {
 byte ppu_read(word addr) {
 	switch (addr) {
 		case PPUSTATUS_VECTOR:
+			ppu.w = 0;
 			return (ppu.ppu_status);
 		case PPUDATA_VECTOR:
 			return (ppu_internal_read());
@@ -140,19 +155,38 @@ void render_pixel_sliver(const byte tile, const byte row, const byte scanline, c
 	//printf("\n");
 }
 
-void render_nametable(struct display *nes_dp) {
-	word start = 0x2000;
-	word vram_addr = 0x2000;
-
-	for (size_t scanline = 0; scanline < 240; scanline++) {
-		if (!(scanline % 8) && scanline != 0) {
-			start += 0x0020;
+void render_scanline(struct display *nes_dp, const byte scanline) {
+	for (byte i = 0; i < 32; i++) {
+		byte tile = ppu_mem[get_nametable_addr(ppu.v)];
+		//printf("NM_ADDR: %x\n", get_nametable_addr(ppu.v));
+		render_pixel_sliver(tile, get_fine_y(ppu.v), scanline, i * 8, nes_dp);
+		if (get_coarse_x(ppu.v) == 31) {
+			clear_coarse_x(ppu.v);
+			toggle_hz_nametable(ppu.v);
+		} else {
+			ppu.v++;
 		}
-		vram_addr = start;
-		for (size_t i = 0; i < 32; i++) {
-			byte tile = ppu_mem[vram_addr];
-			render_pixel_sliver(tile, scanline % 8, scanline, i * 8, nes_dp);
-			vram_addr++;
+	}
+}
+
+void render_nametable(struct display *nes_dp) {
+	ppu.v = ppu.t;
+	for (size_t scanline = 0; scanline < 240; scanline++) {
+		set_coarse_x(ppu.v, get_coarse_x(ppu.t));
+		set_bit_to(ppu.v, 10, check_bit(ppu.t, 10));
+		render_scanline(nes_dp, scanline);
+		if (get_fine_y(ppu.v) < 7) {
+			ppu.v += 0x1000;
+		} else {
+			clear_fine_y(ppu.v);
+			if (get_coarse_y(ppu.v) == 29) {
+				clear_coarse_y(ppu.v);
+				toggle_vt_nametable(ppu.v);
+			} else if (get_coarse_y(ppu.v) == 31) {
+				clear_coarse_y(ppu.v);
+			} else {
+				ppu.v += 0x20;
+			}
 		}
 	}
 	//printf("VRAM: %x\n", vram_addr);
@@ -160,14 +194,15 @@ void render_nametable(struct display *nes_dp) {
 
 void clock_ppu(struct display *nes_dp) {
 	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
-	//render_nametable();
 	//for (int i = 0; i < 8; i++) {
 	//	render_pixel_sliver(0x1D, i % 8, i, 100, nes_dp);
 	//}
 	//render_pattern_table(0, nes_dp);
-	//printf("2006: %x\n", ppu.v);
-	if (check_bit(ppu.ppu_mask, BG_RND)) {
+	if (check_bit(ppu.ppu_mask, BG_RND) && stop == true) {
+		ppu.t = 0;
 		render_nametable(nes_dp);
+		//set_bit(ppu.ppu_status, VBLANK);
+		stop = false;
 	}
 }
 

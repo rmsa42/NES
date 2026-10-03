@@ -6,17 +6,21 @@
 #include "sdl_utils.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include "bus.h"
 
 extern struct cpu cpu;
 
 int window_width = 512;
 int window_height = 480;
+extern bool stop;
 
 void update_nes(struct display *nes_dp) {
 	SDL_Event e;
 
 	SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(nes_dp->renderer);
+	if (stop == true) {
+		SDL_RenderClear(nes_dp->renderer);
+	}
 	while (SDL_PollEvent(&e)) {
 		if (e.type == SDL_EVENT_QUIT) {
 			nes_dp->run = false;
@@ -36,6 +40,7 @@ int nes_init(struct display *nes_dp) {
 	if (create_SDL_display("NES", window_width, window_height, nes_dp)) {
 		return (1);
 	}
+	SDL_SetWindowPosition(nes_dp->window, 1000, 300);
 	cpu_init();
 	ppu_init();
 	nes_dp->run = true;
@@ -80,7 +85,10 @@ int main(int argc, char *argv[]) {
 		return (1);
 	}
 	nes_init(&nes_dp);
-	read_rom(argv[1]);
+	if (read_rom(argv[1])) {
+		printf("Invalid ROM\n");
+		nes_dp.run = false; // Just to make the loop stop
+	}
 
 	while (nes_dp.run && debug_dp.run) {
 		while (debug_dp.run) {

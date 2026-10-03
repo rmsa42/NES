@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "bus.h"
+#include "ppu.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -7,6 +8,8 @@ struct cpu cpu;
 inst insts[INSTS_NBR];
 byte cpu_mem[CPU_MEM_SIZE];
 void fill_insts();
+
+extern bool stop;
 
 void cpu_init() {
 	memset(&cpu, 0, sizeof(struct cpu));
@@ -21,6 +24,9 @@ void cpu_reset() {
 }
 
 void clock_cpu() {
+	if (stop == true) {
+		return;
+	}
 	byte byte = fetch_byte();
 	inst instr = insts[byte];
 	word data = instr.mode();
@@ -34,14 +40,14 @@ void cpu_state() {
 	printf("\tACC: %d\n", cpu.acc);
 	printf("\tSP: %d\n", cpu.sp);
 	printf("Processor Status\n");
-	printf("\tNegative: %d\n", get_bit(cpu.ps, NF));
-	printf("\tOverflow: %d\n", get_bit(cpu.ps, VF));
+	printf("\tNegative: %d\n", check_bit(cpu.ps, NF));
+	printf("\tOverflow: %d\n", check_bit(cpu.ps, VF));
 	printf("\tUnused: 0\n");
-	printf("\tBreak: %d\n", get_bit(cpu.ps, BF));
-	printf("\tDecimal: %d\n", get_bit(cpu.ps, DF));
-	printf("\tInterrupt: %d\n", get_bit(cpu.ps, IF));
-	printf("\tZero: %d\n", get_bit(cpu.ps, ZF));
-	printf("\tCarry: %d\n", get_bit(cpu.ps, CF));
+	printf("\tBreak: %d\n", check_bit(cpu.ps, BF));
+	printf("\tDecimal: %d\n", check_bit(cpu.ps, DF));
+	printf("\tInterrupt: %d\n", check_bit(cpu.ps, IF));
+	printf("\tZero: %d\n", check_bit(cpu.ps, ZF));
+	printf("\tCarry: %d\n", check_bit(cpu.ps, CF));
 }
 
 void cpu_write(word addr, byte value) {
@@ -245,7 +251,7 @@ void bit(word addr) {
 
 void adc(word addr) {
 	byte memvl = bus_read(addr);
-	word res = cpu.acc + memvl + get_bit(cpu.ps, CF);
+	word res = cpu.acc + memvl + check_bit(cpu.ps, CF);
 	byte old_acc = cpu.acc;
 
 	cpu.acc = (byte)res;
@@ -257,7 +263,7 @@ void adc(word addr) {
 
 void sbc(word addr) {
 	byte memvl = bus_read(addr);
-	byte vl = memvl + (1 ^ get_bit(cpu.ps, CF));
+	byte vl = memvl + (1 ^ check_bit(cpu.ps, CF));
 	byte res = cpu.acc - vl;
 	byte old_acc = cpu.acc;
 
@@ -428,49 +434,49 @@ void rts(word addr) {
 // Branches
 
 void bcc(word rdisp) {
-	if (!get_bit(cpu.ps, CF)) {
+	if (!check_bit(cpu.ps, CF)) {
 		cpu.pc += (int8_t)rdisp; 
 	}
 }
 
 void bcs(word rdisp) {
-	if (get_bit(cpu.ps, CF)) {
+	if (check_bit(cpu.ps, CF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
 
 void beq(word rdisp) {
-	if (get_bit(cpu.ps, ZF)) {
+	if (check_bit(cpu.ps, ZF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
 
 void bmi(word rdisp) {
-	if (get_bit(cpu.ps, NF)) {
+	if (check_bit(cpu.ps, NF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
 
 void bne(word rdisp) {
-	if (!get_bit(cpu.ps, ZF)) {
+	if (!check_bit(cpu.ps, ZF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
 
 void bpl(word rdisp) {
-	if (!get_bit(cpu.ps, NF)) {
+	if (!check_bit(cpu.ps, NF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
 
 void bvc(word rdisp) {
-	if (!get_bit(cpu.ps, VF)) {
+	if (!check_bit(cpu.ps, VF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
 
 void bvs(word rdisp) {
-	if (get_bit(cpu.ps, VF)) {
+	if (check_bit(cpu.ps, VF)) {
 		cpu.pc += (int8_t)rdisp;
 	}
 }
@@ -571,7 +577,7 @@ void rol(word addr) {
 	byte *vl = &cpu_mem[addr];
 	byte res = (cpu_mem[addr] << 1);
 
-	set_bit_to(res, 0, get_bit(cpu.ps, CF));
+	set_bit_to(res, 0, check_bit(cpu.ps, CF));
 	if (check_bit(*vl, 7)) {
 		set_bit(cpu.ps, CF);
 	} else {
@@ -585,7 +591,7 @@ void rol(word addr) {
 void rol_acc(word z) {
 	byte res = (cpu.acc << 1);
 
-	set_bit_to(res, 0, get_bit(cpu.ps, CF));
+	set_bit_to(res, 0, check_bit(cpu.ps, CF));
 	if (check_bit(cpu.acc, 7)) {
 		set_bit(cpu.ps, CF);
 	} else {
@@ -600,7 +606,7 @@ void ror(word addr) {
 	byte *vl = &cpu_mem[addr];
 	byte res = (cpu_mem[addr] >> 1);
 
-	set_bit_to(res, 7, get_bit(cpu.ps, CF));
+	set_bit_to(res, 7, check_bit(cpu.ps, CF));
 	if (check_bit(*vl, 0)) {
 		set_bit(cpu.ps, CF);
 	} else {
@@ -615,7 +621,7 @@ void ror(word addr) {
 void ror_acc(word z) {
 	byte res = (cpu.acc >> 1);
 
-	set_bit_to(res, 7, get_bit(cpu.ps, CF));
+	set_bit_to(res, 7, check_bit(cpu.ps, CF));
 	if (check_bit(cpu.acc, 0)) {
 		set_bit(cpu.ps, CF);
 	} else {

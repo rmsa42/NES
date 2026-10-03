@@ -6,8 +6,7 @@
 extern "C" {
 #endif
 
-#define set_bit_to(byte, bit, vl) (byte = ((vl << bit) | byte))
-#define get_bit(byte, bit) ((byte >> bit) & 1)
+#define set_bit_to(byte, bit, vl) (byte = ((byte & (~(1 << bit))) | (vl << bit)))
 #define set_bit(byte, bit) (byte = ((1 << bit) | byte))
 #define clear_bit(byte, bit) (byte = (~(1 << bit) & byte))
 #define check_bit(byte, shift) ((byte >> shift) & 1)

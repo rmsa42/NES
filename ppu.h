@@ -19,6 +19,22 @@ extern "C" {
 
 #define PPU_MEM_SIZE 16384 // bytes
 
+#define get_pixel_offset(scroll) (scroll & 0x07)
+#define get_coarse(scroll) (scroll >> 3)
+#define set_fine_y(v, fine_y) (v = v | (fine_y << 12))
+#define set_coarse_x(v, coarse_x) (v = v | coarse_x)
+#define set_coarse_y(v, coarse_y) (v = v | (coarse_y << 5))
+
+#define get_fine_y(v) (v >> 12)
+#define get_nametable_addr(v) (0x2000 | (v & 0x0FFF))
+#define get_coarse_x(v) (v & 0x001F)
+#define get_coarse_y(v) (v & 0x03E0)
+#define clear_coarse_x(v) (v = v & ~(0x001F))
+#define clear_coarse_y(v) (v = v & ~(0x03E0))
+#define clear_fine_y(v) (v = v & ~(0x7000))
+#define toggle_hz_nametable(v) (v = v ^ 0x0400)
+#define toggle_vt_nametable(v) (v = v ^ 0x0800)
+
 typedef enum {
 	GREY,
 	BG_LFM,
@@ -30,13 +46,19 @@ typedef enum {
 	BLUE
 } mask;
 
+typedef enum {
+	OPEN_BUS,
+	SP_OV = 5,
+	SP_HIT,
+	VBLANK
+} ppu_status;
+
 struct ppu {
 	byte ppu_ctrl;
 	byte ppu_mask;
 	byte ppu_status;
 	byte oam_addr;
 	byte oam_data;
-	byte ppu_scroll;
 	byte ppu_addr;
 	byte ppu_data;
 	byte oam_dma;

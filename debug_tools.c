@@ -226,6 +226,7 @@ int debugger_init(const char *bp_str, struct display *dp) {
 	if (create_SDL_display("DebuggerNes", 640, 480, dp)) {
 		return (1);
 	}
+	SDL_SetWindowPosition(dp->window, 200, 300);
 	run_until_bp = false;
 	if (bp_str != NULL) {
 		bp = strtoul(bp_str, NULL, 16);
@@ -253,14 +254,14 @@ void general_debug_info(struct display *dp) {
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 50, "IY: %x", cpu.iy);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 60, "SP: %x", cpu.sp);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 80, "Processor Status");
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 90, "Negative: %d", get_bit(cpu.ps, NF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 100, "Overflow: %d", get_bit(cpu.ps, VF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 90, "Negative: %d", check_bit(cpu.ps, NF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 100, "Overflow: %d", check_bit(cpu.ps, VF));
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 110, "Unused: 0");
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 120, "Break: %d", get_bit(cpu.ps, BF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 130, "Decimal: %d", get_bit(cpu.ps, DF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 140, "Interrupt: %d", get_bit(cpu.ps, IF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 150, "Zero: %d", get_bit(cpu.ps, ZF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 160, "Carry: %d", get_bit(cpu.ps, CF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 120, "Break: %d", check_bit(cpu.ps, BF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 130, "Decimal: %d", check_bit(cpu.ps, DF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 140, "Interrupt: %d", check_bit(cpu.ps, IF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 150, "Zero: %d", check_bit(cpu.ps, ZF));
+	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 160, "Carry: %d", check_bit(cpu.ps, CF));
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 180, "Breakpoint: %x", bp);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "PPU VRAM: %x", ppu.v);
 	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 200, "Stack");
@@ -314,6 +315,8 @@ bool update_debugger(struct display *dp) {
 			} else if (e.key.scancode == SDL_SCANCODE_M) {
 				debug_panel++;
 				debug_panel = debug_panel % 2;
+			} else if (e.key.scancode == SDL_SCANCODE_P) {
+				nmi(cpu.pc);
 			}
 		}
 	}
@@ -333,11 +336,11 @@ bool update_debugger(struct display *dp) {
 	} else if (run_until_bp == true) {
 		advance = true;
 	}
-	if (cpu.pc == 0xAA66) {
-		nmi(0xAA69);
-	} else if (cpu.pc == 0xAA50) {
-		nmi(0xAA53);
-	}
+	//if (cpu.pc == 0xAA66) {
+	//	nmi(0xAA69);
+	//} else if (cpu.pc == 0xAA50) {
+	//	nmi(0xAA53);
+	//}
 	return (advance);
 }
 
