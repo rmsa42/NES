@@ -62,7 +62,10 @@ Now the memory-mapped registers are right
 - [X] Fix the **tests** CMake file. Bug: Include the SDL library to compile the files
 > R: For now it will stay in the repo root. Whenever i refactor the code to take SDL out of nes units code (ppu, apu), i will put the tests make into their folder
 
-- [ ] Implement the *bus* in the asl, lsr, rol and ror after making tests for the instructions
+**03/10/2026**
+- [X] Implement the *bus* in the asl, lsr, rol and ror after making tests for the instructions
+> R: Done
+
 - [ ] Fully refactor **debug_tools** with a new GUI library or just try to make a GUI with SDL3 :)
 - [ ] Need to finish the **apu_write** function to integrate the apu with the bus
 - [ ] Need to make the memory *mirroring*

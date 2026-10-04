@@ -6,7 +6,6 @@
 #include "sdl_utils.h"
 #include <stdio.h>
 #include <stdbool.h>
-#include "bus.h"
 
 extern struct cpu cpu;
 

@@ -31,7 +31,6 @@ void clock_cpu() {
 	inst instr = insts[byte];
 	word data = instr.mode();
 	instr.run(data);
-	//cpu_state();
 }
 
 void cpu_state() {
@@ -526,16 +525,17 @@ void dey(word addr) {
 // Bit Shifts
 
 void asl(word addr) {
-	byte *vl = &cpu_mem[addr];
+	byte vl = bus_read(addr);
 	
-	if (check_bit(*vl, 7)) {
+	if (check_bit(vl, 7)) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
 	}
-	*vl = *vl << 1;
-	infer_negative_flag(*vl);
-	infer_zero_flag(*vl);
+	vl = vl << 1;
+	bus_write(addr, vl);
+	infer_negative_flag(vl);
+	infer_zero_flag(vl);
 }
 
 void asl_acc(word z) {
@@ -550,16 +550,17 @@ void asl_acc(word z) {
 }
 
 void lsr(word addr) {
-	byte *vl = &cpu_mem[addr];
+	byte vl = bus_read(addr);
 	
-	if (check_bit(*vl, 0)) {
+	if (check_bit(vl, 0)) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
 	}
-	*vl = *vl >> 1;
-	infer_negative_flag(*vl);
-	infer_zero_flag(*vl);
+	vl = vl >> 1;
+	bus_write(addr, vl);
+	infer_negative_flag(vl);
+	infer_zero_flag(vl);
 }
 
 void lsr_acc(word z) {
@@ -574,18 +575,19 @@ void lsr_acc(word z) {
 }
 
 void rol(word addr) {
-	byte *vl = &cpu_mem[addr];
-	byte res = (cpu_mem[addr] << 1);
+	byte vl = bus_read(addr);
+	byte res = (vl << 1);
 
 	set_bit_to(res, 0, check_bit(cpu.ps, CF));
-	if (check_bit(*vl, 7)) {
+	if (check_bit(vl, 7)) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
 	}
-	*vl = res;
-	infer_negative_flag(*vl);
-	infer_zero_flag(*vl);
+	vl = res;
+	bus_write(addr, vl);
+	infer_negative_flag(vl);
+	infer_zero_flag(vl);
 }
 
 void rol_acc(word z) {
@@ -603,18 +605,19 @@ void rol_acc(word z) {
 }
 
 void ror(word addr) {
-	byte *vl = &cpu_mem[addr];
-	byte res = (cpu_mem[addr] >> 1);
+	byte vl = bus_read(addr);
+	byte res = (vl >> 1);
 
 	set_bit_to(res, 7, check_bit(cpu.ps, CF));
-	if (check_bit(*vl, 0)) {
+	if (check_bit(vl, 0)) {
 		set_bit(cpu.ps, CF);
 	} else {
 		clear_bit(cpu.ps, CF);
 	}
-	*vl = res;
-	infer_negative_flag(*vl);
-	infer_zero_flag(*vl);
+	vl = res;
+	bus_write(addr, vl);
+	infer_negative_flag(vl);
+	infer_zero_flag(vl);
 
 }
 
