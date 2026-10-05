@@ -41,6 +41,8 @@ typedef enum {
 typedef struct inst {
 	void (*run)(word);
 	word (*mode)();
+	byte byte_size;
+	byte cycles;
 } inst;
 
 void cpu_init();

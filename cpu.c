@@ -691,220 +691,225 @@ void rti(word np) {
 void fill_insts() {
 	// Logical Instrucions
 
-	insts[AND_IMM] = (inst){ And, imm_address_mode };
-	insts[AND_ABS] = (inst){ And, abs_address_mode };
-	insts[AND_ABSX] = (inst){ And, abs_x_address_mode };
-	insts[AND_ABSY] = (inst){ And, abs_y_address_mode };
-	insts[AND_ZPG] = (inst){ And, zp_address_mode };
-	insts[AND_ZPGX] = (inst){ And, zp_x_address_mode };
-    insts[AND_INDX] = (inst){ And, ind_x_address_mode };
-    insts[AND_INDY] = (inst){ And, ind_y_address_mode };
+	insts[AND_IMM]	= (inst){ And, imm_address_mode,	2, 2 };
+	insts[AND_ABS]	= (inst){ And, abs_address_mode,	3, 4 };
+	insts[AND_ABSX]	= (inst){ And, abs_x_address_mode,	3, 4 };
+	insts[AND_ABSY]	= (inst){ And, abs_y_address_mode,	3, 4 };
+	insts[AND_ZPG]	= (inst){ And, zp_address_mode,		2, 3 };
+	insts[AND_ZPGX]	= (inst){ And, zp_x_address_mode,	2, 4 };
+    insts[AND_INDX]	= (inst){ And, ind_x_address_mode,	2, 6 };
+    insts[AND_INDY]	= (inst){ And, ind_y_address_mode,	2, 5 };
 
-    insts[EOR_IMM]  = (inst){ eor, imm_address_mode };
-    insts[EOR_ZPG]  = (inst){ eor, zp_address_mode };
-    insts[EOR_ZPGX] = (inst){ eor, zp_x_address_mode };
-    insts[EOR_ABS]  = (inst){ eor, abs_address_mode };
-    insts[EOR_ABSX] = (inst){ eor, abs_x_address_mode };
-    insts[EOR_ABSY] = (inst){ eor, abs_y_address_mode };
+    insts[EOR_IMM]	= (inst){ eor, imm_address_mode,	2, 2 };
+    insts[EOR_ABS]	= (inst){ eor, abs_address_mode,	3, 4 };
+    insts[EOR_ABSX]	= (inst){ eor, abs_x_address_mode,	3, 4 };
+    insts[EOR_ABSY]	= (inst){ eor, abs_y_address_mode,	3, 4 };
+    insts[EOR_ZPG]	= (inst){ eor, zp_address_mode,		2, 3 };
+    insts[EOR_ZPGX]	= (inst){ eor, zp_x_address_mode,	2, 4 };
+    insts[EOR_INDX]	= (inst){ eor, ind_x_address_mode,	2, 6 };
+    insts[EOR_INDY]	= (inst){ eor, ind_y_address_mode,	2, 5 };
 
-    insts[ORA_IMM]  = (inst){ ora, imm_address_mode };
-    insts[ORA_ZPG]  = (inst){ ora, zp_address_mode };
-    insts[ORA_ZPGX] = (inst){ ora, zp_x_address_mode };
-    insts[ORA_ABS]  = (inst){ ora, abs_address_mode };
-    insts[ORA_ABSX] = (inst){ ora, abs_x_address_mode };
-    insts[ORA_ABSY] = (inst){ ora, abs_y_address_mode };
+    insts[ORA_IMM]  = (inst){ ora, imm_address_mode,	2, 2 };
+    insts[ORA_ABS]  = (inst){ ora, abs_address_mode,	3, 4 };
+    insts[ORA_ABSX] = (inst){ ora, abs_x_address_mode,	3, 4 };
+    insts[ORA_ABSY] = (inst){ ora, abs_y_address_mode,	3, 4 };
+    insts[ORA_ZPG]  = (inst){ ora, zp_address_mode,		2, 3 };
+    insts[ORA_ZPGX] = (inst){ ora, zp_x_address_mode,	2, 4 };
+    insts[ORA_INDX] = (inst){ ora, zp_x_address_mode,	2, 6 };
+    insts[ORA_INDY] = (inst){ ora, zp_x_address_mode,	2, 5 };
 
-    insts[BIT_ZPG] = (inst){ bit, zp_address_mode };
-    insts[BIT_ABS] = (inst){ bit, abs_address_mode };
+    insts[BIT_ABS] = (inst){ bit, abs_address_mode,		3, 4 };
+    insts[BIT_ZPG] = (inst){ bit, zp_address_mode,		2, 3 };
 
 	//
 
 	// Arithmetic Instructions
 
-	insts[ADC_IMM] = (inst){ adc, imm_address_mode };
-	insts[ADC_ZPG] = (inst){ adc, zp_address_mode };
-	insts[ADC_ZPGX] = (inst){ adc, zp_x_address_mode };
-	insts[ADC_ABS] = (inst){ adc, abs_address_mode };
-	insts[ADC_ABSX] = (inst){ adc, abs_x_address_mode };
-	insts[ADC_ABSY] = (inst){ adc, abs_y_address_mode };
-	insts[ADC_INDX] = (inst){ adc, ind_x_address_mode };
-	insts[ADC_INDY] = (inst){ adc, ind_y_address_mode };
+	insts[ADC_IMM]	= (inst){ adc, imm_address_mode,	2, 2 };
+	insts[ADC_ABS]	= (inst){ adc, abs_address_mode,	3, 4 };
+	insts[ADC_ABSX]	= (inst){ adc, abs_x_address_mode,	3, 4 };
+	insts[ADC_ABSY]	= (inst){ adc, abs_y_address_mode,	3, 4 };
+	insts[ADC_ZPG]	= (inst){ adc, zp_address_mode,		2, 3 };
+	insts[ADC_ZPGX]	= (inst){ adc, zp_x_address_mode,	2, 4 };
+	insts[ADC_INDX]	= (inst){ adc, ind_x_address_mode,	2, 6 };
+	insts[ADC_INDY]	= (inst){ adc, ind_y_address_mode,	2, 5 };
 
-	insts[SBC_IMM] = (inst){ sbc, imm_address_mode };
-	insts[SBC_ZPG] = (inst){ sbc, zp_address_mode };
-	insts[SBC_ZPGX] = (inst){ sbc, zp_x_address_mode };
-	insts[SBC_ABS] = (inst){ sbc, abs_address_mode };
-	insts[SBC_ABSX] = (inst){ sbc, abs_x_address_mode };
-	insts[SBC_ABSY] = (inst){ sbc, abs_y_address_mode };
-	insts[SBC_INDX] = (inst){ sbc, ind_x_address_mode };
-	insts[SBC_INDY] = (inst){ sbc, ind_y_address_mode };
+	insts[SBC_IMM]	= (inst){ sbc, imm_address_mode,	2, 2 };
+	insts[SBC_ABS]	= (inst){ sbc, abs_address_mode,	3, 4 };
+	insts[SBC_ABSX]	= (inst){ sbc, abs_x_address_mode,	3, 4 };
+	insts[SBC_ABSY]	= (inst){ sbc, abs_y_address_mode,	3, 4 };
+	insts[SBC_ZPG]	= (inst){ sbc, zp_address_mode,		2, 3 };
+	insts[SBC_ZPGX]	= (inst){ sbc, zp_x_address_mode,	2, 4 };
+	insts[SBC_INDX]	= (inst){ sbc, ind_x_address_mode,	2, 6 };
+	insts[SBC_INDY]	= (inst){ sbc, ind_y_address_mode,	2, 5 };
 
-	insts[CMP_IMM] = (inst){ cmp, imm_address_mode };
-	insts[CMP_ZPG] = (inst){ cmp, zp_address_mode };
-	insts[CMP_ZPGX] = (inst){ cmp, zp_x_address_mode };
-	insts[CMP_ABS] = (inst){ cmp, abs_address_mode };
-	insts[CMP_ABSX] = (inst){ cmp, abs_x_address_mode };
-	insts[CMP_ABSY] = (inst){ cmp, abs_y_address_mode };
-	insts[CMP_INDX] = (inst){ cmp, ind_x_address_mode };
-	insts[CMP_INDY] = (inst){ cmp, ind_y_address_mode };
+	insts[CMP_IMM]	= (inst){ cmp, imm_address_mode,	2, 2 };
+	insts[CMP_ABS]	= (inst){ cmp, abs_address_mode,	3, 4 };
+	insts[CMP_ABSX]	= (inst){ cmp, abs_x_address_mode,	3, 4 };
+	insts[CMP_ABSY]	= (inst){ cmp, abs_y_address_mode,	3, 4 };
+	insts[CMP_ZPG]	= (inst){ cmp, zp_address_mode,		2, 3 };
+	insts[CMP_ZPGX]	= (inst){ cmp, zp_x_address_mode,	2, 4 };
+	insts[CMP_INDX]	= (inst){ cmp, ind_x_address_mode,	2, 6 };
+	insts[CMP_INDY]	= (inst){ cmp, ind_y_address_mode,	2, 5 };
 
-	insts[CPX_IMM] = (inst){ cpx, imm_address_mode };
-	insts[CPX_ZPG] = (inst){ cpx, zp_address_mode };
-	insts[CPX_ABS] = (inst){ cpx, abs_address_mode };
+	insts[CPX_IMM] = (inst){ cpx, imm_address_mode,		2, 2 };
+	insts[CPX_ABS] = (inst){ cpx, abs_address_mode,		3, 4 };
+	insts[CPX_ZPG] = (inst){ cpx, zp_address_mode,		2, 3 };
 
-	insts[CPY_IMM] = (inst){ cpy, imm_address_mode };
-	insts[CPY_ZPG] = (inst){ cpy, zp_address_mode };
-	insts[CPY_ABS] = (inst){ cpy, abs_address_mode };
+	insts[CPY_IMM] = (inst){ cpy, imm_address_mode,		2, 2 };
+	insts[CPY_ABS] = (inst){ cpy, abs_address_mode,		3, 4 };
+	insts[CPY_ZPG] = (inst){ cpy, zp_address_mode,		2, 3 };
 
 	//
 
 	// Load/Store Instructions
 
-    insts[LDA_IMM]  = (inst){ lda, imm_address_mode };
-    insts[LDA_ZPG]  = (inst){ lda, zp_address_mode };
-    insts[LDA_ZPGX] = (inst){ lda, zp_x_address_mode };
-    insts[LDA_ABS]  = (inst){ lda, abs_address_mode };
-    insts[LDA_ABSX] = (inst){ lda, abs_x_address_mode };
-    insts[LDA_ABSY] = (inst){ lda, abs_y_address_mode };
-    insts[LDA_INDX] = (inst){ lda, ind_x_address_mode };
-    insts[LDA_INDY] = (inst){ lda, ind_y_address_mode };
+    insts[LDA_IMM]  = (inst){ lda, imm_address_mode,	2, 2 };
+    insts[LDA_ABS]  = (inst){ lda, abs_address_mode,	3, 4 };
+    insts[LDA_ABSX] = (inst){ lda, abs_x_address_mode,	3, 4 };
+    insts[LDA_ABSY] = (inst){ lda, abs_y_address_mode,	3, 4 };
+    insts[LDA_ZPG]  = (inst){ lda, zp_address_mode,		2, 3 };
+    insts[LDA_ZPGX] = (inst){ lda, zp_x_address_mode,	2, 4 };
+    insts[LDA_INDX] = (inst){ lda, ind_x_address_mode,	2, 6 };
+    insts[LDA_INDY] = (inst){ lda, ind_y_address_mode,	2, 5 };
 
-    insts[LDY_IMM]  = (inst){ ldy, imm_address_mode };
-    insts[LDY_ZPG]  = (inst){ ldy, zp_address_mode };
-    insts[LDY_ZPGX] = (inst){ ldy, zp_x_address_mode };
-    insts[LDY_ABS]  = (inst){ ldy, abs_address_mode };
-    insts[LDY_ABSX] = (inst){ ldy, abs_x_address_mode };
+    insts[LDX_IMM]  = (inst){ ldx, imm_address_mode,	2, 2 };
+    insts[LDX_ABS]  = (inst){ ldx, abs_address_mode,	3, 4 };
+    insts[LDX_ABSY] = (inst){ ldx, abs_y_address_mode,	3, 4 };
+    insts[LDX_ZPG]  = (inst){ ldx, zp_address_mode,		2, 3 };
+    insts[LDX_ZPGY] = (inst){ ldx, zp_y_address_mode,	2, 4 };
 
-    insts[LDX_IMM]  = (inst){ ldx, imm_address_mode };
-    insts[LDX_ZPG]  = (inst){ ldx, zp_address_mode };
-    insts[LDX_ZPGY] = (inst){ ldx, zp_y_address_mode };
-    insts[LDX_ABS]  = (inst){ ldx, abs_address_mode };
-    insts[LDX_ABSY] = (inst){ ldx, abs_y_address_mode };
+    insts[LDY_IMM]  = (inst){ ldy, imm_address_mode,	2, 2 };
+    insts[LDY_ABS]  = (inst){ ldy, abs_address_mode,	3, 4 };
+    insts[LDY_ABSX] = (inst){ ldy, abs_x_address_mode,	3, 4 };
+    insts[LDY_ZPG]  = (inst){ ldy, zp_address_mode,		2, 3 };
+    insts[LDY_ZPGX] = (inst){ ldy, zp_x_address_mode,	2, 4 };
 
-    insts[STA_ZPG]  = (inst){ sta, zp_address_mode };
-    insts[STA_ZPGX] = (inst){ sta, zp_x_address_mode };
-    insts[STA_ABS]  = (inst){ sta, abs_address_mode };
-    insts[STA_ABSX] = (inst){ sta, abs_x_address_mode };
-    insts[STA_ABSY] = (inst){ sta, abs_y_address_mode };
-    insts[STA_INDX] = (inst){ sta, ind_x_address_mode };
-    insts[STA_INDY] = (inst){ sta, ind_y_address_mode };
+    insts[STA_ABS]  = (inst){ sta, abs_address_mode,	3, 4 };
+    insts[STA_ABSX] = (inst){ sta, abs_x_address_mode,	3, 5 };
+    insts[STA_ABSY] = (inst){ sta, abs_y_address_mode,	3, 5 };
+    insts[STA_ZPG]  = (inst){ sta, zp_address_mode,		2, 3 };
+    insts[STA_ZPGX] = (inst){ sta, zp_x_address_mode,	2, 4 };
+    insts[STA_INDX] = (inst){ sta, ind_x_address_mode,	2, 6 };
+    insts[STA_INDY] = (inst){ sta, ind_y_address_mode,	2, 6 };
 
-    insts[STX_ZPG]  = (inst){ stx, zp_address_mode };
-    insts[STX_ZPGY] = (inst){ stx, zp_y_address_mode };
-    insts[STX_ABS]  = (inst){ stx, abs_address_mode };
+    insts[STX_ABS]  = (inst){ stx, abs_address_mode,	3, 4 };
+    insts[STX_ZPG]  = (inst){ stx, zp_address_mode,		2, 3 };
+    insts[STX_ZPGY] = (inst){ stx, zp_y_address_mode,	2, 4 };
 
-    insts[STY_ZPG]  = (inst){ sty, zp_address_mode };
-    insts[STY_ZPGX] = (inst){ sty, zp_x_address_mode };
-    insts[STY_ABS]  = (inst){ sty, abs_address_mode };
+    insts[STY_ABS]  = (inst){ sty, abs_address_mode,	3, 4 };
+    insts[STY_ZPG]  = (inst){ sty, zp_address_mode,		2, 3 };
+    insts[STY_ZPGX]	= (inst){ sty, zp_x_address_mode,	2, 4 };
 
 	//
 
     // Transfers (implied)
 
-    insts[TAX_IMPL] = (inst){ tax, impl_address_mode };
-    insts[TAY_IMPL] = (inst){ tay, impl_address_mode };
-    insts[TXA_IMPL] = (inst){ txa, impl_address_mode };
-    insts[TYA_IMPL] = (inst){ tya, impl_address_mode };
-    insts[TSX_IMPL] = (inst){ tsx, impl_address_mode };
-    insts[TXS_IMPL] = (inst){ txs, impl_address_mode };
+    insts[TAX_IMPL]	= (inst){ tax, impl_address_mode,	1, 2 };
+    insts[TAY_IMPL]	= (inst){ tay, impl_address_mode,	1, 2 };
+    insts[TXA_IMPL]	= (inst){ txa, impl_address_mode,	1, 2 };
+    insts[TYA_IMPL]	= (inst){ tya, impl_address_mode,	1, 2 };
+    insts[TSX_IMPL]	= (inst){ tsx, impl_address_mode,	1, 2 };
+    insts[TXS_IMPL]	= (inst){ txs, impl_address_mode,	1, 2 };
 
 	//
 
     // Stack
 
-    insts[PHA_IMPL] = (inst){ pha, impl_address_mode };
-    insts[PHP_IMPL] = (inst){ php, impl_address_mode };
-    insts[PLA_IMPL] = (inst){ pla, impl_address_mode };
-    insts[PLP_IMPL] = (inst){ plp, impl_address_mode };
+    insts[PHA_IMPL]	= (inst){ pha, impl_address_mode,	1, 3 };
+    insts[PHP_IMPL]	= (inst){ php, impl_address_mode,	1, 3 };
+    insts[PLA_IMPL]	= (inst){ pla, impl_address_mode,	1, 4 };
+    insts[PLP_IMPL]	= (inst){ plp, impl_address_mode,	1, 4 };
 
 	//
 
     // Jumps
 
-    insts[JMP_ABS] = (inst){ jmp, abs_address_mode };
-    insts[JMP_IND] = (inst){ jmp, ind_address_mode };
-    insts[JSR_ABS] = (inst){ jsr, abs_address_mode };
-    insts[RTS_IMPL]= (inst){ rts, impl_address_mode };
+    insts[JMP_ABS]	= (inst){ jmp, abs_address_mode,	3, 3 };
+    insts[JMP_IND]	= (inst){ jmp, ind_address_mode,	3, 5 };
+    insts[JSR_ABS]	= (inst){ jsr, abs_address_mode,	3, 6 };
+    insts[RTI_IMPL] = (inst){ rti, impl_address_mode,	1, 6 };
+    insts[RTS_IMPL]	= (inst){ rts, impl_address_mode,	1, 6 };
 
 	//
 
     // Branches (relative)
 
-    insts[BCC_RLT] = (inst){ bcc, rel_address_mode };
-    insts[BCS_RLT] = (inst){ bcs, rel_address_mode };
-    insts[BEQ_RLT] = (inst){ beq, rel_address_mode };
-    insts[BNE_RLT] = (inst){ bne, rel_address_mode };
-    insts[BMI_RLT] = (inst){ bmi, rel_address_mode };
-    insts[BPL_RLT] = (inst){ bpl, rel_address_mode };
-    insts[BVC_RLT] = (inst){ bvc, rel_address_mode };
-    insts[BVS_RLT] = (inst){ bvs, rel_address_mode };
+    insts[BCC_RLT]	= (inst){ bcc, rel_address_mode,	2, 2 };
+    insts[BCS_RLT]	= (inst){ bcs, rel_address_mode,	2, 2 };
+    insts[BEQ_RLT]	= (inst){ beq, rel_address_mode,	2, 2 };
+    insts[BNE_RLT]	= (inst){ bne, rel_address_mode,	2, 2 };
+    insts[BMI_RLT]	= (inst){ bmi, rel_address_mode,	2, 2 };
+    insts[BPL_RLT]	= (inst){ bpl, rel_address_mode,	2, 2 };
+    insts[BVC_RLT]	= (inst){ bvc, rel_address_mode,	2, 2 };
+    insts[BVS_RLT]	= (inst){ bvs, rel_address_mode,	2, 2 };
 	
 	//
 
 	// Increment/Decrement
 
-    insts[INC_ABS] = (inst){ inc, rel_address_mode };
-    insts[INC_ABSX] = (inst){ inc, rel_address_mode };
-    insts[INC_ZPG] = (inst){ inc, rel_address_mode };
-    insts[INC_ZPGX] = (inst){ inc, rel_address_mode };
+    insts[INC_ABS]	= (inst){ inc, rel_address_mode,	3, 6 };
+    insts[INC_ABSX]	= (inst){ inc, rel_address_mode,	3, 7 };
+    insts[INC_ZPG]	= (inst){ inc, rel_address_mode,	2, 5 };
+    insts[INC_ZPGX]	= (inst){ inc, rel_address_mode,	2, 6 };
 
-    insts[DEC_ABS] = (inst){ dec, abs_address_mode };
-    insts[DEC_ABSX] = (inst){ dec, abs_x_address_mode };
-	insts[DEC_ZPG] = (inst){ dec, zp_address_mode };
-    insts[DEC_ZPGX] = (inst){ dec, zp_x_address_mode };
+    insts[INX_IMPL]	= (inst){ inx, impl_address_mode,	1, 2 };
+    insts[INY_IMPL]	= (inst){ iny, impl_address_mode,	1, 2 };
 
-    insts[INX_IMPL] = (inst){ inx, impl_address_mode };
-    insts[INY_IMPL] = (inst){ iny, impl_address_mode };
-    insts[DEX_IMPL] = (inst){ dex, impl_address_mode };
-    insts[DEY_IMPL] = (inst){ dey, impl_address_mode };
+    insts[DEC_ABS]	= (inst){ dec, abs_address_mode,	3, 6 };
+    insts[DEC_ABSX]	= (inst){ dec, abs_x_address_mode,	3, 7 };
+	insts[DEC_ZPG]	= (inst){ dec, zp_address_mode,		2, 5 };
+    insts[DEC_ZPGX]	= (inst){ dec, zp_x_address_mode,	2, 6 };
+
+    insts[DEX_IMPL]	= (inst){ dex, impl_address_mode,	1, 2 };
+    insts[DEY_IMPL]	= (inst){ dey, impl_address_mode,	1, 2 };
 
 	//
 
 	// Bit Shifts
 
-	insts[ASL_ACC] = (inst){ asl_acc, impl_address_mode };
-	insts[ASL_ABS] = (inst){ asl, abs_address_mode };
-	insts[ASL_ABSX] = (inst){ asl, abs_x_address_mode };
-	insts[ASL_ZPG] = (inst){ asl, zp_address_mode };
-	insts[ASL_ZPGX] = (inst){ asl, zp_x_address_mode };
+	insts[ASL_ACC]	= (inst){ asl_acc, impl_address_mode,	1, 2 };
+	insts[ASL_ABS]	= (inst){ asl, abs_address_mode,		3, 6 };
+	insts[ASL_ABSX]	= (inst){ asl, abs_x_address_mode,		3, 7 };
+	insts[ASL_ZPG]	= (inst){ asl, zp_address_mode,			2, 5 };
+	insts[ASL_ZPGX]	= (inst){ asl, zp_x_address_mode,		2, 6 };
 
-	insts[LSR_ACC] = (inst){ lsr_acc, impl_address_mode };
-	insts[LSR_ABS] = (inst){ lsr, abs_address_mode };
-	insts[LSR_ABSX] = (inst){ lsr, abs_x_address_mode };
-	insts[LSR_ZPG] = (inst){ lsr, zp_address_mode };
-	insts[LSR_ZPGX] = (inst){ lsr, zp_x_address_mode };
+	insts[LSR_ACC]	= (inst){ lsr_acc, impl_address_mode,	1, 2 };
+	insts[LSR_ABS]	= (inst){ lsr, abs_address_mode,		3, 6 };
+	insts[LSR_ABSX]	= (inst){ lsr, abs_x_address_mode,		3, 7 };
+	insts[LSR_ZPG]	= (inst){ lsr, zp_address_mode,			2, 5 };
+	insts[LSR_ZPGX]	= (inst){ lsr, zp_x_address_mode,		2, 6 };
 
-	insts[ROL_ACC] = (inst){ rol_acc, impl_address_mode };
-	insts[ROL_ABS] = (inst){ rol, abs_address_mode };
-	insts[ROL_ABSX] = (inst){ rol, abs_x_address_mode };
-	insts[ROL_ZPG] = (inst){ rol, zp_address_mode };
-	insts[ROL_ZPGX] = (inst){ rol, zp_x_address_mode };
+	insts[ROL_ACC]	= (inst){ rol_acc, impl_address_mode,	1, 2 };
+	insts[ROL_ABS]	= (inst){ rol, abs_address_mode,		3, 6 };
+	insts[ROL_ABSX]	= (inst){ rol, abs_x_address_mode,		3, 7 };
+	insts[ROL_ZPG]	= (inst){ rol, zp_address_mode,			2, 5 };
+	insts[ROL_ZPGX]	= (inst){ rol, zp_x_address_mode,		2, 6 };
 
-	insts[ROR_ACC] = (inst){ ror_acc, impl_address_mode };
-	insts[ROR_ABS] = (inst){ ror, abs_address_mode };
-	insts[ROR_ABSX] = (inst){ ror, abs_x_address_mode };
-	insts[ROR_ZPG] = (inst){ ror, zp_address_mode };
-	insts[ROR_ZPGX] = (inst){ ror, zp_x_address_mode };
+	insts[ROR_ACC] = (inst){ ror_acc, impl_address_mode,	1, 2 };
+	insts[ROR_ABS] = (inst){ ror, abs_address_mode,			3, 6 };
+	insts[ROR_ABSX] = (inst){ ror, abs_x_address_mode,		3, 7 };
+	insts[ROR_ZPG] = (inst){ ror, zp_address_mode,			2, 5 };
+	insts[ROR_ZPGX] = (inst){ ror, zp_x_address_mode,		2, 6 };
 
 	//
 
     // Status Flags
 
-    insts[CLC_IMPL] = (inst){ clc, impl_address_mode };
-    insts[SEC_IMPL] = (inst){ sec, impl_address_mode };
-    insts[CLI_IMPL] = (inst){ cli, impl_address_mode };
-    insts[SEI_IMPL] = (inst){ sei, impl_address_mode };
-    insts[CLV_IMPL] = (inst){ clv, impl_address_mode };
-    insts[CLD_IMPL] = (inst){ cld, impl_address_mode };
-    insts[SED_IMPL] = (inst){ sed, impl_address_mode };
+    insts[CLC_IMPL]	= (inst){ clc, impl_address_mode,	1, 2 };
+    insts[SEC_IMPL]	= (inst){ sec, impl_address_mode,	1, 2 };
+    insts[CLI_IMPL]	= (inst){ cli, impl_address_mode,	1, 2 };
+    insts[SEI_IMPL]	= (inst){ sei, impl_address_mode,	1, 2 };
+    insts[CLV_IMPL]	= (inst){ clv, impl_address_mode,	1, 2 };
+    insts[CLD_IMPL]	= (inst){ cld, impl_address_mode,	1, 2 };
+    insts[SED_IMPL]	= (inst){ sed, impl_address_mode,	1, 2 };
 
 	//
 
     // System
 
-    insts[NOP_IMPL] = (inst){ nop, impl_address_mode };
-    insts[BRK_IMPL] = (inst){ brk, impl_address_mode };
-    insts[RTI_IMPL] = (inst){ rti, impl_address_mode };
+    insts[NOP_IMPL]	= (inst){ nop, impl_address_mode,	1, 2 };
+    insts[BRK_IMPL]	= (inst){ brk, impl_address_mode,	1, 7 };
 
 	//
 }
