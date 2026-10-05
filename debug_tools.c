@@ -13,6 +13,130 @@ bool run_until_bp = false;
 int debug_panel = 0;
 int ct = 34;
 
+const char *instr_enum_to_str(const byte instr);
+
+int debugger_init(const char *bp_str, struct display *dp) {
+	if (create_SDL_display("DebuggerNes", 640, 480, dp)) {
+		return (1);
+	}
+	SDL_SetWindowPosition(dp->window, 200, 300);
+	run_until_bp = false;
+	if (bp_str != NULL) {
+		bp = strtoul(bp_str, NULL, 16);
+		run_until_bp = true;
+	}
+	return (0);
+}
+
+void general_debug_info(struct display *dp) {
+	int win_width;
+	int win_height;
+	
+	//printf("Inst %s running\n", instr_enum_to_str(bus_read(cpu.pc))); // Running Instruction
+	SDL_GetWindowSize(dp->window, &win_width, &win_height);
+	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderScale(dp->renderer, 1.7, 1.7);
+
+	byte memvl = bus_read(cpu.pc);
+	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+	text(dp, "%02x: %02x  %s", cpu.pc, memvl, instr_enum_to_str(memvl));
+	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	for (unsigned int i = 0; i < 21; i++) {
+		memvl = bus_read(cpu.pc + i);
+		text(dp, "%02x: %02x  %s", cpu.pc + i, memvl, instr_enum_to_str(memvl));
+	}
+
+	start_panel(dp, "CPU Info", (fpoint){win_width / 4.0f, 0}, (fpoint){win_width - win_width / 4.0f, win_height}, NORMAL);
+	//set_in_pos(dp, (fpoint){(win_width / 4) + 10, 0});
+	text(dp, "PC: %02x", cpu.pc);
+	text(dp, "ACC: %02x", cpu.acc);
+	text(dp, "IX: %02x", cpu.ix);
+	text(dp, "IY: %02x", cpu.iy);
+	text(dp, "SP: %02x", cpu.sp);
+	text(dp, "Processor Status");
+	text(dp, "Negative: %d", check_bit(cpu.ps, NF));
+	text(dp, "Overflow: %d", check_bit(cpu.ps, VF));
+	text(dp, "Unused: 0");
+	text(dp, "Break: %d", check_bit(cpu.ps, BF));
+	text(dp, "Decimal: %d", check_bit(cpu.ps, DF));
+	text(dp, "Interrupt: %d", check_bit(cpu.ps, IF));
+	text(dp, "Zero: %d", check_bit(cpu.ps, ZF));
+	text(dp, "Carry: %d", check_bit(cpu.ps, CF));
+	text(dp, "PPU VRAM: %04x", ppu.v);
+
+	text(dp, "Stack");
+	start_panel(dp, "Stack", (fpoint){0, 0}, (fpoint){100, 50}, CURR_POS | WITH_BORDER);
+	for (size_t i = cpu.sp + 1; i <= 0xFF; i++) {
+		text(dp, "%02x,", bus_read(make_word(STACK_OFFSET, (byte)i)));
+		text_options(dp, SAME_LINE);
+	}
+	end_panel(dp);
+
+	text(dp, "Breakpoint: %04x", bp);
+	end_panel(dp);
+
+}
+
+void memory_debug(struct display *dp) {
+	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderScale(dp->renderer, 2, 2);
+
+	start_panel(dp, "PPU Memory", (fpoint){0, 0}, (fpoint){320, 240}, WITH_BORDER);
+	text(dp, "PPU Memory");
+	word addr = ppu.v - 10;
+	for (unsigned int i = 1; i < 21; i++) {
+		text(dp, "%04x: %02x   %02x   %02x   %02x", addr,
+			ppu_mem[addr], ppu_mem[addr + 1], ppu_mem[addr + 2], ppu_mem[addr + 3]);
+		addr += 4;
+	}
+	end_panel(dp);
+}
+
+bool update_debugger(struct display *dp) {
+	SDL_Event e;
+	bool advance = false;
+
+	start_frame(dp);
+	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderClear(dp->renderer);
+	while (SDL_PollEvent(&e)) {
+		if (e.type == SDL_EVENT_KEY_DOWN) {
+			if (e.key.scancode == SDL_SCANCODE_RETURN) {
+				advance = true;
+			} else if (e.key.scancode == SDL_SCANCODE_Q) {
+				dp->run = false;
+			} else if (e.key.scancode == SDL_SCANCODE_M) {
+				debug_panel++;
+				debug_panel = debug_panel % 2;
+			} else if (e.key.scancode == SDL_SCANCODE_P) {
+				nmi(cpu.pc);
+			}
+		}
+	}
+	if (debug_panel == 0) {
+		general_debug_info(dp);
+	} else {
+		memory_debug(dp);
+	}
+	SDL_RenderPresent(dp->renderer);
+	if (cpu.pc == bp) {
+		ct -= 1;
+		if (ct == 0) {
+			run_until_bp = false;
+		} else {
+			advance = true;
+		}
+	} else if (run_until_bp == true) {
+		advance = true;
+	}
+	//if (cpu.pc == 0xAA66) {
+	//	nmi(0xAA69);
+	//} else if (cpu.pc == 0xAA50) {
+	//	nmi(0xAA53);
+	//}
+	return (advance);
+}
+
 const char *instr_enum_to_str(const byte instr) {
 	switch (instr) {
 		case AND_IMM:
@@ -220,127 +344,5 @@ const char *instr_enum_to_str(const byte instr) {
 		default:
 			return ("");
 	}
-}
-
-int debugger_init(const char *bp_str, struct display *dp) {
-	if (create_SDL_display("DebuggerNes", 640, 480, dp)) {
-		return (1);
-	}
-	SDL_SetWindowPosition(dp->window, 200, 300);
-	run_until_bp = false;
-	if (bp_str != NULL) {
-		bp = strtoul(bp_str, NULL, 16);
-		run_until_bp = true;
-	}
-	return (0);
-}
-
-void general_debug_info(struct display *dp) {
-	SDL_FRect rect;
-	int win_width;
-	int win_height;
-	int cpu_info_x;
-	
-	//printf("Inst %s running\n", instr_enum_to_str(bus_read(cpu.pc))); // Running Instruction
-	SDL_GetWindowSize(dp->window, &win_width, &win_height);
-	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-	SDL_SetRenderScale(dp->renderer, 2, 2);
-
-	cpu_info_x = (win_width / 4) + 10;
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 10, "CPU State");
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 20, "PC: %x", cpu.pc);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 30, "ACC: %x", cpu.acc);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 40, "IX: %x", cpu.ix);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 50, "IY: %x", cpu.iy);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 60, "SP: %x", cpu.sp);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 80, "Processor Status");
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 90, "Negative: %d", check_bit(cpu.ps, NF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 100, "Overflow: %d", check_bit(cpu.ps, VF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 110, "Unused: 0");
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 120, "Break: %d", check_bit(cpu.ps, BF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 130, "Decimal: %d", check_bit(cpu.ps, DF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 140, "Interrupt: %d", check_bit(cpu.ps, IF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 150, "Zero: %d", check_bit(cpu.ps, ZF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 160, "Carry: %d", check_bit(cpu.ps, CF));
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 180, "Breakpoint: %x", bp);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 190, "PPU VRAM: %x", ppu.v);
-	SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x, 200, "Stack");
-	for (size_t i = cpu.sp + 1; i <= 0xFF; i++) {
-		SDL_RenderDebugTextFormat(dp->renderer, cpu_info_x - 20, 210, "%x", bus_read(make_word(STACK_OFFSET, (byte)i)));
-		cpu_info_x += 20;
-	}
-
-	SDL_SetRenderScale(dp->renderer, 1, 1);
-	rect.y = 5;
-	rect.h = win_height - 10;
-	rect.x = 5;
-	rect.w = win_width / 2;
-	SDL_RenderRect(dp->renderer, &rect);
-	SDL_SetRenderScale(dp->renderer, 2, 2);
-	for (unsigned int i = 0; i < 23; i++) {
-		const byte memvl = bus_read(cpu.pc + i);
-		SDL_RenderDebugTextFormat(dp->renderer, 6, 6 + (i * 10), "%x: %x", cpu.pc + i, memvl);
-		SDL_RenderDebugTextFormat(dp->renderer, 80, 6 + (i * 10), "%s", instr_enum_to_str(memvl));
-	}
-	SDL_RenderLine(dp->renderer, 120, 9, 140, 9);
-	SDL_RenderLine(dp->renderer, 120, 9, 130, 14);
-	SDL_RenderLine(dp->renderer, 120, 9, 130, 4);
-}
-
-void memory_debug(struct display *dp) {
-	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-	SDL_SetRenderScale(dp->renderer, 2, 2);
-
-	SDL_RenderDebugText(dp->renderer, 40, 0, "PPU Memory");
-	word addr = ppu.v - 10;
-	for (unsigned int i = 0; i < 21; i++) {
-		SDL_RenderDebugTextFormat(dp->renderer, 10, 20 + (i * 10), "%02x:  %02x   %02x   %02x   %02x", addr,
-			ppu_mem[addr], ppu_mem[addr + 1], ppu_mem[addr + 2], ppu_mem[addr + 3]);
-		addr += 4;
-	}
-}
-
-bool update_debugger(struct display *dp) {
-	SDL_Event e;
-	bool advance = false;
-
-	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(dp->renderer);
-	while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_EVENT_KEY_DOWN) {
-			if (e.key.scancode == SDL_SCANCODE_RETURN) {
-				advance = true;
-			} else if (e.key.scancode == SDL_SCANCODE_Q) {
-				dp->run = false;
-			} else if (e.key.scancode == SDL_SCANCODE_M) {
-				debug_panel++;
-				debug_panel = debug_panel % 2;
-			} else if (e.key.scancode == SDL_SCANCODE_P) {
-				nmi(cpu.pc);
-			}
-		}
-	}
-	if (debug_panel == 0) {
-		general_debug_info(dp);
-	} else {
-		memory_debug(dp);
-	}
-	SDL_RenderPresent(dp->renderer);
-	if (cpu.pc == bp) {
-		ct -= 1;
-		if (ct == 0) {
-			run_until_bp = false;
-		} else {
-			advance = true;
-		}
-	} else if (run_until_bp == true) {
-		advance = true;
-	}
-	//if (cpu.pc == 0xAA66) {
-	//	nmi(0xAA69);
-	//} else if (cpu.pc == 0xAA50) {
-	//	nmi(0xAA53);
-	//}
-	return (advance);
 }
 

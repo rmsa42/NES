@@ -21,6 +21,8 @@ set(SOURCES
 	debug_tools.h
 	sdl_utils.c
 	sdl_utils.h
+	fpoint.c
+	fpoint.h
 )
 
 
@@ -48,6 +50,8 @@ if(TESTS)
 		debug_tools.h
 		sdl_utils.c
 		sdl_utils.h
+		fpoint.c
+		fpoint.h
 		arithmetic_tests.cpp
 		shift_tests.cpp
 		tests.h
