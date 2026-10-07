@@ -25,6 +25,14 @@ set(SOURCES
 	fpoint.h
 )
 
+set(SOURCES_UI
+	ui.c
+	sdl_utils.c
+	sdl_utils.h
+	fpoint.c
+	fpoint.h
+)
+
 
 add_subdirectory(SDL)
 #file(COPY_FILE ${CMAKE_BINARY_DIR}/SDL/SDL3.dll ${CMAKE_BINARY_DIR}/SDL3.dll ONLY_IF_DIFFERENT)
@@ -32,6 +40,10 @@ add_subdirectory(SDL)
 add_executable(cpu ${SOURCES})
 target_link_libraries(cpu PRIVATE SDL3::SDL3)
 target_include_directories(cpu PRIVATE ${CMAKE_CURRENT_DIR})
+
+add_executable(ui ${SOURCES_UI})
+target_link_libraries(ui PRIVATE SDL3::SDL3)
+target_include_directories(ui PRIVATE ${CMAKE_CURRENT_DIR})
 
 if(TESTS)
 	set(BUILD_GMOCK 0)

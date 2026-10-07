@@ -66,7 +66,9 @@ Now the memory-mapped registers are right
 - [X] Implement the *bus* in the asl, lsr, rol and ror after making tests for the instructions
 > R: Done
 
-- [ ] Fully refactor **debug_tools** with a new GUI library or just try to make a GUI with SDL3 :)
+- [X] Fully refactor **debug_tools** with a new GUI library or just try to make a GUI with SDL3 :)
+> R: This is not happening. I want to try and make something myself with future plans in mind
+
 - [ ] Need to finish the **apu_write** function to integrate the apu with the bus
 - [ ] Need to make the memory *mirroring*
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable

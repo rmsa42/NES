@@ -10,7 +10,8 @@ extern "C" {
 
 typedef enum {
 	NA,
-	SAME_LINE
+	CENTERED = 1 << 1,
+	SAME_LINE = 1 << 2,
 } text_opt;
 
 typedef enum {
@@ -21,10 +22,12 @@ typedef enum {
 
 typedef struct panel {
 	const char *name;
-	fpoint tlc;
-	fpoint in_pos;
-	char text_buff[50];
+	fpoint in_cursor;
+	fpoint old_cursor;
 	fpoint padding;
+	fpoint tlc;
+	char text_buff[50];
+	text_opt text_opts;
 	int w;
 	int h;
 } panel;
@@ -50,7 +53,6 @@ int start_panel(struct display *dp, const char *name, fpoint xy, fpoint wh, pane
 void end_panel(struct display *dp);
 void text(struct display *dp, const char *fmt, ...);
 void text_options(struct display *dp, text_opt opts);
-void set_in_pos(struct display *dp, fpoint pt);
 
 #ifdef __cplusplus
 }

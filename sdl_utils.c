@@ -1,5 +1,4 @@
 #include "sdl_utils.h"
-#include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -11,12 +10,42 @@ int create_panel(panel **pl, const char *name, fpoint tlc, fpoint wh) {
 		return (1);
 	}
 	(*pl)->name = name;
-	(*pl)->padding = (fpoint){5, 3};
-	add_fpoint(&tlc, (*pl)->padding);
+	(*pl)->padding = (fpoint){2, 2};
+	divide_fpoint(&tlc, 8);
 	(*pl)->tlc = tlc;
-	(*pl)->w = wh.x;
-	(*pl)->h = wh.y;
+	(*pl)->w = wh.x / 8;
+	(*pl)->h = wh.y / 8;
 	return (0);
+}
+
+void advc_panel_cursor_x_w_padding(panel *pan, float inc_x) {
+	pan->old_cursor.x = pan->in_cursor.x;
+	pan->in_cursor.x += inc_x;
+}
+
+void advc_panel_cursor_y_w_padding(panel *pan, float inc_y) {
+	pan->old_cursor.y = pan->in_cursor.y;
+	pan->in_cursor.y += inc_y;
+}
+
+void advc_panel_cursor_w_padding(panel *pan, float inc_x, float inc_y) {
+	advc_panel_cursor_x_w_padding(pan, inc_x);
+	advc_panel_cursor_y_w_padding(pan, inc_y);
+}
+
+void set_panel_cursor_x_pos(panel *pan, float xpos) {
+	pan->old_cursor.x = pan->in_cursor.x;
+	pan->in_cursor.x = xpos;
+}
+
+void set_panel_cursor_y_pos(panel *pan, float ypos) {
+	pan->old_cursor.y = pan->in_cursor.y;
+	pan->in_cursor.y = ypos;
+}
+
+void set_panel_cursor_pos(panel *pan, float xpos, float ypos) {
+	set_panel_cursor_x_pos(pan, xpos);
+	set_panel_cursor_y_pos(pan, ypos);
 }
 
 void create_panel_border(struct display *dp, fpoint xy, fpoint wh) {
@@ -30,29 +59,35 @@ void create_panel_border(struct display *dp, fpoint xy, fpoint wh) {
 }
 
 fpoint pass_panel_pos_to_screen_pos(panel *pan) {
-	fpoint ret = pan->in_pos;
+	fpoint ret = pan->in_cursor;
 	
 	add_fpoint(&ret, pan->tlc);
+	multiply_fpoint(&ret, 8);
 	return (ret);
+}
+
+void pass_panel_wh_to_screen_wh(panel *pan, int *w, int *h) {
+	*w = pan->w * 8;
+	*h = pan->h * 8;
 }
 
 int start_panel(struct display *dp, const char *name, fpoint tlc, fpoint wh, panel_flags flags) {
 	panel *panel = NULL;
 
-	if (dp->stack_i > 10) {
+	if (dp->stack_i >= 10) {
 		return (1);
 	}
 	if (flags & CURR_POS) {
 		tlc = pass_panel_pos_to_screen_pos(dp->context);
+		if (dp->stack_i - 1 >= 1) {
+			dp->context->in_cursor.y += wh.y / 8;
+		}
 	}
 	if (create_panel(&panel, name, tlc, wh)) {
 		return (1);
 	}
 	if (flags & WITH_BORDER) {
 		create_panel_border(dp, tlc, wh);
-	}
-	if (dp->stack_i - 1 >= 1) {
-		dp->context->in_pos.y += wh.y + dp->context->padding.y;
 	}
 	dp->context = panel;
 	dp->panel_stack[dp->stack_i] = panel;
@@ -69,35 +104,33 @@ void end_panel(struct display *dp) {
 }
 
 void text(struct display *dp, const char *fmt, ...) {
-	panel *panel = dp->context;
+	panel *pan = dp->context;
 	fpoint screen_pos;
 	int len = 0;
 
 	va_list(args);
 	va_start(args, fmt);
-	vsnprintf(panel->text_buff, sizeof(panel->text_buff), fmt, args);
+	vsnprintf(pan->text_buff, sizeof(pan->text_buff), fmt, args);
 	va_end(args);
-	len = strlen(panel->text_buff) * 8;
-	if (panel->in_pos.x + len >= panel->w) {
-		panel->in_pos.y += 8;
-		panel->in_pos.x = 0;
+	len = strlen(pan->text_buff);
+	if (pan->text_opts & CENTERED) {
+		advc_panel_cursor_x_w_padding(pan, (pan->w / 2.0f) - (len / 2.0f));
 	}
-	screen_pos = pass_panel_pos_to_screen_pos(panel);
-	SDL_RenderDebugText(dp->renderer, screen_pos.x, screen_pos.y, panel->text_buff);
-	panel->in_pos.y += 8 + panel->padding.y;
+	if (pan->text_opts & SAME_LINE) {
+		set_panel_cursor_pos(pan, pan->old_cursor.x, pan->old_cursor.y);
+	}
+	if (pan->in_cursor.x + len >= pan->w) {
+		set_panel_cursor_x_pos(pan, 0);
+		advc_panel_cursor_y_w_padding(pan, 1);
+	}
+	screen_pos = pass_panel_pos_to_screen_pos(pan);
+	SDL_RenderDebugText(dp->renderer, screen_pos.x, screen_pos.y, pan->text_buff);
+	advc_panel_cursor_w_padding(pan, len, 1);
+	set_panel_cursor_x_pos(pan, 0);
 }
 
 void text_options(struct display *dp, text_opt opts) {
-	panel *panel = dp->context;
-
-	if (opts == SAME_LINE) {
-		panel->in_pos.x += strlen(panel->text_buff) * 8 + panel->padding.x;
-		panel->in_pos.y -= 8 + panel->padding.y;
-	}
-}
-
-void set_in_pos(struct display *dp, fpoint pt) {
-	dp->context->in_pos = pt;
+	dp->context->text_opts = opts;
 }
 
 void start_frame(struct display *dp) {
@@ -107,7 +140,7 @@ void start_frame(struct display *dp) {
 	}
 	dp->context = dp->panel_stack[0];
 	dp->stack_i = 1;
-	dp->context->in_pos = dp->context->padding;
+	set_panel_cursor_pos(dp->context, 0, 0);
 }
 
 int create_SDL_display(const char *win_name, const int width, const int height, struct display *dp) {
@@ -137,8 +170,13 @@ void update_display(struct display *dp, void (*callback)(struct display *dp)) {
 }
 
 void clean_SDL_display(struct display *dp) {
-	free(dp->panel_stack[0]);
+	for (int i = 0; i < 10; i++) {
+		free(dp->panel_stack[i]);
+		dp->panel_stack[i] = NULL;
+	}
 	SDL_DestroyRenderer(dp->renderer);
+	dp->renderer = NULL;
 	SDL_DestroyWindow(dp->window);
+	dp->window = NULL;
 }
 

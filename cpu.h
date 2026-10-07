@@ -231,6 +231,8 @@ typedef enum {
 //
 } instr_type;
 
+inst get_inst_info(instr_type instr);
+
 #ifdef __cplusplus
 }
 #endif

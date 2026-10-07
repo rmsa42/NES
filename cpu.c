@@ -23,6 +23,8 @@ void cpu_reset() {
 	cpu.sp = STACK_VECTOR;
 }
 
+inst get_inst_info(instr_type instr) { return (insts[instr]); }
+
 void clock_cpu() {
 	if (stop == true) {
 		return;
@@ -886,11 +888,11 @@ void fill_insts() {
 	insts[ROL_ZPG]	= (inst){ rol, zp_address_mode,			2, 5 };
 	insts[ROL_ZPGX]	= (inst){ rol, zp_x_address_mode,		2, 6 };
 
-	insts[ROR_ACC] = (inst){ ror_acc, impl_address_mode,	1, 2 };
-	insts[ROR_ABS] = (inst){ ror, abs_address_mode,			3, 6 };
-	insts[ROR_ABSX] = (inst){ ror, abs_x_address_mode,		3, 7 };
-	insts[ROR_ZPG] = (inst){ ror, zp_address_mode,			2, 5 };
-	insts[ROR_ZPGX] = (inst){ ror, zp_x_address_mode,		2, 6 };
+	insts[ROR_ACC]	= (inst){ ror_acc, impl_address_mode,	1, 2 };
+	insts[ROR_ABS]	= (inst){ ror, abs_address_mode,		3, 6 };
+	insts[ROR_ABSX]	= (inst){ ror, abs_x_address_mode,		3, 7 };
+	insts[ROR_ZPG]	= (inst){ ror, zp_address_mode,			2, 5 };
+	insts[ROR_ZPGX]	= (inst){ ror, zp_x_address_mode,		2, 6 };
 
 	//
 

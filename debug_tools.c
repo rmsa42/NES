@@ -9,7 +9,9 @@ extern struct ppu ppu;
 extern byte ppu_mem[PPU_MEM_SIZE];
 
 word bp = 0;
-bool run_until_bp = false;
+int step_cnt = 0;
+bool step_into = false;
+bool run = false;
 int debug_panel = 0;
 int ct = 34;
 
@@ -20,34 +22,45 @@ int debugger_init(const char *bp_str, struct display *dp) {
 		return (1);
 	}
 	SDL_SetWindowPosition(dp->window, 200, 300);
-	run_until_bp = false;
+	run = false;
 	if (bp_str != NULL) {
 		bp = strtoul(bp_str, NULL, 16);
-		run_until_bp = true;
+		run = true;
 	}
 	return (0);
+}
+
+void print_debug_cpu_instr(struct display *dp, word *addr) {
+	byte instr_byte = bus_read(*addr);
+	inst instr = get_inst_info(instr_byte);
+
+	//printf("Addr: %x, %d\n", *addr, instr.byte_size);
+	text(dp, "%04x:", *addr);
+	text_options(dp, SAME_LINE);
+	text(dp, " %s", instr_enum_to_str(bus_read(*addr)));
+	for (int i = 1; i < instr.byte_size; i++) {
+		text(dp, " %02x", bus_read(*addr + i));
+	}
+	text_options(dp, NA);
+	*addr += instr.byte_size;
 }
 
 void general_debug_info(struct display *dp) {
 	int win_width;
 	int win_height;
 	
-	//printf("Inst %s running\n", instr_enum_to_str(bus_read(cpu.pc))); // Running Instruction
 	SDL_GetWindowSize(dp->window, &win_width, &win_height);
-	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
-	SDL_SetRenderScale(dp->renderer, 1.7, 1.7);
+	SDL_SetRenderDrawColor(dp->renderer, 120, 120, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderScale(dp->renderer, 2, 2);
 
-	byte memvl = bus_read(cpu.pc);
-	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
-	text(dp, "%02x: %02x  %s", cpu.pc, memvl, instr_enum_to_str(memvl));
+	word addr = cpu.pc;
+	print_debug_cpu_instr(dp, &addr);
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-	for (unsigned int i = 0; i < 21; i++) {
-		memvl = bus_read(cpu.pc + i);
-		text(dp, "%02x: %02x  %s", cpu.pc + i, memvl, instr_enum_to_str(memvl));
+	for (int i = 0; i < 15; i++) {
+		print_debug_cpu_instr(dp, &addr);
 	}
 
 	start_panel(dp, "CPU Info", (fpoint){win_width / 4.0f, 0}, (fpoint){win_width - win_width / 4.0f, win_height}, NORMAL);
-	//set_in_pos(dp, (fpoint){(win_width / 4) + 10, 0});
 	text(dp, "PC: %02x", cpu.pc);
 	text(dp, "ACC: %02x", cpu.acc);
 	text(dp, "IX: %02x", cpu.ix);
@@ -64,8 +77,10 @@ void general_debug_info(struct display *dp) {
 	text(dp, "Carry: %d", check_bit(cpu.ps, CF));
 	text(dp, "PPU VRAM: %04x", ppu.v);
 
-	text(dp, "Stack");
 	start_panel(dp, "Stack", (fpoint){0, 0}, (fpoint){100, 50}, CURR_POS | WITH_BORDER);
+	text_options(dp, CENTERED);
+	text(dp, "Stack");
+	text_options(dp, NA);
 	for (size_t i = cpu.sp + 1; i <= 0xFF; i++) {
 		text(dp, "%02x,", bus_read(make_word(STACK_OFFSET, (byte)i)));
 		text_options(dp, SAME_LINE);
@@ -78,63 +93,72 @@ void general_debug_info(struct display *dp) {
 }
 
 void memory_debug(struct display *dp) {
-	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-	SDL_SetRenderScale(dp->renderer, 2, 2);
+	word addr = 0x2000;
 
-	start_panel(dp, "PPU Memory", (fpoint){0, 0}, (fpoint){320, 240}, WITH_BORDER);
+	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderScale(dp->renderer, 1.5, 1.5);
+
+	start_panel(dp, "PPU Memory", (fpoint){0, 0}, (fpoint){640, 480}, NORMAL);
 	text(dp, "PPU Memory");
-	word addr = ppu.v - 10;
-	for (unsigned int i = 1; i < 21; i++) {
-		text(dp, "%04x: %02x   %02x   %02x   %02x", addr,
-			ppu_mem[addr], ppu_mem[addr + 1], ppu_mem[addr + 2], ppu_mem[addr + 3]);
-		addr += 4;
+	if (ppu.v >= 0x2200){
+		addr = 0x2200;
+	} 
+	for (int i = 0; i < 33; i++) {
+		text(dp, "%04x:", addr);
+		text_options(dp, SAME_LINE);
+		for (int k = 0; k < 16; k++) {
+			addr++;
+			text(dp, " %02x", ppu_mem[addr + k]);
+		}
+		text_options(dp, NA);
 	}
 	end_panel(dp);
 }
 
-bool update_debugger(struct display *dp) {
-	SDL_Event e;
-	bool advance = false;
+void debugger_handle_event(struct display *dp, SDL_Event *e) {
+	if (e->type == SDL_EVENT_KEY_DOWN) {
+		if (e->key.scancode == SDL_SCANCODE_RETURN) {
+			step_into = true;
+		} else if (e->key.scancode == SDL_SCANCODE_Q) {
+			dp->run = false;
+		} else if (e->key.scancode == SDL_SCANCODE_M) {
+			debug_panel++;
+			debug_panel = debug_panel % 2;
+		} else if (e->key.scancode == SDL_SCANCODE_P) {
+			nmi(cpu.pc);
+		} else if (e->key.scancode == SDL_SCANCODE_R) {
+			run = true;
+		}
+	}
+}
 
+bool update_debugger(struct display *dp) {
 	start_frame(dp);
 	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(dp->renderer);
-	while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_EVENT_KEY_DOWN) {
-			if (e.key.scancode == SDL_SCANCODE_RETURN) {
-				advance = true;
-			} else if (e.key.scancode == SDL_SCANCODE_Q) {
-				dp->run = false;
-			} else if (e.key.scancode == SDL_SCANCODE_M) {
-				debug_panel++;
-				debug_panel = debug_panel % 2;
-			} else if (e.key.scancode == SDL_SCANCODE_P) {
-				nmi(cpu.pc);
-			}
-		}
-	}
 	if (debug_panel == 0) {
 		general_debug_info(dp);
 	} else {
 		memory_debug(dp);
 	}
 	SDL_RenderPresent(dp->renderer);
-	if (cpu.pc == bp) {
-		ct -= 1;
-		if (ct == 0) {
-			run_until_bp = false;
+	if (run == true && cpu.pc == bp) {
+		run = false;
+	} else if (step_into == true) {
+		if (step_cnt == 1) {
+			step_into = false;
+			step_cnt = 0;
 		} else {
-			advance = true;
+			step_cnt += 1;
 		}
-	} else if (run_until_bp == true) {
-		advance = true;
 	}
+	
 	//if (cpu.pc == 0xAA66) {
 	//	nmi(0xAA69);
 	//} else if (cpu.pc == 0xAA50) {
 	//	nmi(0xAA53);
 	//}
-	return (advance);
+	return (run | step_into);
 }
 
 const char *instr_enum_to_str(const byte instr) {

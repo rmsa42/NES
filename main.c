@@ -13,21 +13,35 @@ int window_width = 512;
 int window_height = 480;
 extern bool stop;
 
-void update_nes(struct display *nes_dp) {
+void nes_handle_event(struct display *nes_dp, SDL_Event *e) {
+	if (e->type == SDL_EVENT_KEY_DOWN) {
+		if (e->key.scancode == SDL_SCANCODE_Q) {
+			nes_dp->run = false;
+		}
+	}
+}
+
+void handle_events(struct display *nes_dp, struct display *debugger_dp) {
 	SDL_Event e;
 
-	SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	if (stop == true) {
-		SDL_RenderClear(nes_dp->renderer);
-	}
 	while (SDL_PollEvent(&e)) {
 		if (e.type == SDL_EVENT_QUIT) {
 			nes_dp->run = false;
-		} else if (e.type == SDL_EVENT_KEY_DOWN) {
-			if (e.key.scancode == SDL_SCANCODE_Q) {
-				nes_dp->run = false;
-			}
+			debugger_dp->run = false;
 		}
+		SDL_Window *ewindow = SDL_GetWindowFromEvent(&e);
+		if (ewindow == nes_dp->window) {
+			nes_handle_event(nes_dp, &e);
+		} else if (ewindow == debugger_dp->window) {
+			debugger_handle_event(debugger_dp, &e);
+		}
+	}
+}
+
+void update_nes(struct display *nes_dp) {
+	SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	if (stop == true) {
+		SDL_RenderClear(nes_dp->renderer);
 	}
 	clock_cpu();
 	clock_ppu(nes_dp);
@@ -90,12 +104,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (nes_dp.run && debug_dp.run) {
-		while (debug_dp.run) {
-			if (update_debugger(&debug_dp)) {
-				break;
-			}
+		handle_events(&nes_dp, &debug_dp);
+		if (update_debugger(&debug_dp)) {
+			update_nes(&nes_dp);
 		}
-		update_nes(&nes_dp);
 	}
 
 	clean_SDL_display(&debug_dp);
