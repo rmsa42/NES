@@ -1,10 +1,14 @@
 #include "ppu.h"
+#include "cpu.h"
 #include <string.h>
 #include <stdio.h>
+
+extern int cpu_cycles;
 
 struct ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
 bool stop = false;
+int counter = 0;
 
 void ppu_init() {
 	memset(&ppu, 0, sizeof(struct ppu));
@@ -74,16 +78,22 @@ void ppu_write(word addr, byte value) {
 }
 
 byte ppu_read(word addr) {
+	byte ret;
+
 	switch (addr) {
 		case PPUSTATUS_VECTOR:
+			ret = ppu.ppu_status;
+			clear_bit(ppu.ppu_status, 7);
 			ppu.w = 0;
-			return (ppu.ppu_status);
+			break;
 		case PPUDATA_VECTOR:
-			return (ppu_internal_read());
+			ret = ppu_internal_read();
+			break;
 
 		default:
 			return (0);
 	}
+	return (ret);
 }
 
 void render_pattern_table_tile(const int tile_x, const int tile_y, struct display *nes_dp) {
@@ -192,17 +202,23 @@ void render_nametable(struct display *nes_dp) {
 	//printf("VRAM: %x\n", vram_addr);
 }
 
-void clock_ppu(struct display *nes_dp) {
+void clock_ppu(struct display *nes_dp, byte cycles) {
 	SDL_SetRenderScale(nes_dp->renderer, 1, 1);
-	//for (int i = 0; i < 8; i++) {
-	//	render_pixel_sliver(0x1D, i % 8, i, 100, nes_dp);
-	//}
 	//render_pattern_table(0, nes_dp);
+	counter += cycles;
+	if (counter >= 27120 && !check_bit(ppu.ppu_status, 7)) {
+		set_bit(ppu.ppu_status, 7);
+		printf("Flag Check: %x %x\n", check_bit(ppu.ppu_status, 7), check_bit(ppu.ppu_ctrl, 7));
+		if (check_bit(ppu.ppu_status, 7) == 1 && check_bit(ppu.ppu_ctrl, 7) == 1) {
+			nmi();
+		}
+	} else if (counter >= 29380) {
+		clear_bit(ppu.ppu_status, 7);
+		counter = 0;
+	}
 	if (check_bit(ppu.ppu_mask, BG_RND) && stop == true) {
 		ppu.t = 0;
 		render_nametable(nes_dp);
-		//set_bit(ppu.ppu_status, VBLANK);
-		stop = false;
 	}
 }
 

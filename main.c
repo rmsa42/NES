@@ -1,25 +1,10 @@
-#include "cpu.h"
-#include "apu.h"
-#include "ppu.h"
-#include "rom.h"
-#include "debug_tools.h"
+#include "nes.h"
 #include "sdl_utils.h"
+#include "debug_tools.h"
 #include <stdio.h>
 #include <stdbool.h>
 
 extern struct cpu cpu;
-
-int window_width = 512;
-int window_height = 480;
-extern bool stop;
-
-void nes_handle_event(struct display *nes_dp, SDL_Event *e) {
-	if (e->type == SDL_EVENT_KEY_DOWN) {
-		if (e->key.scancode == SDL_SCANCODE_Q) {
-			nes_dp->run = false;
-		}
-	}
-}
 
 void handle_events(struct display *nes_dp, struct display *debugger_dp) {
 	SDL_Event e;
@@ -36,30 +21,6 @@ void handle_events(struct display *nes_dp, struct display *debugger_dp) {
 			debugger_handle_event(debugger_dp, &e);
 		}
 	}
-}
-
-void update_nes(struct display *nes_dp) {
-	SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	if (stop == true) {
-		SDL_RenderClear(nes_dp->renderer);
-	}
-	clock_cpu();
-	clock_ppu(nes_dp);
-	//clock_apu(stream);
-	SDL_RenderPresent(nes_dp->renderer);
-}
-
-int nes_init(struct display *nes_dp) {
-	if (create_SDL_display("NES", window_width, window_height, nes_dp)) {
-		return (1);
-	}
-	SDL_SetWindowPosition(nes_dp->window, 1000, 300);
-	cpu_init();
-	ppu_init();
-	nes_dp->run = true;
-	cpu.pc = 0x8000; // This is here for now. The prg-rom is loaded in the 0x8000 addr
-	printf("Nes Init\n");
-	return (0);
 }
 
 int aux_tools_init(const char *bp, struct display *debug_dp) {
@@ -97,10 +58,8 @@ int main(int argc, char *argv[]) {
 	if (aux_tools_init(argv[2], &debug_dp)) {
 		return (1);
 	}
-	nes_init(&nes_dp);
-	if (read_rom(argv[1])) {
-		printf("Invalid ROM\n");
-		nes_dp.run = false; // Just to make the loop stop
+	if (nes_init(&nes_dp, argv[1])) {
+		return (1);
 	}
 
 	while (nes_dp.run && debug_dp.run) {
@@ -115,3 +74,4 @@ int main(int argc, char *argv[]) {
 	//SDL_DestroyAudioStream(stream);
 	SDL_Quit();
 }
+

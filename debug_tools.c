@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 extern struct cpu cpu;
+extern int cpu_cycles;
 extern struct ppu ppu;
 extern byte ppu_mem[PPU_MEM_SIZE];
 
@@ -88,6 +89,7 @@ void general_debug_info(struct display *dp) {
 	end_panel(dp);
 
 	text(dp, "Breakpoint: %04x", bp);
+	text(dp, "CPU_Cycles: %d", cpu_cycles);
 	end_panel(dp);
 
 }
@@ -124,8 +126,6 @@ void debugger_handle_event(struct display *dp, SDL_Event *e) {
 		} else if (e->key.scancode == SDL_SCANCODE_M) {
 			debug_panel++;
 			debug_panel = debug_panel % 2;
-		} else if (e->key.scancode == SDL_SCANCODE_P) {
-			nmi(cpu.pc);
 		} else if (e->key.scancode == SDL_SCANCODE_R) {
 			run = true;
 		}
@@ -152,12 +152,6 @@ bool update_debugger(struct display *dp) {
 			step_cnt += 1;
 		}
 	}
-	
-	//if (cpu.pc == 0xAA66) {
-	//	nmi(0xAA69);
-	//} else if (cpu.pc == 0xAA50) {
-	//	nmi(0xAA53);
-	//}
 	return (run | step_into);
 }
 
@@ -271,6 +265,8 @@ const char *instr_enum_to_str(const byte instr) {
 			return ("TYA");
 		case TSX_IMPL:
 			return ("TSX");
+		case TXS_IMPL:
+			return ("TXS");
 		case PHA_IMPL:
 			return ("PHA");
 		case PHP_IMPL:

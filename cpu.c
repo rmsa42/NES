@@ -1,12 +1,14 @@
 #include "cpu.h"
 #include "bus.h"
-#include "ppu.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 struct cpu cpu;
 inst insts[INSTS_NBR];
 byte cpu_mem[CPU_MEM_SIZE];
+int cpu_cycles;
+bool nmi_flip = false;
 void fill_insts();
 
 extern bool stop;
@@ -15,6 +17,7 @@ void cpu_init() {
 	memset(&cpu, 0, sizeof(struct cpu));
 	memset(cpu_mem, 0, sizeof(cpu_mem));
 	fill_insts();
+	cpu_cycles = 0;
 	cpu.sp = STACK_VECTOR;
 }
 
@@ -25,14 +28,18 @@ void cpu_reset() {
 
 inst get_inst_info(instr_type instr) { return (insts[instr]); }
 
-void clock_cpu() {
-	if (stop == true) {
-		return;
-	}
+void cpu_start() {
+	cpu.pc = RES_VECTOR;
+	cpu.pc = fetch_word();
+}
+
+byte clock_cpu() {
 	byte byte = fetch_byte();
 	inst instr = insts[byte];
 	word data = instr.mode();
 	instr.run(data);
+	cpu_cycles += instr.cycles;
+	return (instr.cycles);
 }
 
 void cpu_state() {
@@ -108,13 +115,22 @@ word abs_address_mode() {
 }
 
 word abs_x_address_mode() {
-	word addr = fetch_word() + cpu.ix;
-	return (addr);
+	word addr = fetch_word();
+
+	if (low_byte(addr) + cpu.ix > 0xFF) {
+		cpu_cycles += 1;
+	}
+	return (addr + cpu.ix);
 }
 
 word abs_y_address_mode() {
-	word addr = fetch_word() + cpu.iy;
-	return (addr);
+	word addr = fetch_word();
+
+	if (low_byte(addr) + cpu.iy > 0xFF) {
+		printf("Cross: %x %x\n", low_byte(addr), cpu.iy);
+		cpu_cycles += 1;
+	}
+	return (addr + cpu.iy);
 }
 
 word ind_x_address_mode() {
@@ -129,6 +145,7 @@ word ind_y_address_mode() {
 
 	if (bus_read(ind_addr) + cpu.iy > 0xFF) {
 		hb += 1;
+		cpu_cycles += 1;
 	}
 	return (make_word(hb, lb));
 }
@@ -203,12 +220,12 @@ void infer_carry_flag(word res) {
 
 //
 
-void nmi(word addr) {
-	push_word(addr);
+void nmi() {
+	push_word(cpu.pc);
 	clear_bit(cpu.ps, BF);
 	push_byte(cpu.ps);
 	cpu.pc = make_word(cpu_mem[NMI_VECTOR + 1], cpu_mem[NMI_VECTOR]);
-	printf("NMI $%x Called into %x\n", addr, cpu.pc);
+	printf("NMI handler called\n");
 }
 
 // Instructions
@@ -435,50 +452,93 @@ void rts(word addr) {
 // Branches
 
 void bcc(word rdisp) {
+	int8_t rdisp_s = rdisp;
+
 	if (!check_bit(cpu.ps, CF)) {
-		cpu.pc += (int8_t)rdisp; 
+		byte before_branch_hb = high_byte(cpu.pc);
+		cpu.pc += rdisp_s; 
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void bcs(word rdisp) {
 	if (check_bit(cpu.ps, CF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void beq(word rdisp) {
 	if (check_bit(cpu.ps, ZF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			printf("CrossPage\n");
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void bmi(word rdisp) {
 	if (check_bit(cpu.ps, NF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void bne(word rdisp) {
 	if (!check_bit(cpu.ps, ZF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void bpl(word rdisp) {
 	if (!check_bit(cpu.ps, NF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void bvc(word rdisp) {
 	if (!check_bit(cpu.ps, VF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
 void bvs(word rdisp) {
 	if (check_bit(cpu.ps, VF)) {
+		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
+		if (high_byte(cpu.pc) != before_branch_hb) {
+			cpu_cycles += 1;
+		}
+		cpu_cycles += 1;
 	}
 }
 
@@ -850,10 +910,10 @@ void fill_insts() {
 
 	// Increment/Decrement
 
-    insts[INC_ABS]	= (inst){ inc, rel_address_mode,	3, 6 };
-    insts[INC_ABSX]	= (inst){ inc, rel_address_mode,	3, 7 };
-    insts[INC_ZPG]	= (inst){ inc, rel_address_mode,	2, 5 };
-    insts[INC_ZPGX]	= (inst){ inc, rel_address_mode,	2, 6 };
+    insts[INC_ABS]	= (inst){ inc, abs_address_mode,	3, 6 };
+    insts[INC_ABSX]	= (inst){ inc, abs_x_address_mode,	3, 7 };
+    insts[INC_ZPG]	= (inst){ inc, zp_address_mode,	2, 5 };
+    insts[INC_ZPGX]	= (inst){ inc, zp_x_address_mode,	2, 6 };
 
     insts[INX_IMPL]	= (inst){ inx, impl_address_mode,	1, 2 };
     insts[INY_IMPL]	= (inst){ iny, impl_address_mode,	1, 2 };

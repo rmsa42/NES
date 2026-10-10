@@ -72,7 +72,7 @@ struct ppu {
 void ppu_init();
 void ppu_write(word addr, byte value);
 byte ppu_read(word addr);
-void clock_ppu(struct display *nes_dp);
+void clock_ppu(struct display *nes_dp, byte cycles);
 
 #ifdef __cplusplus
 }

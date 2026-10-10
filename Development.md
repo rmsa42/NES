@@ -66,9 +66,12 @@ Now the memory-mapped registers are right
 - [X] Implement the *bus* in the asl, lsr, rol and ror after making tests for the instructions
 > R: Done
 
+**08/10/2026**
 - [X] Fully refactor **debug_tools** with a new GUI library or just try to make a GUI with SDL3 :)
 > R: This is not happening. I want to try and make something myself with future plans in mind
 
+- [ ] Need to make tests for crossing pages
+- [ ] Need to check if there's a way to optimize the **cross page** checks
 - [ ] Need to finish the **apu_write** function to integrate the apu with the bus
 - [ ] Need to make the memory *mirroring*
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable

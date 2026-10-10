@@ -17,6 +17,8 @@ set(SOURCES
 	rom.h
 	bus.c
 	bus.h
+	nes.c
+	nes.h
 	debug_tools.c
 	debug_tools.h
 	sdl_utils.c
@@ -58,6 +60,8 @@ if(TESTS)
 		rom.h
 		bus.c
 		bus.h
+		nes.c
+		nes.h
 		debug_tools.c
 		debug_tools.h
 		sdl_utils.c
