@@ -1,13 +1,14 @@
 #include "ppu.h"
 #include "cpu.h"
+#include "rom.h"
 #include <string.h>
 #include <stdio.h>
 
 extern int cpu_cycles;
+extern byte pallete_rgb[PALLETE_SIZE];
 
 struct ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
-bool stop = false;
 int counter = 0;
 
 void ppu_init() {
@@ -38,9 +39,6 @@ void ppu_write(word addr, byte value) {
 			break;
 		case PPUMASK_VECTOR:
 			ppu.ppu_mask = value;
-			if (check_bit(ppu.ppu_mask, BG_RND)) {
-				stop = true;
-			}
 			printf("$2001: %x\n", ppu.ppu_mask);
 			printf("Rendering Background: %x\n", check_bit(ppu.ppu_mask, BG_RND));
 			break;
@@ -137,7 +135,7 @@ void render_pattern_table(const int table_nbr, struct display *nes_dp) {
 	}
 }
 
-void render_pixel_sliver(const byte tile, const byte row, const byte scanline, const byte x, struct display *nes_dp) {
+void render_pixel_sliver(const byte tile, const byte attr, const byte row, const byte scanline, const byte x, struct display *nes_dp) {
 	const word addr = (tile * 16) + row;
 	byte plane1 = ppu_mem[addr];
 	byte plane2 = ppu_mem[addr + 8];
@@ -148,16 +146,13 @@ void render_pixel_sliver(const byte tile, const byte row, const byte scanline, c
 		byte pixel = (pl2bit << 1) | pl1bit;
 		SDL_FRect rect;
 		if (pixel >= 1) {
+			word pli_addr = 0x3F00 | (attr & 0x03) << 2 | pixel;
+			word pli = ppu_mem[pli_addr] * 3;
+			//printf("Pli_Attr: %x\n", pli);
 			rect.h = rect.w = 2;
 			rect.x = (x + k) * rect.w;
 			rect.y = scanline * rect.h;
-			if (pixel == 3) {
-				SDL_SetRenderDrawColor(nes_dp->renderer, 192, 192, 192, SDL_ALPHA_OPAQUE);
-			} else if (pixel == 2) {
-				SDL_SetRenderDrawColor(nes_dp->renderer, 255, 222, 173, SDL_ALPHA_OPAQUE);
-			} else {
-				SDL_SetRenderDrawColor(nes_dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-			}
+			SDL_SetRenderDrawColor(nes_dp->renderer, pallete_rgb[pli], pallete_rgb[pli + 1], pallete_rgb[pli + 2], SDL_ALPHA_OPAQUE);
 			SDL_RenderFillRect(nes_dp->renderer, &rect);
 		}
 		//printf("%d", pixel);
@@ -168,8 +163,8 @@ void render_pixel_sliver(const byte tile, const byte row, const byte scanline, c
 void render_scanline(struct display *nes_dp, const byte scanline) {
 	for (byte i = 0; i < 32; i++) {
 		byte tile = ppu_mem[get_nametable_addr(ppu.v)];
-		//printf("NM_ADDR: %x\n", get_nametable_addr(ppu.v));
-		render_pixel_sliver(tile, get_fine_y(ppu.v), scanline, i * 8, nes_dp);
+		byte attr = ppu_mem[get_attribute_addr(ppu.v)];
+		render_pixel_sliver(tile, attr, get_fine_y(ppu.v), scanline, i * 8, nes_dp);
 		if (get_coarse_x(ppu.v) == 31) {
 			clear_coarse_x(ppu.v);
 			toggle_hz_nametable(ppu.v);
@@ -216,7 +211,7 @@ void clock_ppu(struct display *nes_dp, byte cycles) {
 		clear_bit(ppu.ppu_status, 7);
 		counter = 0;
 	}
-	if (check_bit(ppu.ppu_mask, BG_RND) && stop == true) {
+	if (check_bit(ppu.ppu_mask, BG_RND)) {
 		ppu.t = 0;
 		render_nametable(nes_dp);
 	}

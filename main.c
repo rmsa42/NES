@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 		return (1);
 	}
 
-	while (nes_dp.run && debug_dp.run) {
+	while (nes_dp.run) {
 		handle_events(&nes_dp, &debug_dp);
 		if (update_debugger(&debug_dp)) {
 			update_nes(&nes_dp);

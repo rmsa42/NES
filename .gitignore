@@ -6,6 +6,3 @@ build/
 
 # Roms
 roms
-
-# Temporary
-ui.c

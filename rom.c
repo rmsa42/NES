@@ -7,7 +7,9 @@
 extern byte cpu_mem[CPU_MEM_SIZE];
 extern byte ppu_mem[PPU_MEM_SIZE];
 
-static void print_buff(byte *buff, const size_t size) {
+byte pallete_rgb[PALLETE_SIZE];
+
+void print_buff(byte *buff, const size_t size) {
 	for (size_t i = 0; i < size; i++) {
 		printf("%x: %x\n", i, buff[i]);
 	}
@@ -60,6 +62,17 @@ static void parse_chr_rom(FILE *rom, size_t chr_size) {
 	//print_buff(&ppu_mem[0x0000], size);
 }
 
+static void parse_pallete() {
+	FILE *pal;
+	size_t size = 0x3F * 3;
+
+	memset(&pallete_rgb, 0, sizeof(pallete_rgb));
+	pal = fopen("../palettes/RP2C03.pal", "r");
+	fread(&pallete_rgb[0], size, 1, pal);
+	//print_buff(&pallete_rgb[0], size);
+	fclose(pal);
+}
+
 int read_rom(const char *rom_name) {
 	FILE *rom = NULL;
 	struct nes_header hd;
@@ -80,6 +93,8 @@ int read_rom(const char *rom_name) {
 	}
 	parse_prg_rom(rom, hd.prg_rom_size);
 	parse_chr_rom(rom, hd.chr_rom_size);
+	fclose(rom);
+	parse_pallete();
 	printf("Parsed Rom\n");
 	return (0);
 }

@@ -7,17 +7,18 @@
 struct cpu cpu;
 inst insts[INSTS_NBR];
 byte cpu_mem[CPU_MEM_SIZE];
-int cpu_cycles;
 bool nmi_flip = false;
-void fill_insts();
+int cpu_cycles;
+int nbr_instr;
 
-extern bool stop;
+void fill_insts();
 
 void cpu_init() {
 	memset(&cpu, 0, sizeof(struct cpu));
 	memset(cpu_mem, 0, sizeof(cpu_mem));
 	fill_insts();
 	cpu_cycles = 0;
+	nbr_instr = 0;
 	cpu.sp = STACK_VECTOR;
 }
 
@@ -39,6 +40,7 @@ byte clock_cpu() {
 	word data = instr.mode();
 	instr.run(data);
 	cpu_cycles += instr.cycles;
+	nbr_instr += 1;
 	return (instr.cycles);
 }
 
@@ -224,6 +226,7 @@ void nmi() {
 	push_word(cpu.pc);
 	clear_bit(cpu.ps, BF);
 	push_byte(cpu.ps);
+	set_bit(cpu.ps, IF);
 	cpu.pc = make_word(cpu_mem[NMI_VECTOR + 1], cpu_mem[NMI_VECTOR]);
 	printf("NMI handler called\n");
 }

@@ -6,6 +6,7 @@
 
 extern struct cpu cpu;
 extern int cpu_cycles;
+extern int nbr_instr;
 extern struct ppu ppu;
 extern byte ppu_mem[PPU_MEM_SIZE];
 
@@ -23,11 +24,10 @@ int debugger_init(const char *bp_str, struct display *dp) {
 		return (1);
 	}
 	SDL_SetWindowPosition(dp->window, 200, 300);
-	run = false;
 	if (bp_str != NULL) {
 		bp = strtoul(bp_str, NULL, 16);
-		run = true;
 	}
+	run = true;
 	return (0);
 }
 
@@ -90,6 +90,7 @@ void general_debug_info(struct display *dp) {
 
 	text(dp, "Breakpoint: %04x", bp);
 	text(dp, "CPU_Cycles: %d", cpu_cycles);
+	text(dp, "Instr: %d", nbr_instr);
 	end_panel(dp);
 
 }
@@ -114,6 +115,20 @@ void memory_debug(struct display *dp) {
 		}
 		text_options(dp, NA);
 	}
+	text(dp, "");
+	text(dp, "Palletes");
+	text(dp, "%04x: ", 0x3F00);
+	text_options(dp, SAME_LINE);
+	for (int i = 0; i < 0xF; i++) {
+		text(dp, " %02x", ppu_mem[0x3F00 + i]);
+	}
+	text_options(dp, NA);
+	text(dp, "%04x: ", 0x3F10);
+	text_options(dp, SAME_LINE);
+	for (int i = 0; i < 0xF; i++) {
+		text(dp, " %02x", ppu_mem[0x3F10 + i]);
+	}
+	text_options(dp, NA);
 	end_panel(dp);
 }
 
@@ -128,6 +143,8 @@ void debugger_handle_event(struct display *dp, SDL_Event *e) {
 			debug_panel = debug_panel % 2;
 		} else if (e->key.scancode == SDL_SCANCODE_R) {
 			run = true;
+		} else if (e->key.scancode == SDL_SCANCODE_P) {
+			nmi();
 		}
 	}
 }
