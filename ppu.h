@@ -54,6 +54,19 @@ typedef enum {
 	VBLANK
 } ppu_status;
 
+typedef struct pixel_data {
+	word lowp_shift_reg;
+	word highp_shift_reg;
+	byte attr_latch;
+} pixel_data;
+
+typedef struct addr_latch {
+	byte nametable;
+	byte attr;
+	byte tile_low;
+	byte tile_high;
+} addr_latch;
+
 struct ppu {
 	byte ppu_ctrl;
 	byte ppu_mask;
@@ -68,6 +81,9 @@ struct ppu {
 	word t;
 	byte x;
 	bool w;
+
+	pixel_data pixel_data;
+	addr_latch addr_latch;
 };
 
 void ppu_init();
@@ -78,6 +94,8 @@ void clock_ppu(struct display *nes_dp, byte cycles);
 // Just for making tests
 void render_nametable(struct display *nes_dp);
 void render_pattern_table(const int table_nbr, struct display *nes_dp);
+void scanline();
+void render_pixel(pixel_data *pixel_data, byte tile_nbr, byte pixel_nbr);
 
 #ifdef __cplusplus
 }

@@ -9,6 +9,7 @@ extern int cpu_cycles;
 extern int nbr_instr;
 extern struct ppu ppu;
 extern byte ppu_mem[PPU_MEM_SIZE];
+extern int scanline_g;
 
 word bp = 0;
 int step_cnt = 0;
@@ -77,6 +78,7 @@ void general_debug_info(struct display *dp) {
 	text(dp, "Zero: %d", check_bit(cpu.ps, ZF));
 	text(dp, "Carry: %d", check_bit(cpu.ps, CF));
 	text(dp, "PPU VRAM: %04x", ppu.v);
+	text(dp, "Scanline: %d", scanline_g);
 
 	start_panel(dp, "Stack", (fpoint){0, 0}, (fpoint){100, 50}, CURR_POS | WITH_BORDER);
 	text_options(dp, CENTERED);
@@ -117,15 +119,15 @@ void memory_debug(struct display *dp) {
 	}
 	text(dp, "");
 	text(dp, "Palletes");
-	text(dp, "%04x: ", 0x3F00);
+	text(dp, "%04x:", 0x3F00);
 	text_options(dp, SAME_LINE);
-	for (int i = 0; i < 0xF; i++) {
+	for (int i = 0; i < 0x10; i++) {
 		text(dp, " %02x", ppu_mem[0x3F00 + i]);
 	}
 	text_options(dp, NA);
-	text(dp, "%04x: ", 0x3F10);
+	text(dp, "%04x:", 0x3F10);
 	text_options(dp, SAME_LINE);
-	for (int i = 0; i < 0xF; i++) {
+	for (int i = 0; i < 0x10; i++) {
 		text(dp, " %02x", ppu_mem[0x3F10 + i]);
 	}
 	text_options(dp, NA);

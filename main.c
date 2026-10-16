@@ -64,9 +64,9 @@ int main(int argc, char *argv[]) {
 
 	while (nes_dp.run) {
 		handle_events(&nes_dp, &debug_dp);
-		if (update_debugger(&debug_dp)) {
+		//if (update_debugger(&debug_dp)) {
 			update_nes(&nes_dp);
-		}
+		//}
 	}
 
 	clean_SDL_display(&debug_dp);
