@@ -8,6 +8,7 @@ extern struct ppu ppu;
 extern byte ppu_mem[PPU_MEM_SIZE];
 extern byte pallete_rgb[0x3F * 3];
 extern byte pixels[256 * 240 * 4];
+extern int scanline_nbr;
 extern SDL_Texture *texture;
 
 int win_w = 512;
@@ -90,6 +91,7 @@ int main() {
 	data.attr_latch = 0x40 & 0x03;
 	for (int i = 0; i < 239; i++) {
 		scanline();
+		scanline_nbr += 1;
 	}
 	SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
 	SDL_RenderTexture(dp.renderer, texture, NULL, NULL);

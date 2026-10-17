@@ -129,7 +129,6 @@ word abs_y_address_mode() {
 	word addr = fetch_word();
 
 	if (low_byte(addr) + cpu.iy > 0xFF) {
-		printf("Cross: %x %x\n", low_byte(addr), cpu.iy);
 		cpu_cycles += 1;
 	}
 	return (addr + cpu.iy);
@@ -228,7 +227,6 @@ void nmi() {
 	push_byte(cpu.ps);
 	set_bit(cpu.ps, IF);
 	cpu.pc = make_word(cpu_mem[NMI_VECTOR + 1], cpu_mem[NMI_VECTOR]);
-	printf("NMI handler called\n");
 }
 
 // Instructions
@@ -483,7 +481,6 @@ void beq(word rdisp) {
 		byte before_branch_hb = high_byte(cpu.pc);
 		cpu.pc += (int8_t)rdisp;
 		if (high_byte(cpu.pc) != before_branch_hb) {
-			printf("CrossPage\n");
 			cpu_cycles += 1;
 		}
 		cpu_cycles += 1;

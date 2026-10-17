@@ -5,7 +5,6 @@
 #include "rom.h"
 #include <stdio.h>
 
-extern int scanline_g;
 extern byte pixels[256 * 240 * 4];
 
 int window_width = 512;
@@ -31,17 +30,22 @@ int nes_init(struct display *nes_dp, const char *rom_name) {
 
 }
 
-void update_nes(struct display *nes_dp) {
+void update_nes(struct display *nes_dp, int curr_time, int *last_time) {
 	byte cycles = 0;
 
-	SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
-	SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(nes_dp->renderer);
+	if (curr_time > *last_time + 16) {
+		SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderClear(nes_dp->renderer);
+	}
 	cycles = clock_cpu();
 	clock_ppu(nes_dp, cycles);
 	//clock_apu(stream);
-	SDL_RenderTexture(nes_dp->renderer, texture, NULL, NULL);
-	SDL_RenderPresent(nes_dp->renderer);
+	if (curr_time > *last_time + 16) {
+		SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
+		SDL_RenderTexture(nes_dp->renderer, texture, NULL, NULL);
+		SDL_RenderPresent(nes_dp->renderer);
+		*last_time = curr_time;
+	}
 }
 
 void nes_handle_event(struct display *nes_dp, SDL_Event *e) {

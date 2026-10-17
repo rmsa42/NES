@@ -36,6 +36,9 @@ extern "C" {
 #define toggle_hz_nametable(v) (v = v ^ 0x0400)
 #define toggle_vt_nametable(v) (v = v ^ 0x0800)
 
+#define SCANLINE_TILE_COUNT 32
+#define SCANLINE_CPU_CYCLES 113.667f
+
 typedef enum {
 	GREY,
 	BG_LFM,
@@ -45,14 +48,20 @@ typedef enum {
 	RED,
 	GREEN,
 	BLUE
-} mask;
+} ppu_mask_bit;
 
 typedef enum {
 	OPEN_BUS,
 	SP_OV = 5,
 	SP_HIT,
 	VBLANK
-} ppu_status;
+} ppu_status_bit;
+
+typedef enum {
+	NAMETABLE_HORIZONTAL = 0,
+	NAMETABLE_VERTICAL = 1,
+	VRAM_INC = 2
+} ppu_ctrl_bit;
 
 typedef struct pixel_data {
 	word lowp_shift_reg;
@@ -60,12 +69,12 @@ typedef struct pixel_data {
 	byte attr_latch;
 } pixel_data;
 
-typedef struct addr_latch {
+typedef struct render_data_latch {
 	byte nametable;
 	byte attr;
 	byte tile_low;
 	byte tile_high;
-} addr_latch;
+} render_data_latch;
 
 struct ppu {
 	byte ppu_ctrl;
@@ -83,19 +92,19 @@ struct ppu {
 	bool w;
 
 	pixel_data pixel_data;
-	addr_latch addr_latch;
+	render_data_latch render_dt_latch;
 };
 
 void ppu_init();
 void ppu_write(word addr, byte value);
 byte ppu_read(word addr);
 void clock_ppu(struct display *nes_dp, byte cycles);
+void ppu_write_mem(word addr, byte value);
+byte ppu_read_mem(word addr);
 
 // Just for making tests
-void render_nametable(struct display *nes_dp);
 void render_pattern_table(const int table_nbr, struct display *nes_dp);
 void scanline();
-void render_pixel(pixel_data *pixel_data, byte tile_nbr, byte pixel_nbr);
 
 #ifdef __cplusplus
 }
