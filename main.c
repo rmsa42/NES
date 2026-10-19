@@ -67,13 +67,14 @@ int main(int argc, char *argv[]) {
 	while (nes_dp.run) {
 		curr_time = SDL_GetTicks();
 		handle_events(&nes_dp, &debug_dp);
-		//if (update_debugger(&debug_dp)) {
+		update_debugger(&debug_dp);
+		if (debug_block()) {
 			update_nes(&nes_dp, curr_time, &last_time);
-		//}
+		}
 	}
 
-	clean_SDL_display(&debug_dp);
-	clean_SDL_display(&nes_dp);
+	clean_display(&debug_dp);
+	clean_display(&nes_dp);
 	//SDL_DestroyAudioStream(stream);
 	SDL_Quit();
 }

@@ -12,7 +12,7 @@ int window_height = 480;
 SDL_Texture *texture;
 
 int nes_init(struct display *nes_dp, const char *rom_name) {
-	if (create_SDL_display("NES", window_width, window_height, nes_dp)) {
+	if (create_display("NES", window_width, window_height, nes_dp)) {
 		return (1);
 	}
 	SDL_SetWindowPosition(nes_dp->window, 1000, 300);
@@ -32,15 +32,16 @@ int nes_init(struct display *nes_dp, const char *rom_name) {
 
 void update_nes(struct display *nes_dp, int curr_time, int *last_time) {
 	byte cycles = 0;
+	bool render = curr_time > *last_time + 16;
 
-	if (curr_time > *last_time + 16) {
+	if (render) {
 		SDL_SetRenderDrawColor(nes_dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(nes_dp->renderer);
 	}
 	cycles = clock_cpu();
 	clock_ppu(nes_dp, cycles);
 	//clock_apu(stream);
-	if (curr_time > *last_time + 16) {
+	if (render) {
 		SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
 		SDL_RenderTexture(nes_dp->renderer, texture, NULL, NULL);
 		SDL_RenderPresent(nes_dp->renderer);

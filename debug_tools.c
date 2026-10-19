@@ -10,23 +10,24 @@ extern int nbr_instr;
 extern struct ppu ppu;
 extern int scanline_nbr;
 
-word bp = 0;
-int step_cnt = 0;
-bool step_into = false;
-bool run = false;
-int debug_panel = 0;
+debugger debug;
 
 const char *instr_enum_to_str(const byte instr);
 
+bool debug_block() {
+	return (debug.run);
+}
+
 int debugger_init(const char *bp_str, struct display *dp) {
-	if (create_SDL_display("DebuggerNes", 640, 480, dp)) {
+	memset(&debug, 0, sizeof(debugger));
+	if (create_display("DebuggerNes", 640, 480, dp)) {
 		return (1);
 	}
 	SDL_SetWindowPosition(dp->window, 200, 300);
 	if (bp_str != NULL) {
-		bp = strtoul(bp_str, NULL, 16);
+		debug.breakpoint = strtoul(bp_str, NULL, 16);
 	}
-	run = true;
+	debug.until_bp = true;
 	return (0);
 }
 
@@ -88,7 +89,7 @@ void general_debug_info(struct display *dp) {
 	}
 	end_panel(dp);
 
-	text(dp, "Breakpoint: %04x", bp);
+	text(dp, "Breakpoint: %04x", debug.breakpoint);
 	text(dp, "CPU_Cycles: %d", cpu_cycles);
 	text(dp, "Instr: %d", nbr_instr);
 	end_panel(dp);
@@ -135,41 +136,39 @@ void memory_debug(struct display *dp) {
 void debugger_handle_event(struct display *dp, SDL_Event *e) {
 	if (e->type == SDL_EVENT_KEY_DOWN) {
 		if (e->key.scancode == SDL_SCANCODE_RETURN) {
-			step_into = true;
+			debug.step_into = true;
 		} else if (e->key.scancode == SDL_SCANCODE_Q) {
 			dp->run = false;
 		} else if (e->key.scancode == SDL_SCANCODE_M) {
-			debug_panel++;
-			debug_panel = debug_panel % 2;
+			debug.panel++;
+			debug.panel = debug.panel % 2;
 		} else if (e->key.scancode == SDL_SCANCODE_R) {
-			run = true;
+			debug.until_bp = true;
 		} else if (e->key.scancode == SDL_SCANCODE_P) {
 			nmi();
 		}
 	}
 }
 
-bool update_debugger(struct display *dp) {
-	start_frame(dp);
+void update_debugger(struct display *dp) {
+	debug.run = debug.step_into | debug.until_bp;
+	if (debug.until_bp == true && cpu.pc == debug.breakpoint) {
+		debug.until_bp = false;
+	} else if (debug.step_into == true) {
+		debug.step_into = false;
+	}
+	if (debug.run == true) {
+		return;
+	}
 	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(dp->renderer);
-	if (debug_panel == 0) {
+	start_frame(dp);
+	if (debug.panel == 0) {
 		general_debug_info(dp);
 	} else {
 		memory_debug(dp);
 	}
 	SDL_RenderPresent(dp->renderer);
-	if (run == true && cpu.pc == bp) {
-		run = false;
-	} else if (step_into == true) {
-		if (step_cnt == 1) {
-			step_into = false;
-			step_cnt = 0;
-		} else {
-			step_cnt += 1;
-		}
-	}
-	return (run | step_into);
 }
 
 const char *instr_enum_to_str(const byte instr) {

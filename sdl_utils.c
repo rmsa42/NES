@@ -143,7 +143,7 @@ void start_frame(struct display *dp) {
 	set_panel_cursor_pos(dp->context, 0, 0);
 }
 
-int create_SDL_display(const char *win_name, const int width, const int height, struct display *dp) {
+int create_display(const char *win_name, const int width, const int height, struct display *dp) {
 	memset(dp, 0, sizeof(struct display));
 	if (start_panel(dp, win_name, (fpoint){0, 0}, (fpoint){width, height}, NORMAL)) {
 		return (1);
@@ -159,17 +159,7 @@ int create_SDL_display(const char *win_name, const int width, const int height, 
 	return (0);
 }
 
-void update_display(struct display *dp, void (*callback)(struct display *dp)) {
-	SDL_Event e;
-
-	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(dp->renderer);
-	while (SDL_PollEvent(&e)) {}
-	callback(dp);
-	SDL_RenderPresent(dp->renderer);
-}
-
-void clean_SDL_display(struct display *dp) {
+void clean_display(struct display *dp) {
 	for (int i = 0; i < 10; i++) {
 		free(dp->panel_stack[i]);
 		dp->panel_stack[i] = NULL;

@@ -45,12 +45,12 @@ void loop(struct display *dp) {
 int main() {
 	struct display dp;
 
-	create_SDL_display("WIN", w_w, w_h, &dp);
+	create_display("WIN", w_w, w_h, &dp);
 	dp.run = true;
 
 	while (dp.run) {
 		loop(&dp);
 	}
 
-	clean_SDL_display(&dp);
+	clean_display(&dp);
 }

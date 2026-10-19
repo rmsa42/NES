@@ -44,9 +44,8 @@ struct display {
 	SDL_AudioStream *stream;
 };
 
-int create_SDL_display(const char *win_name, const int width, const int height, struct display *dp);
-void update_display(struct display *dp, void (*callback)(struct display *dp));
-void clean_SDL_display(struct display *dp);
+int create_display(const char *win_name, const int width, const int height, struct display *dp);
+void clean_display(struct display *dp);
 
 void start_frame(struct display *dp);
 int start_panel(struct display *dp, const char *name, fpoint xy, fpoint wh, panel_flags flags);

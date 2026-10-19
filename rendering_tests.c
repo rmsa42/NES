@@ -97,6 +97,6 @@ int main() {
 	SDL_RenderTexture(dp.renderer, texture, NULL, NULL);
 	SDL_RenderPresent(dp.renderer);
 	SDL_Delay(3000);
-	clean_SDL_display(&dp);
+	clean_display(&dp);
 	SDL_Quit();
 }
