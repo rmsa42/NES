@@ -86,9 +86,8 @@ int main() {
 	fill_palletes(0x0F);
 	set_bit(ppu.ppu_mask, BG_RND);
 
-	data.highp_shift_reg = 0;
-	data.lowp_shift_reg = 0;
-	data.attr_latch = 0x40 & 0x03;
+	data.patt_high_shift_reg = 0;
+	data.patt_low_shift_reg = 0;
 	for (int i = 0; i < 239; i++) {
 		scanline();
 		scanline_nbr += 1;

@@ -29,12 +29,13 @@ extern "C" {
 #define get_nametable_addr(v) (0x2000 | (v & 0x0FFF))
 #define get_attribute_addr(v) (0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07))
 #define get_coarse_x(v) (v & 0x001F)
-#define get_coarse_y(v) (v & 0x03E0)
+#define get_coarse_y(v) ((v & 0x03E0) >> 5)
 #define clear_coarse_x(v) (v = v & ~(0x001F))
 #define clear_coarse_y(v) (v = v & ~(0x03E0))
 #define clear_fine_y(v) (v = v & ~(0x7000))
 #define toggle_hz_nametable(v) (v = v ^ 0x0400)
 #define toggle_vt_nametable(v) (v = v ^ 0x0800)
+#define merge_plane_bits(high_b, low_b) ((high_b << 1) | low_b)
 
 #define SCANLINE_TILE_COUNT 32
 #define SCANLINE_CPU_CYCLES 113.667f
@@ -64,16 +65,18 @@ typedef enum {
 } ppu_ctrl_bit;
 
 typedef struct pixel_data {
-	word lowp_shift_reg;
-	word highp_shift_reg;
-	byte attr_latch;
+	word patt_low_shift_reg;
+	word patt_high_shift_reg;
+	word attr_low_shift_reg;
+	word attr_high_shift_reg;
 } pixel_data;
 
 typedef struct render_data_latch {
 	byte nametable;
-	byte attr;
-	byte tile_low;
-	byte tile_high;
+	byte attr_low;
+	byte attr_high;
+	byte patt_low;
+	byte patt_high;
 } render_data_latch;
 
 struct ppu {

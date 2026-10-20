@@ -11,6 +11,8 @@ byte ppu_mem[PPU_MEM_SIZE];
 int scanline_nbr = 0;
 float cpu_cycle_counter = 0;
 byte pixels[256 * 240 * 4];
+int flag = 0;
+int flag2 = 0;
 
 void ppu_init() {
 	memset(&ppu, 0, sizeof(struct ppu));
@@ -141,12 +143,17 @@ void render_pattern_table(const int table_nbr, struct display *nes_dp) {
 
 void render_pixel(pixel_data *pixel_data, byte tile_nbr, byte pixel_nbr, bool render_flag) {
 	// Getting the pixel_color_index via the low_plane and high_plane bits
-	byte low_plane_bit = check_bit(pixel_data->lowp_shift_reg, 0);
-	byte high_plane_bit = check_bit(pixel_data->highp_shift_reg, 0);
-	byte pixel_color_index = (high_plane_bit << 1) | low_plane_bit;
+	byte pixel_color_index = merge_plane_bits(
+		check_bit(pixel_data->patt_high_shift_reg, 0),
+		check_bit(pixel_data->patt_low_shift_reg, 0)
+	);
+	byte attr_index = merge_plane_bits(
+		check_bit(pixel_data->attr_high_shift_reg, 0),
+		check_bit(pixel_data->attr_low_shift_reg, 0)
+	);
 
 	// Mashing the attributes and pixel_color_index and the addr 0x3F00 to get the palette color of the pixel
-	word palette_addr = 0x3F00 | pixel_data->attr_latch << 2 | pixel_color_index;
+	word palette_addr = 0x3F00 | attr_index << 2 | pixel_color_index;
 	// Get the RGB color from the loaded palette (2C03)
 	int pixel = ppu_mem[palette_addr] * 3;
 
@@ -161,24 +168,33 @@ void render_pixel(pixel_data *pixel_data, byte tile_nbr, byte pixel_nbr, bool re
 		pixels[index + 2] = pallete_rgb[pixel + 2];
 		pixels[index + 3] = 255;
 	}
-	pixel_data->lowp_shift_reg >>= 1;
-	pixel_data->highp_shift_reg >>= 1;
+	pixel_data->patt_low_shift_reg >>= 1;
+	pixel_data->patt_high_shift_reg >>= 1;
+	pixel_data->attr_low_shift_reg >>= 1;
+	pixel_data->attr_high_shift_reg >>= 1;
 }
 
-void transfer_addr_latch_to_pixel_data(render_data_latch *render_dt_latch, pixel_data *pixel_data) {
-	pixel_data->lowp_shift_reg = make_word(render_dt_latch->tile_low, pixel_data->lowp_shift_reg);
-	pixel_data->highp_shift_reg = make_word(render_dt_latch->tile_high, pixel_data->highp_shift_reg);
-	pixel_data->attr_latch = render_dt_latch->attr & 0x03;
+void transfer_render_latch_to_pixel_data(render_data_latch *render_dt_latch, pixel_data *pixel_data) {
+	pixel_data->patt_low_shift_reg = make_word(render_dt_latch->patt_low, pixel_data->patt_low_shift_reg);
+	pixel_data->patt_high_shift_reg = make_word(render_dt_latch->patt_high, pixel_data->patt_high_shift_reg);
+	pixel_data->attr_low_shift_reg = make_word((render_dt_latch->attr_low * 0xFF), pixel_data->attr_low_shift_reg);
+	pixel_data->attr_high_shift_reg = make_word((render_dt_latch->attr_high * 0xFF), pixel_data->attr_high_shift_reg);
 }
 
 void get_tile_data(render_data_latch *render_dt_latch) {
 	word pattern_data_addr;
+	byte attr_side = merge_plane_bits(
+		check_bit(get_coarse_y(ppu.v), 1),
+		check_bit(get_coarse_x(ppu.v), 1)
+	) * 2;
+	byte attr = ppu_mem[get_attribute_addr(ppu.v)];
 
-	render_dt_latch->nametable = ppu_mem[get_nametable_addr(ppu.v)]; // 1 Fetch
-	render_dt_latch->attr = ppu_mem[get_attribute_addr(ppu.v)]; // 2 Fetch
+	render_dt_latch->nametable = ppu_mem[get_nametable_addr(ppu.v)];
+	render_dt_latch->attr_low = check_bit(attr, attr_side);
+	render_dt_latch->attr_high = check_bit(attr, (attr_side + 1));
 	pattern_data_addr = render_dt_latch->nametable * 16 + get_fine_y(ppu.v);
-	render_dt_latch->tile_low = ppu_mem[pattern_data_addr]; // 3 Fetch
-	render_dt_latch->tile_high = ppu_mem[pattern_data_addr + 8]; // 4 Fetch
+	render_dt_latch->patt_low = ppu_mem[pattern_data_addr];
+	render_dt_latch->patt_high = ppu_mem[pattern_data_addr + 8];
 }
 
 void render_tile(const byte tile, bool render_flag) {
@@ -186,16 +202,16 @@ void render_tile(const byte tile, bool render_flag) {
 	for (int pixel_nbr = 0; pixel_nbr < 8; pixel_nbr++) {
 		render_pixel(&ppu.pixel_data, tile, pixel_nbr, render_flag);
 	}
-	transfer_addr_latch_to_pixel_data(&ppu.render_dt_latch, &ppu.pixel_data);
+	transfer_render_latch_to_pixel_data(&ppu.render_dt_latch, &ppu.pixel_data);
 	ppu.v++;
 }
 
 void scanline() {
 	set_bit_to(ppu.v, 10, check_bit(ppu.t, 10));
-	for (int i = 0; i < SCANLINE_TILE_COUNT; i++) {
-		render_tile(i, true);
+	for (int tile = 0; tile < SCANLINE_TILE_COUNT; tile++) {
+		render_tile(tile, true);
 	}
-	ppu.v -= 3; // Decrement as it's supposed to finish 31 not 32
+	ppu.v -= 3; // Decrement as it's supposed to finish 31 not 34
 	// Reset the coarse_x
 	clear_coarse_x(ppu.v);
 
