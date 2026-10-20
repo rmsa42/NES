@@ -97,15 +97,15 @@ void general_debug_info(struct display *dp) {
 }
 
 void memory_debug(struct display *dp) {
-	word addr = 0x2000;
+	word addr = 0x2400;
 
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	SDL_SetRenderScale(dp->renderer, 1.5, 1.5);
 
 	start_panel(dp, "PPU Memory", (fpoint){0, 0}, (fpoint){640, 480}, NORMAL);
 	text(dp, "PPU Memory");
-	if (ppu.v >= 0x2200){
-		addr = 0x2200;
+	if (ppu.v >= 0x2600){
+		addr = 0x2600;
 	} 
 	for (int i = 0; i < 33; i++) {
 		text(dp, "%04x:", addr);

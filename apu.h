@@ -1,13 +1,11 @@
 #pragma once
 
 #include "utils.h"
-#include "SDL3/SDL_audio.h"
+#include "sdl_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define SAMPLE_RATE 44100 // Hz
 
 #define SQUARE1_VECTOR 0x4000
 #define SQUARE2_VECTOR 0x4004
@@ -67,7 +65,8 @@ struct apu {
 	byte frame_ct;
 };
 
-void clock_apu(SDL_AudioStream *stream);
+void apu_write(word addr, byte value);
+void clock_apu(struct display *nes_dp);
 
 #ifdef __cplusplus
 }

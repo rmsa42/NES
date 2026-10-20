@@ -46,13 +46,12 @@ void check_strobe() {
 	}
 	if (ct > 0) {
 		if (ct == 4) {
-			if (ct2 == 10000) {
+			if (ct2 == 5000) {
 				input_shift_reg = 0;
 				ct2 = 0;
 			}
 			bus_write(0x4016, input_shift_reg);
 			if (input_shift_reg == 1) {
-				printf("Sending 1, %d\n", ct2);
 				ct2++;
 			}
 		} else {
@@ -73,7 +72,7 @@ void update_nes(struct display *nes_dp, int curr_time, int *last_time) {
 	cycles = clock_cpu();
 	clock_ppu(nes_dp, cycles);
 	check_strobe();
-	//clock_apu(stream);
+	//clock_apu(nes_dp);
 	if (render) {
 		SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
 		SDL_RenderTexture(nes_dp->renderer, texture, NULL, NULL);

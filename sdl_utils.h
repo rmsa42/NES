@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define SAMPLE_RATE 44100 // Hz
+
 typedef enum {
 	NA,
 	CENTERED = 1 << 1,

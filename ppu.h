@@ -61,7 +61,8 @@ typedef enum {
 typedef enum {
 	NAMETABLE_HORIZONTAL = 0,
 	NAMETABLE_VERTICAL = 1,
-	VRAM_INC = 2
+	VRAM_INC = 2,
+	BG_PATT_ADDR = 4
 } ppu_ctrl_bit;
 
 typedef struct pixel_data {

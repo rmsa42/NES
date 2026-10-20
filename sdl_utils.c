@@ -144,6 +144,7 @@ void start_frame(struct display *dp) {
 }
 
 int create_display(const char *win_name, const int width, const int height, struct display *dp) {
+
 	memset(dp, 0, sizeof(struct display));
 	if (start_panel(dp, win_name, (fpoint){0, 0}, (fpoint){width, height}, NORMAL)) {
 		return (1);
@@ -156,6 +157,16 @@ int create_display(const char *win_name, const int width, const int height, stru
 		printf("Can't change renderer presentation\n");
 		return (1);
 	}
+	SDL_AudioSpec spec;
+	spec.channels = 1;
+	spec.format = SDL_AUDIO_F32;
+	spec.freq = SAMPLE_RATE;
+	dp->stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+	if (!dp->stream) {
+		printf("SDL Audio Stream error\n");
+		return (1);
+	}
+	SDL_ResumeAudioStreamDevice(dp->stream);
 	return (0);
 }
 
@@ -168,5 +179,7 @@ void clean_display(struct display *dp) {
 	dp->renderer = NULL;
 	SDL_DestroyWindow(dp->window);
 	dp->window = NULL;
+	SDL_DestroyAudioStream(dp->stream);
+	dp->stream = NULL;
 }
 

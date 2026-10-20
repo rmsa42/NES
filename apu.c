@@ -12,56 +12,56 @@ int triangle_phases[32] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 };
 
-void apu_write(word addr, byte value) {}
+void apu_write(word addr, byte value) {
+	switch (addr) {
+		case SQUARE1_VECTOR:
+			apu.square1.duty = duty_table[get_duty(value)];
+			apu.square1.env_loop = get_evelope_loop(value);
+			break;
+		case SQUARE1_VECTOR + 2:
+			apu.square1.timer = get_timer(value, 0);
+			break;
+		case SQUARE1_VECTOR + 3:
+			apu.square1.timer = get_timer(apu.square1.timer, value);
+			apu.square1.len_counter_load = get_len_counter_load(value);
+			break;
 
-void read_pulse_data(pulse *square, word addr) {
-	byte dlcv = cpu_mem[addr++];
-	byte epns = cpu_mem[addr++];
-	byte tl = cpu_mem[addr++];
-	byte lth = cpu_mem[addr];
+		case TRIANGLE_VECTOR:
+			apu.triangle.control_flag = check_bit(value, 7);
+			apu.triangle.lin_counter_load = get_lin_counter_load(value);
+			break;
+		case TRIANGLE_VECTOR + 2:
+			apu.triangle.timer = get_timer(value, 0);
+			break;
+		case TRIANGLE_VECTOR + 3:
+			apu.triangle.timer = get_timer(apu.triangle.timer, value);
+			break;
 
-	square->duty = duty_table[get_duty(dlcv)];
-	square->env_loop = get_evelope_loop(dlcv);
-	square->timer = get_timer(tl, lth);
-	square->len_counter_load = get_len_counter_load(lth);
+		default:
+			break;
+	}
 }
 
-void read_triangle_data(word addr) {
-	byte cr = cpu_mem[addr++];
-	byte unused = cpu_mem[addr++];
-	byte tl = cpu_mem[addr++];
-	byte lth = cpu_mem[addr];
-
-	apu.triangle.control_flag = check_bit(cr, 7);
-	apu.triangle.lin_counter_load = get_lin_counter_load(cr);
-	apu.triangle.unused = unused;
-	apu.triangle.timer = get_timer(tl, lth);
-	apu.triangle.len_counter_load = get_len_counter_load(lth);
-	apu.triangle.lin_reload_flag = 0; // Need to modify this
-}
+void apu_read(word addr) {}
 
 void pulse_debug(const int freq) {
 	printf("Freq %d\n", freq);
-	printf("Timer %d\n", apu.triangle.timer);
-	printf("Duty %f\n", apu.square1.duty);
+	//printf("Timer %d\n", apu.square1.timer);
+	//printf("Duty %f\n", apu.square1.duty);
 }
 
-void clock_apu(SDL_AudioStream *stream) {
+void clock_apu(struct display *nes_dp) {
 	int freq = 0;
 	int freqt = 0;
 
-	read_pulse_data(&apu.square1, SQUARE1_VECTOR);
-	//read_pulse_data(&apu.square2, SQUARE2_VECTOR);
-	read_triangle_data(TRIANGLE_VECTOR);
 	freq = CPU_FREQ / (16 * (apu.square1.timer + 1));
 	freqt = CPU_FREQ / (32 * (apu.triangle.timer + 1));
-
-	pulse_debug(freqt);
 
 	float samples[150];
 	const int min_audio = (SAMPLE_RATE * sizeof(float)) / 2;
 
-	if (SDL_GetAudioStreamQueued(stream) < min_audio) {
+	if (SDL_GetAudioStreamQueued(nes_dp->stream) < min_audio) {
+		//pulse_debug(freqt);
 		// Square Wave
 		//for (int i = 0; i < SDL_arraysize(samples); i++) {
 		//	samples[i] = (wave_phase < apu.square1.duty) ? 1 : -1;
@@ -71,14 +71,14 @@ void clock_apu(SDL_AudioStream *stream) {
 		//	}
 		//}
 		// Triangle Wave
-		for (int i = 0; i < SDL_arraysize(samples); i++) {
-			samples[i] = triangle_phases[(int)(wave_phase)] / 15.0f;
-			wave_phase += (freqt / (float)SAMPLE_RATE) * 32;
-			while (wave_phase >= 32.0f) {
-				wave_phase -= 32.0f;
-			}
-		}
-		SDL_SetAudioStreamGain(stream, 0.3f);
-		SDL_PutAudioStreamData(stream, samples, sizeof(samples));
+		//for (int i = 0; i < SDL_arraysize(samples); i++) {
+		//	samples[i] = triangle_phases[(int)(wave_phase)] / 15.0f;
+		//	wave_phase += (freqt / (float)SAMPLE_RATE) * 32;
+		//	while (wave_phase >= 32.0f) {
+		//		wave_phase -= 32.0f;
+		//	}
+		//}
+		//SDL_SetAudioStreamGain(nes_dp->stream, 0.5f);
+		//SDL_PutAudioStreamData(nes_dp->stream, samples, sizeof(samples));
 	}
 }

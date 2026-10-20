@@ -11,8 +11,6 @@ byte ppu_mem[PPU_MEM_SIZE];
 int scanline_nbr = 0;
 float cpu_cycle_counter = 0;
 byte pixels[256 * 240 * 4];
-int flag = 0;
-int flag2 = 0;
 
 void ppu_init() {
 	memset(&ppu, 0, sizeof(struct ppu));
@@ -182,7 +180,7 @@ void transfer_render_latch_to_pixel_data(render_data_latch *render_dt_latch, pix
 }
 
 void get_tile_data(render_data_latch *render_dt_latch) {
-	word pattern_data_addr;
+	word pattern_data_addr = 0x0000; //check_bit(ppu.ppu_ctrl, BG_PATT_ADDR) ? 0x1000 : 0;
 	byte attr_side = merge_plane_bits(
 		check_bit(get_coarse_y(ppu.v), 1),
 		check_bit(get_coarse_x(ppu.v), 1)
@@ -192,7 +190,7 @@ void get_tile_data(render_data_latch *render_dt_latch) {
 	render_dt_latch->nametable = ppu_mem[get_nametable_addr(ppu.v)];
 	render_dt_latch->attr_low = check_bit(attr, attr_side);
 	render_dt_latch->attr_high = check_bit(attr, (attr_side + 1));
-	pattern_data_addr = render_dt_latch->nametable * 16 + get_fine_y(ppu.v);
+	pattern_data_addr = pattern_data_addr | (render_dt_latch->nametable * 16 + get_fine_y(ppu.v));
 	render_dt_latch->patt_low = ppu_mem[pattern_data_addr];
 	render_dt_latch->patt_high = ppu_mem[pattern_data_addr + 8];
 }
@@ -207,7 +205,10 @@ void render_tile(const byte tile, bool render_flag) {
 }
 
 void scanline() {
-	set_bit_to(ppu.v, 10, check_bit(ppu.t, 10));
+	//set_bit_to(ppu.v, 10, check_bit(ppu.t, 10));
+	//set_bit_to(ppu.v, 11, check_bit(ppu.t, 11));
+	set_bit_to(ppu.v, 10, 0); // For now, always render the 0 (2000-2400) nametable
+	set_bit_to(ppu.v, 11, 0);
 	for (int tile = 0; tile < SCANLINE_TILE_COUNT; tile++) {
 		render_tile(tile, true);
 	}

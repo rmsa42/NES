@@ -45,6 +45,8 @@ set(SOURCES_RENDER
 	cpu.h
 	bus.c
 	bus.h
+	apu.c
+	apu.h
 	nes.c
 	nes.h
 	sdl_utils.c

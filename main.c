@@ -24,19 +24,6 @@ void handle_events(struct display *nes_dp, struct display *debugger_dp) {
 }
 
 int aux_tools_init(const char *bp, struct display *debug_dp) {
-	//SDL_AudioSpec spec;
-
-	// Need to make this start in the display function
-	//spec.channels = 1;
-	//spec.format = SDL_AUDIO_F32;
-	//spec.freq = SAMPLE_RATE;
-	//stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
-	//if (!stream) {
-	//	printf("SDL Audio Stream error\n");
-	//	return (1);
-	//}
-	//SDL_ResumeAudioStreamDevice(stream);
-
 	if (debugger_init(bp, debug_dp)) {
 		return (1);
 	}
@@ -75,7 +62,6 @@ int main(int argc, char *argv[]) {
 
 	clean_display(&debug_dp);
 	clean_display(&nes_dp);
-	//SDL_DestroyAudioStream(stream);
 	SDL_Quit();
 }
 
