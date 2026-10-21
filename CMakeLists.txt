@@ -19,6 +19,8 @@ set(SOURCES
 	bus.h
 	nes.c
 	nes.h
+	controller.c
+	controller.h
 	debug_tools.c
 	debug_tools.h
 	sdl_utils.c
@@ -49,6 +51,8 @@ set(SOURCES_RENDER
 	apu.h
 	nes.c
 	nes.h
+	controller.c
+	controller.h
 	sdl_utils.c
 	sdl_utils.h
 	fpoint.c

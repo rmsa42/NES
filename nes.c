@@ -3,18 +3,15 @@
 #include "ppu.h"
 #include "apu.h"
 #include "rom.h"
-#include "bus.h"
+#include "controller.h"
 #include <stdio.h>
 
 extern byte pixels[256 * 240 * 4];
+extern struct controller joy1;
 
 int window_width = 512;
 int window_height = 480;
 SDL_Texture *texture;
-bool strobe = false;
-int ct = 0;
-byte input_shift_reg = 0;
-int ct2 = 0;
 
 int nes_init(struct display *nes_dp, const char *rom_name) {
 	if (create_display("NES", window_width, window_height, nes_dp)) {
@@ -35,32 +32,6 @@ int nes_init(struct display *nes_dp, const char *rom_name) {
 
 }
 
-void check_strobe() {
-	bool strobe_high = check_bit(bus_read(0x4016), 0);
-
-	if (!strobe && strobe_high) {
-		strobe = true;
-	} else if (strobe && !strobe_high) {
-		strobe = false;
-		ct = 7;
-	}
-	if (ct > 0) {
-		if (ct == 4) {
-			if (ct2 == 5000) {
-				input_shift_reg = 0;
-				ct2 = 0;
-			}
-			bus_write(0x4016, input_shift_reg);
-			if (input_shift_reg == 1) {
-				ct2++;
-			}
-		} else {
-			bus_write(0x4016, 0);
-		}
-		ct--;
-	}
-}
-
 void update_nes(struct display *nes_dp, int curr_time, int *last_time) {
 	byte cycles = 0;
 	bool render = curr_time > *last_time + 16;
@@ -71,7 +42,6 @@ void update_nes(struct display *nes_dp, int curr_time, int *last_time) {
 	}
 	cycles = clock_cpu();
 	clock_ppu(nes_dp, cycles);
-	check_strobe();
 	//clock_apu(nes_dp);
 	if (render) {
 		SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
@@ -86,12 +56,39 @@ void nes_handle_event(struct display *nes_dp, SDL_Event *e) {
 		if (e->key.scancode == SDL_SCANCODE_Q) {
 			nes_dp->run = false;
 		} else if (e->key.scancode == SDL_SCANCODE_RETURN) {
-			input_shift_reg = 1;
+			set_btn(START, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_BACKSPACE) {
+			set_btn(SELECT, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_UP) {
+			set_btn(UP, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_LEFT) {
+			set_btn(LEFT, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_DOWN) {
+			set_btn(DOWN, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_RIGHT) {
+			set_btn(RIGHT, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_X) {
+			set_btn(A, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_Z) {
+			set_btn(B, 1);
 		}
-	} 
-	//else if (e->type == SDL_EVENT_KEY_DOWN) {
-	//	if (e->key.scancode == SDL_SCANCODE_RETURN) {
-	//		input_shift_reg = 0;
-	//	}
-	//}
+	} else if (e->type == SDL_EVENT_KEY_UP) {
+		if (e->key.scancode == SDL_SCANCODE_RETURN) {
+			set_btn(START, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_BACKSPACE) {
+			set_btn(SELECT, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_UP) {
+			set_btn(UP, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_LEFT) {
+			set_btn(LEFT, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_DOWN) {
+			set_btn(DOWN, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_RIGHT) {
+			set_btn(RIGHT, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_X) {
+			set_btn(A, 0);
+		} else if (e->key.scancode == SDL_SCANCODE_Z) {
+			set_btn(B, 0);
+		}
+	}
 }

@@ -70,9 +70,12 @@ Now the memory-mapped registers are right
 - [X] Fully refactor **debug_tools** with a new GUI library or just try to make a GUI with SDL3 :)
 > R: This is not happening. I want to try and make something myself with future plans in mind
 
+**20/10/2026**
+- [X] Need to finish the **apu_write** function to integrate the apu with the bus
+> R: It's done for the **apu_write**. The **apu_read** will be done when I refactor the apu module
+
 - [ ] Need to make tests for crossing pages
 - [ ] Need to check if there's a way to optimize the **cross page** checks
-- [ ] Need to finish the **apu_write** function to integrate the apu with the bus
 - [ ] Need to make the memory *mirroring*
 - [ ] Need to switch the **nes_header** struct flags to a single byte variable
 - [ ] Need to make the Sweep, envelope loop, const volume, volume and length counter load in apu for the pulses
