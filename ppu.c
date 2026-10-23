@@ -1,6 +1,7 @@
 #include "ppu.h"
 #include "cpu.h"
 #include "rom.h"
+#include "bus.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -8,6 +9,7 @@ extern byte pallete_rgb[PALLETE_SIZE];
 
 struct ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
+byte ppu_oam_mem[PPU_OAM_MEM_SIZE];
 int scanline_nbr = 0;
 float cpu_cycle_counter = 0;
 byte pixels[256 * 240 * 4];
@@ -15,6 +17,7 @@ byte pixels[256 * 240 * 4];
 void ppu_init() {
 	memset(&ppu, 0, sizeof(struct ppu));
 	memset(ppu_mem, 0, sizeof(ppu_mem));
+	memset(ppu_oam_mem, 0, sizeof(ppu_oam_mem));
 }
 
 byte ppu_read_mem(word addr) {
@@ -37,6 +40,15 @@ byte ppu_internal_read() {
 	return (ret);
 }
 
+void ppu_internal_oam_write(byte value) {
+	ppu_oam_mem[ppu.oam_addr] = value;
+	ppu.oam_addr++;
+}
+
+byte ppu_internal_oam_read() {
+	return (ppu_oam_mem[ppu.oam_addr]);
+}
+
 void ppu_write(word addr, byte value) {
 	switch (addr) {
 		case PPUCTRL_VECTOR:
@@ -49,6 +61,18 @@ void ppu_write(word addr, byte value) {
 			break;
 		case OAMADDR_VECTOR:
 			ppu.oam_addr = value;
+			break;
+		case OAMDATA_VECTOR:
+			ppu_internal_oam_write(value);
+			break;
+		case OAMDMA_VECTOR:
+			ppu.oam_dma = value;
+			for (int i = 0; i < 256; i++) {
+				byte byte = bus_read(make_word(value, i));
+				ppu_internal_oam_write(byte);
+			}
+			//print_buff(ppu_oam1_mem, sizeof(ppu_oam1_mem));
+			//printf("$4014: %x\n", ppu.oam_dma);
 			break;
 		case PPUSCROLL_VECTOR:
 			if (!ppu.w) {
@@ -87,6 +111,9 @@ byte ppu_read(word addr) {
 			ret = ppu.ppu_status;
 			clear_bit(ppu.ppu_status, VBLANK);
 			ppu.w = 0;
+			break;
+		case OAMDATA_VECTOR:
+			ret = ppu_internal_read();
 			break;
 		case PPUDATA_VECTOR:
 			ret = ppu_internal_read();
@@ -204,11 +231,56 @@ void render_tile(const byte tile, bool render_flag) {
 	ppu.v++;
 }
 
+void clear_oam2_mem() {
+	for (int i = 2; i < 63; i += 2) {
+		ppu_oam_mem[oam_offset(i, 0)] = 0xFF;
+	}
+}
+
+void oam_evaluation() {
+	for (int i = 0; i < 64; i++) {
+		byte y = ppu_oam_mem[oam_offset(i, 0)];
+		int row = scanline_nbr - (y + 1);
+		if (row <= -1 || row >= 8) {
+			continue;
+		}
+		byte tile = ppu_oam_mem[oam_offset(i, 1)];
+		byte attr = ppu_oam_mem[oam_offset(i, 2)];
+		byte x = ppu_oam_mem[oam_offset(i, 3)];
+		printf("%d (Y, Tile, Attr, X): %d %x %x %d\n", scanline_nbr, y, tile, attr, x);
+
+		//word atile = check_bit(tile, 0) ? 0x1000 : 0x0000;
+		//clear_bit(tile, 0);
+		//tile >>= 1;
+		word atile = 0x1000 | (tile * 16);
+		byte low = ppu_mem[atile + row];
+		byte high = ppu_mem[atile + 8 + row];
+		for (int k = 0; k < 8; k++) {
+			byte pixel_index = merge_plane_bits(
+				check_bit(high, k),
+				check_bit(low, k)
+			);
+			word palette_addr = 0x3F10 | (attr & 0x03) << 2 | pixel_index;
+			//printf("Palette_addr: %x\n", palette_addr);
+			//if (pixel_index != 0) {
+			int pixel = ppu_mem[palette_addr] * 3;
+			//printf("Pixel: %x\n", pixel);
+			int index = ((scanline_nbr * 256) + x + (7 - k)) * 4;
+			pixels[index] = pallete_rgb[pixel];
+			pixels[index + 1] = pallete_rgb[pixel + 1];
+			pixels[index + 2] = pallete_rgb[pixel + 2];
+			pixels[index + 3] = 255;
+			//}
+		}
+	}
+}
+
 void scanline() {
 	//set_bit_to(ppu.v, 10, check_bit(ppu.t, 10));
 	//set_bit_to(ppu.v, 11, check_bit(ppu.t, 11));
 	set_bit_to(ppu.v, 10, 0); // For now, always render the 0 (2000-2400) nametable
 	set_bit_to(ppu.v, 11, 0);
+
 	for (int tile = 0; tile < SCANLINE_TILE_COUNT; tile++) {
 		render_tile(tile, true);
 	}
@@ -230,6 +302,10 @@ void scanline() {
 			ppu.v += 0x20;
 		}
 	}
+
+	// OAM
+	//clear_oam2_mem();
+	oam_evaluation();
 
 	// Render next 2 tiles
 	for (int i = 0; i < 2; i++) {

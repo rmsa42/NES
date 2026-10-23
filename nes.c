@@ -8,6 +8,7 @@
 
 extern byte pixels[256 * 240 * 4];
 extern struct controller joy1;
+extern byte ppu_oam_mem[PPU_OAM_MEM_SIZE];
 
 int window_width = 512;
 int window_height = 480;
@@ -71,6 +72,8 @@ void nes_handle_event(struct display *nes_dp, SDL_Event *e) {
 			set_btn(A, 1);
 		} else if (e->key.scancode == SDL_SCANCODE_Z) {
 			set_btn(B, 1);
+		} else if (e->key.scancode == SDL_SCANCODE_P) {
+			print_buff(ppu_oam_mem, sizeof(ppu_oam_mem));
 		}
 	} else if (e->type == SDL_EVENT_KEY_UP) {
 		if (e->key.scancode == SDL_SCANCODE_RETURN) {

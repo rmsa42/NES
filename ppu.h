@@ -18,6 +18,7 @@ extern "C" {
 #define OAMDMA_VECTOR 0x4014
 
 #define PPU_MEM_SIZE 16384 // bytes
+#define PPU_OAM_MEM_SIZE 288 // bytes
 
 #define get_pixel_offset(scroll) (scroll & 0x07)
 #define get_coarse(scroll) (scroll >> 3)
@@ -36,6 +37,7 @@ extern "C" {
 #define toggle_hz_nametable(v) (v = v ^ 0x0400)
 #define toggle_vt_nametable(v) (v = v ^ 0x0800)
 #define merge_plane_bits(high_b, low_b) ((high_b << 1) | low_b)
+#define oam_offset(n, m) (n * 4 + m)
 
 #define SCANLINE_TILE_COUNT 32
 #define SCANLINE_CPU_CYCLES 113.667f
