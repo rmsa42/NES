@@ -37,28 +37,6 @@ set(SOURCES_UI
 	fpoint.h
 )
 
-set(SOURCES_RENDER
-	rendering_tests.c
-	ppu.c
-	ppu.h
-	rom.c
-	rom.h
-	cpu.c
-	cpu.h
-	bus.c
-	bus.h
-	apu.c
-	apu.h
-	nes.c
-	nes.h
-	controller.c
-	controller.h
-	sdl_utils.c
-	sdl_utils.h
-	fpoint.c
-	fpoint.h
-)
-
 add_compile_options(-g -O0 -gdwarf-2)
 add_link_options(-g -gdwarf-2)
 
@@ -72,10 +50,6 @@ target_include_directories(nes PRIVATE ${CMAKE_CURRENT_DIR})
 add_executable(ui ${SOURCES_UI})
 target_link_libraries(ui PRIVATE SDL3::SDL3)
 target_include_directories(ui PRIVATE ${CMAKE_CURRENT_DIR})
-
-add_executable(render ${SOURCES_RENDER})
-target_link_libraries(render PRIVATE SDL3::SDL3)
-target_include_directories(render PRIVATE ${CMAKE_CURRENT_DIR})
 
 if(TESTS)
 	set(BUILD_GMOCK 0)

@@ -18,14 +18,19 @@ extern "C" {
 #define OAMDMA_VECTOR 0x4014
 
 #define PPU_MEM_SIZE 16384 // bytes
-#define PPU_OAM_MEM_SIZE 288 // bytes
+#define PPU_OAM1_MEM_SIZE 256 // bytes
+#define PPU_OAM2_MEM_SIZE 32 // bytes
 
+#define TOTAL_SPRITE_NBR 64
+#define TOTAL_SPRITE_IN_SCANLINE 8
+#define TRANSPARENT_PIXEL 0
+
+#define get_pattern_addr(table_addr, tile, row) (table_addr | (tile * 16 + row))
 #define get_pixel_offset(scroll) (scroll & 0x07)
 #define get_coarse(scroll) (scroll >> 3)
 #define set_fine_y(v, fine_y) (v = v | (fine_y << 12))
 #define set_coarse_x(v, coarse_x) (v = v | coarse_x)
 #define set_coarse_y(v, coarse_y) (v = v | (coarse_y << 5))
-
 #define get_fine_y(v) (v >> 12)
 #define get_nametable_addr(v) (0x2000 | (v & 0x0FFF))
 #define get_attribute_addr(v) (0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07))
@@ -41,6 +46,13 @@ extern "C" {
 
 #define SCANLINE_TILE_COUNT 32
 #define SCANLINE_CPU_CYCLES 113.667f
+
+typedef enum {
+	SP_Y = 0,
+	SP_TILE = 1,
+	SP_ATTR = 2,
+	SP_X = 3,
+} oam_sprite_byte;
 
 typedef enum {
 	GREY,
@@ -64,23 +76,41 @@ typedef enum {
 	NAMETABLE_HORIZONTAL = 0,
 	NAMETABLE_VERTICAL = 1,
 	VRAM_INC = 2,
+	SP_PATT_ADDR = 3,
 	BG_PATT_ADDR = 4
 } ppu_ctrl_bit;
 
-typedef struct pixel_data {
-	word patt_low_shift_reg;
-	word patt_high_shift_reg;
-	word attr_low_shift_reg;
-	word attr_high_shift_reg;
-} pixel_data;
+typedef struct pixel_shift_reg {
+	word low_shift_reg;
+	word high_shift_reg;
+} pixel_shifter;
+
+typedef struct patt_latch {
+	byte patt_low;
+	byte patt_high;
+} patt_latch;
+
+typedef struct attr_latch {
+	byte attr_low;
+	byte attr_high;
+} attr_latch;
+
+typedef struct bg_pixel_data {
+	pixel_shifter patt_shifter;
+	pixel_shifter attr_shifter;
+} bg_pixel_data;
 
 typedef struct render_data_latch {
 	byte nametable;
-	byte attr_low;
-	byte attr_high;
-	byte patt_low;
-	byte patt_high;
+	attr_latch attr_latch;
+	patt_latch patt_latch;
 } render_data_latch;
+
+typedef struct sp_pixel_data {
+	byte attr;
+	byte xcounter;
+	pixel_shifter patt_shifter;
+} sp_pixel_data;
 
 struct ppu {
 	byte ppu_ctrl;
@@ -97,7 +127,8 @@ struct ppu {
 	byte x;
 	bool w;
 
-	pixel_data pixel_data;
+	bg_pixel_data pixel_data;
+	sp_pixel_data sprite_data[8];
 	render_data_latch render_dt_latch;
 };
 
