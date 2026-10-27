@@ -169,9 +169,13 @@ void transfer_oam2_data_to_sp_pixel_data(sp_pixel_data *sp_pixel, byte sp_nbr) {
 		row
 	);
 
-	fill_shifter_low_bits(&sp_pixel->patt_shifter, ppu_mem[patt_addr], ppu_mem[patt_addr + 8]);
 	sp_pixel->attr = ppu_oam2_mem[oam_offset(sp_nbr, SP_ATTR)];
 	sp_pixel->xcounter = ppu_oam2_mem[oam_offset(sp_nbr, SP_X)];
+	fill_shifter_low_bits(&sp_pixel->patt_shifter, ppu_mem[patt_addr], ppu_mem[patt_addr + 8]);
+	if (check_bit(sp_pixel->attr, 6)) {
+		sp_pixel->patt_shifter.low_shift_reg = mirror_hz_byte(sp_pixel->patt_shifter.low_shift_reg);
+		sp_pixel->patt_shifter.high_shift_reg = mirror_hz_byte(sp_pixel->patt_shifter.high_shift_reg);
+	}
 }
 
 byte get_sprite_pixel(sp_pixel_data *sprite_data) {

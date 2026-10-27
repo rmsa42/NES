@@ -27,6 +27,8 @@ set(SOURCES
 	sdl_utils.h
 	fpoint.c
 	fpoint.h
+	utils.c
+	utils.h
 )
 
 set(SOURCES_UI

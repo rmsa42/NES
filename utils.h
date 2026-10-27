@@ -18,6 +18,8 @@ typedef uint8_t byte;
 typedef uint16_t word;
 typedef uint32_t dword;
 
+byte mirror_hz_byte(byte b);
+
 #ifdef __cplusplus
 }
 #endif
