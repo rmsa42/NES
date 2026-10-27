@@ -27,7 +27,7 @@ void cpu_reset() {
 	cpu.sp = STACK_VECTOR;
 }
 
-inst get_inst_info(instr_type instr) { return (insts[instr]); }
+inst get_inst_info(enum instr_type instr) { return (insts[instr]); }
 
 void cpu_start() {
 	cpu.pc = RES_VECTOR;

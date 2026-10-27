@@ -7,83 +7,90 @@
 extern "C" {
 #endif
 
-#define PPUCTRL_VECTOR 0x2000
-#define PPUMASK_VECTOR 0x2001
-#define PPUSTATUS_VECTOR 0x2002
-#define OAMADDR_VECTOR 0x2003
-#define OAMDATA_VECTOR 0x2004
-#define PPUSCROLL_VECTOR 0x2005
-#define PPUADDR_VECTOR 0x2006
-#define PPUDATA_VECTOR 0x2007
-#define OAMDMA_VECTOR 0x4014
+#define PPUCTRL		0x2000
+#define PPUMASK		0x2001
+#define PPUSTATUS	0x2002
+#define OAMADDR		0x2003
+#define OAMDATA		0x2004
+#define PPUSCROLL	0x2005
+#define PPUADDR		0x2006
+#define PPUDATA		0x2007
+#define OAMDMA		0x4014
 
-#define PPU_MEM_SIZE 16384 // bytes
-#define PPU_OAM1_MEM_SIZE 256 // bytes
-#define PPU_OAM2_MEM_SIZE 32 // bytes
-
-#define TOTAL_SPRITE_NBR 64
-#define TOTAL_SPRITE_IN_SCANLINE 8
-#define TRANSPARENT_PIXEL 0
-
-#define get_pattern_addr(table_addr, tile, row) (table_addr | (tile * 16 + row))
-#define get_pixel_offset(scroll) (scroll & 0x07)
-#define get_coarse(scroll) (scroll >> 3)
-#define set_fine_y(v, fine_y) (v = v | (fine_y << 12))
-#define set_coarse_x(v, coarse_x) (v = v | coarse_x)
-#define set_coarse_y(v, coarse_y) (v = v | (coarse_y << 5))
-#define get_fine_y(v) (v >> 12)
-#define get_nametable_addr(v) (0x2000 | (v & 0x0FFF))
-#define get_attribute_addr(v) (0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07))
-#define get_coarse_x(v) (v & 0x001F)
-#define get_coarse_y(v) ((v & 0x03E0) >> 5)
-#define clear_coarse_x(v) (v = v & ~(0x001F))
-#define clear_coarse_y(v) (v = v & ~(0x03E0))
-#define clear_fine_y(v) (v = v & ~(0x7000))
-#define toggle_hz_nametable(v) (v = v ^ 0x0400)
-#define toggle_vt_nametable(v) (v = v ^ 0x0800)
-#define merge_plane_bits(high_b, low_b) ((high_b << 1) | low_b)
-#define oam_offset(n, m) (n * 4 + m)
-
-#define SCANLINE_TILE_COUNT 32
+#define PPU_MEM_SIZE		16384 // bytes
+#define PPU_OAM1_MEM_SIZE	256 // bytes
+#define PPU_OAM2_MEM_SIZE	32 // bytes
 #define SCANLINE_CPU_CYCLES 113.667f
 
-typedef enum {
+#define TOTAL_SPRITE_NBR			64
+#define TOTAL_SPRITE_IN_SCANLINE	8
+#define TOTAL_TILES_IN_SCANLINE		32
+#define TOTAL_ROWS_IN_SCANLINE		30
+#define TRANSPARENT_PIXEL			0
+#define NAMETABLE_HORIZONTAL_BIT	10
+#define NAMETABLE_VERTICAL_BIT		11
+
+#define PATTERN_TABLE_0		0x0000
+#define PATTERN_TABLE_1		0x1000
+#define BACKGROUND_PALETTES 0x3F00
+#define SPRITE_PALETTES		0x3F10
+
+#define get_pattern_addr(table_addr, tile, row) (table_addr | (tile * 16 + row))
+#define get_pixel_offset(scroll)				(scroll & 0x07)
+#define get_coarse(scroll)						(scroll >> 3)
+#define set_fine_y(v, fine_y)					(v = v | (fine_y << 12))
+#define set_coarse_x(v, coarse_x)				(v = v | coarse_x)
+#define set_coarse_y(v, coarse_y)				(v = v | (coarse_y << 5))
+#define get_fine_y(v)							(v >> 12)
+#define get_nametable_addr(v)					(0x2000 | (v & 0x0FFF))
+#define get_attribute_addr(v)					(0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07))
+#define get_coarse_x(v)							(v & 0x001F)
+#define get_coarse_y(v)							((v & 0x03E0) >> 5)
+#define clear_coarse_x(v)						(v = v & ~(0x001F))
+#define clear_coarse_y(v) 						(v = v & ~(0x03E0))
+#define clear_fine_y(v)							(v = v & ~(0x7000))
+#define toggle_hz_nametable(v)					(v = v ^ 0x0400)
+#define toggle_vt_nametable(v)					(v = v ^ 0x0800)
+#define merge_plane_bits(high, low, bit)		(((check_bit(high, bit)) << 1) | (check_bit(low, bit)))
+#define oam_offset(n, m)						(n * 4 + m)
+
+enum oam_sprite_byte {
 	SP_Y = 0,
 	SP_TILE = 1,
 	SP_ATTR = 2,
 	SP_X = 3,
-} oam_sprite_byte;
+};
 
-typedef enum {
-	GREY,
+enum ppu_mask_bit {
+	GREYSCALE,
 	BG_LFM,
 	SP_LFM,
 	BG_RND,
 	SP_RND,
-	RED,
-	GREEN,
-	BLUE
-} ppu_mask_bit;
+	EMPH_RED,
+	EMPH_GREEN,
+	EMPH_BLUE
+};
 
-typedef enum {
+enum ppu_status_bit {
 	OPEN_BUS,
 	SP_OV = 5,
 	SP_HIT,
 	VBLANK
-} ppu_status_bit;
+};
 
-typedef enum {
-	NAMETABLE_HORIZONTAL = 0,
-	NAMETABLE_VERTICAL = 1,
+enum ppu_ctrl_bit {
+	NAMETABLE_ADDR1 = 0,
+	NAMETABLE_ADDR2 = 1,
 	VRAM_INC = 2,
 	SP_PATT_ADDR = 3,
 	BG_PATT_ADDR = 4
-} ppu_ctrl_bit;
+};
 
-typedef struct pixel_shift_reg {
+typedef struct shifter {
 	word low_shift_reg;
 	word high_shift_reg;
-} pixel_shifter;
+} shifter;
 
 typedef struct patt_latch {
 	byte patt_low;
@@ -96,8 +103,8 @@ typedef struct attr_latch {
 } attr_latch;
 
 typedef struct bg_pixel_data {
-	pixel_shifter patt_shifter;
-	pixel_shifter attr_shifter;
+	shifter patt_shifter;
+	shifter attr_shifter;
 } bg_pixel_data;
 
 typedef struct render_data_latch {
@@ -109,7 +116,7 @@ typedef struct render_data_latch {
 typedef struct sp_pixel_data {
 	byte attr;
 	byte xcounter;
-	pixel_shifter patt_shifter;
+	shifter patt_shifter;
 } sp_pixel_data;
 
 struct ppu {
@@ -127,7 +134,7 @@ struct ppu {
 	byte x;
 	bool w;
 
-	bg_pixel_data pixel_data;
+	bg_pixel_data bg_pixel_data;
 	sp_pixel_data sprite_data[8];
 	render_data_latch render_dt_latch;
 };

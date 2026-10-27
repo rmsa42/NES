@@ -14,26 +14,26 @@ int triangle_phases[32] = {
 
 void apu_write(word addr, byte value) {
 	switch (addr) {
-		case SQUARE1_VECTOR:
+		case SQUARE1:
 			apu.square1.duty = duty_table[get_duty(value)];
 			apu.square1.env_loop = get_evelope_loop(value);
 			break;
-		case SQUARE1_VECTOR + 2:
+		case SQUARE1 + 2:
 			apu.square1.timer = get_timer(value, 0);
 			break;
-		case SQUARE1_VECTOR + 3:
+		case SQUARE1 + 3:
 			apu.square1.timer = get_timer(apu.square1.timer, value);
 			apu.square1.len_counter_load = get_len_counter_load(value);
 			break;
 
-		case TRIANGLE_VECTOR:
+		case TRIANGLE:
 			apu.triangle.control_flag = check_bit(value, 7);
 			apu.triangle.lin_counter_load = get_lin_counter_load(value);
 			break;
-		case TRIANGLE_VECTOR + 2:
+		case TRIANGLE + 2:
 			apu.triangle.timer = get_timer(value, 0);
 			break;
-		case TRIANGLE_VECTOR + 3:
+		case TRIANGLE + 3:
 			apu.triangle.timer = get_timer(apu.triangle.timer, value);
 			break;
 

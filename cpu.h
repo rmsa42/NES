@@ -6,15 +6,15 @@
 extern "C" {
 #endif
 
-#define NMI_VECTOR 0xFFFA
-#define RES_VECTOR 0xFFFC
-#define IRQ_VECTOR 0xFFFE
-#define STACK_VECTOR 0xFF
-#define STACK_OFFSET 0x01
+#define NMI_VECTOR		0xFFFA
+#define RES_VECTOR		0xFFFC
+#define IRQ_VECTOR		0xFFFE
+#define STACK_VECTOR	0xFF
+#define STACK_OFFSET	0x01
 
-#define CPU_FREQ 1789773 // Hz
-#define CPU_MEM_SIZE 65536 // Bytes
-#define INSTS_NBR 256
+#define CPU_FREQ		1789773 // Hz
+#define CPU_MEM_SIZE	65536 // Bytes
+#define INSTS_NBR		256
 
 #define CARRY_6_MASK 0x7F
 
@@ -56,7 +56,7 @@ byte fetch_byte();
 word fetch_word();
 void nmi();
 
-typedef enum {
+enum instr_type {
 // Load/Store Instrutions
 	LDA_IMM = 0xA9,
 	LDA_ZPG = 0xA5,
@@ -230,9 +230,9 @@ typedef enum {
 	RTI_IMPL = 0x40,
 	BRK_IMPL = 0x00,
 //
-} instr_type;
+};
 
-inst get_inst_info(instr_type instr);
+inst get_inst_info(enum instr_type instr);
 
 #ifdef __cplusplus
 }

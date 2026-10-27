@@ -58,7 +58,6 @@ static void parse_chr_rom(FILE *rom, size_t chr_size) {
 	size_t size = 8192;
 
 	rsize = fread(&ppu_mem[0x0000], size, 1, rom);
-	rsize = fread(&ppu_mem[0x0000], size, 1, rom);
 	//rsize = fread(&ppu_mem[0x0000], size, 1, rom);
 	//printf("RSize: %zu\n", rsize);
 	//print_buff(&ppu_mem[0x0000], size);

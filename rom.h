@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-#define NES_EOF 0x1A
-#define PALLETE_SIZE 0xBD
+#define NES_EOF			0x1A
+#define PALLETE_SIZE	0xBD
 
 struct nes_header {
 	bool ines_format;

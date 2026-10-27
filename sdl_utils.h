@@ -12,14 +12,14 @@ extern "C" {
 
 typedef enum {
 	NA,
-	CENTERED = 1 << 1,
-	SAME_LINE = 1 << 2,
+	CENTERED	= 1 << 1,
+	SAME_LINE	= 1 << 2,
 } text_opt;
 
 typedef enum {
-	NORMAL = 0,
-	WITH_BORDER = 1,
-	CURR_POS = 2,
+	NORMAL		= 0,
+	WITH_BORDER	= 1,
+	CURR_POS	= 2,
 } panel_flags;
 
 typedef struct panel {

@@ -7,17 +7,17 @@
 extern "C" {
 #endif
 
-#define SQUARE1_VECTOR 0x4000
-#define SQUARE2_VECTOR 0x4004
-#define TRIANGLE_VECTOR 0x4008
-#define NOISE_VECTOR 0x400C
-#define DMC_VECTOR 0x4010
+#define SQUARE1		0x4000
+#define SQUARE2		0x4004
+#define TRIANGLE	0x4008
+#define NOISE		0x400C
+#define DMC			0x4010
 
-#define get_timer(tl, lth) (((0x07 & lth) << 8) | tl)
-#define get_duty(dlcv) (dlcv >> 6)
-#define get_evelope_loop(dlcv) (dlcv >> 5)
-#define get_len_counter_load(lth) ((lth & 0xF8) >> 3)
-#define get_lin_counter_load(cr) (cr & 0x7F)
+#define get_timer(tl, lth)			(((0x07 & lth) << 8) | tl)
+#define get_duty(dlcv)				(dlcv >> 6)
+#define get_evelope_loop(dlcv)		(dlcv >> 5)
+#define get_len_counter_load(lth)	((lth & 0xF8) >> 3)
+#define get_lin_counter_load(cr)	(cr & 0x7F)
 
 typedef struct pulse {
 	float duty;
