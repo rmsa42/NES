@@ -734,7 +734,7 @@ void sei(word np) {
 // System
 
 void brk(word np) {
-	push_word(cpu.pc);
+	push_word(cpu.pc + 1);
 	set_bit(cpu.ps, BF);
 	push_byte(cpu.ps);
 	cpu.pc = IRQ_VECTOR;
@@ -777,8 +777,8 @@ void fill_insts() {
     insts[ORA_ABSY] = (inst){ ora, abs_y_address_mode,	3, 4 };
     insts[ORA_ZPG]  = (inst){ ora, zp_address_mode,		2, 3 };
     insts[ORA_ZPGX] = (inst){ ora, zp_x_address_mode,	2, 4 };
-    insts[ORA_INDX] = (inst){ ora, zp_x_address_mode,	2, 6 };
-    insts[ORA_INDY] = (inst){ ora, zp_x_address_mode,	2, 5 };
+    insts[ORA_INDX] = (inst){ ora, ind_x_address_mode,	2, 6 };
+    insts[ORA_INDY] = (inst){ ora, ind_y_address_mode,	2, 5 };
 
     insts[BIT_ABS] = (inst){ bit, abs_address_mode,		3, 4 };
     insts[BIT_ZPG] = (inst){ bit, zp_address_mode,		2, 3 };
