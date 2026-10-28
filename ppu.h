@@ -30,10 +30,10 @@ extern "C" {
 #define NAMETABLE_HORIZONTAL_BIT	10
 #define NAMETABLE_VERTICAL_BIT		11
 
-#define PATTERN_TABLE_0		0x0000
-#define PATTERN_TABLE_1		0x1000
-#define BACKGROUND_PALETTES 0x3F00
-#define SPRITE_PALETTES		0x3F10
+#define PATTERN_TABLE_0_ADDR		0x0000
+#define PATTERN_TABLE_1_ADDR		0x1000
+#define BACKGROUND_PALETTES_ADDR	0x3F00
+#define SPRITE_PALETTES_ADDR		0x3F10
 
 #define get_pattern_addr(table_addr, tile, row) (table_addr | (tile * 16 + row))
 #define get_pixel_offset(scroll)				(scroll & 0x07)
@@ -53,6 +53,8 @@ extern "C" {
 #define toggle_vt_nametable(v)					(v = v ^ 0x0800)
 #define merge_plane_bits(high, low, bit)		(((check_bit(high, bit)) << 1) | (check_bit(low, bit)))
 #define oam_offset(n, m)						(n * 4 + m)
+#define sprite_attr_palette(attr)				(attr & 0x03)
+#define make_pixel(attr, pixel)					(attr << 2 | pixel)
 
 enum oam_sprite_byte {
 	SP_Y = 0,

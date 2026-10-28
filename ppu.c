@@ -161,7 +161,7 @@ void transfer_render_latch_to_bg_pixel_data(render_data_latch *render_dt_latch, 
 }
 
 void transfer_oam2_data_to_sp_pixel_data(sp_pixel_data *sp_pixel, byte sp_nbr) {
-	word patt_table = check_bit(ppu.ppu_ctrl, SP_PATT_ADDR) ? PATTERN_TABLE_1 : PATTERN_TABLE_0;
+	word patt_table = check_bit(ppu.ppu_ctrl, SP_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
 	byte row = scanline_nbr - ppu_oam2_mem[oam_offset(sp_nbr, SP_Y)];
 	word patt_addr = get_pattern_addr(
 		patt_table,
@@ -191,7 +191,7 @@ byte get_sprite_pixel(sp_pixel_data *sprite_data) {
 		}
 		pixel_color = merge_plane_bits_shifter(&curr->patt_shifter, 7);
 		if (pixel_color != TRANSPARENT_PIXEL) {
-			sprite_pixel = (curr->attr & 0x03) << 2 | pixel_color;
+			sprite_pixel = make_pixel(sprite_attr_palette(curr->attr), pixel_color);
 		}
 		advance_shifter(&curr->patt_shifter);
 	}
@@ -204,7 +204,7 @@ byte get_background_pixel(bg_pixel_data *bg_pixel_data) {
 
 	advance_shifter(&bg_pixel_data->patt_shifter);
 	advance_shifter(&bg_pixel_data->attr_shifter);
-	return (attr_index << 2 | pixel_color);
+	return (make_pixel(attr_index, pixel_color));
 }
 
 // For now this function is not used but in future it will be
@@ -238,9 +238,9 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 	word palette_addr;
 
 	if (sp_pixel & 0x03) {
-		palette_addr = SPRITE_PALETTES | sp_pixel;
+		palette_addr = SPRITE_PALETTES_ADDR | sp_pixel;
 	} else {
-		palette_addr = BACKGROUND_PALETTES | bg_pixel;
+		palette_addr = BACKGROUND_PALETTES_ADDR | bg_pixel;
 	}
 
 	if (render_flag == true) {
@@ -255,7 +255,7 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 }
 
 void get_tile_data(render_data_latch *render_dt_latch) {
-	word pattern_data_addr = PATTERN_TABLE_0; //check_bit(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1 : PATTERN_TABLE_0;
+	word pattern_data_addr = PATTERN_TABLE_0_ADDR; //check_bit(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
 	byte attr_side = merge_plane_bits(get_coarse_y(ppu.v), get_coarse_x(ppu.v), 1) * 2;
 
 	render_dt_latch->nametable = ppu_mem[get_nametable_addr(ppu.v)];
@@ -264,10 +264,13 @@ void get_tile_data(render_data_latch *render_dt_latch) {
 }
 
 void render_tile(const byte tile, bool render_flag) {
+	byte sp_pixel;
+	byte bg_pixel;
+
 	get_tile_data(&ppu.render_dt_latch);
 	for (int pixel_nbr = 0; pixel_nbr < 8; pixel_nbr++) {
-		byte sp_pixel = get_sprite_pixel(ppu.sprite_data);
-		byte bg_pixel = get_background_pixel(&ppu.bg_pixel_data);
+		sp_pixel = get_sprite_pixel(ppu.sprite_data);
+		bg_pixel = get_background_pixel(&ppu.bg_pixel_data);
 		render_pixel(bg_pixel, sp_pixel, tile, pixel_nbr, render_flag);
 	}
 	transfer_render_latch_to_bg_pixel_data(&ppu.render_dt_latch, &ppu.bg_pixel_data);
