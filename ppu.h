@@ -17,9 +17,9 @@ extern "C" {
 #define PPUDATA		0x2007
 #define OAMDMA		0x4014
 
-#define PPU_MEM_SIZE		16384 // bytes
-#define PPU_OAM1_MEM_SIZE	256 // bytes
-#define PPU_OAM2_MEM_SIZE	32 // bytes
+#define PPU_MEM_SIZE		16384	// bytes
+#define PPU_OAM1_MEM_SIZE	256		// bytes
+#define PPU_OAM2_MEM_SIZE	32		// bytes
 #define SCANLINE_CPU_CYCLES 113.667f
 
 #define TOTAL_SPRITE_NBR			64
@@ -35,26 +35,30 @@ extern "C" {
 #define BACKGROUND_PALETTES_ADDR	0x3F00
 #define SPRITE_PALETTES_ADDR		0x3F10
 
-#define get_pattern_addr(table_addr, tile, row) (table_addr | (tile * 16 + row))
-#define get_pixel_offset(scroll)				(scroll & 0x07)
-#define get_coarse(scroll)						(scroll >> 3)
-#define set_fine_y(v, fine_y)					(v = v | (fine_y << 12))
-#define set_coarse_x(v, coarse_x)				(v = v | coarse_x)
-#define set_coarse_y(v, coarse_y)				(v = v | (coarse_y << 5))
-#define get_fine_y(v)							(v >> 12)
-#define get_nametable_addr(v)					(0x2000 | (v & 0x0FFF))
-#define get_attribute_addr(v)					(0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07))
-#define get_coarse_x(v)							(v & 0x001F)
-#define get_coarse_y(v)							((v & 0x03E0) >> 5)
-#define clear_coarse_x(v)						(v = v & ~(0x001F))
-#define clear_coarse_y(v) 						(v = v & ~(0x03E0))
-#define clear_fine_y(v)							(v = v & ~(0x7000))
-#define toggle_hz_nametable(v)					(v = v ^ 0x0400)
-#define toggle_vt_nametable(v)					(v = v ^ 0x0800)
-#define merge_plane_bits(high, low, bit)		(((check_bit(high, bit)) << 1) | (check_bit(low, bit)))
-#define oam_offset(n, m)						(n * 4 + m)
-#define sprite_attr_palette(attr)				(attr & 0x03)
-#define make_pixel(attr, pixel)					(attr << 2 | pixel)
+#define GET_PATTERN_ADDR(table_addr, tile, row) (table_addr | (tile * 16 + row))
+#define GET_NAMETABLE_ADDR(v)					(0x2000 | (v & 0x0FFF))
+#define GET_ATTRIBUTE_ADDR(v)					(0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07))
+
+#define GET_COARSE(scroll)						(scroll >> 3)
+#define GET_PIXEL_OFFSET(scroll)				(scroll & 0x07)
+
+#define SET_COARSE_X(v, coarse_x)				(v |= coarse_x)
+#define GET_COARSE_X(v)							(v & 0x001F)
+#define CLEAR_COARSE_X(v)						(v &= ~(0x001F))
+
+#define SET_COARSE_Y(v, coarse_y)				(v |= coarse_y << 5)
+#define GET_COARSE_Y(v)							((v & 0x03E0) >> 5)
+#define CLEAR_COARSE_Y(v) 						(v &= ~(0x03E0))
+
+#define SET_FINE_Y(v, fine_y)					(v |= fine_y << 12)
+#define GET_FINE_Y(v)							(v >> 12)
+#define CLEAR_FINE_Y(v)							(v &= ~(0x7000))
+
+#define GET_OAM_INDEX(n, m)						(n * 4 + m)
+
+#define MERGE_PLANE_BITS(high, low, bit)		(((GET_BIT(high, bit)) << 1) | (GET_BIT(low, bit)))
+#define SPRITE_PALETTE_INDEX(attr)				(attr & 0x03)
+#define MAKE_PIXEL(attr, pixel)					(attr << 2 | pixel)
 
 enum oam_sprite_byte {
 	SP_Y = 0,
@@ -77,8 +81,8 @@ enum ppu_mask_bit {
 enum ppu_status_bit {
 	OPEN_BUS,
 	SP_OV = 5,
-	SP_HIT,
-	VBLANK
+	SP_HIT = 6,
+	VBLANK = 7
 };
 
 enum ppu_ctrl_bit {

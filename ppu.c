@@ -32,13 +32,13 @@ void ppu_write_mem(word addr, byte value) {
 
 void ppu_internal_write(byte value) {
 	ppu_mem[ppu.v] = value;
-	ppu.v += check_bit(ppu.ppu_ctrl, VRAM_INC) ? 32 : 1;
+	ppu.v += GET_BIT(ppu.ppu_ctrl, VRAM_INC) ? 32 : 1;
 }
 
 byte ppu_internal_read() {
 	byte ret = ppu_mem[ppu.v];
 
-	ppu.v += check_bit(ppu.ppu_ctrl, VRAM_INC) ? 32 : 1;
+	ppu.v += GET_BIT(ppu.ppu_ctrl, VRAM_INC) ? 32 : 1;
 	return (ret);
 }
 
@@ -55,8 +55,8 @@ void ppu_write(word addr, byte value) {
 	switch (addr) {
 		case PPUCTRL:
 			ppu.ppu_ctrl = value;
-			set_bit_to(ppu.t, NAMETABLE_HORIZONTAL_BIT, check_bit(ppu.ppu_ctrl, NAMETABLE_ADDR1));
-			set_bit_to(ppu.t, NAMETABLE_VERTICAL_BIT, check_bit(ppu.ppu_ctrl, NAMETABLE_ADDR2));
+			SET_BIT_TO(ppu.t, NAMETABLE_HORIZONTAL_BIT, GET_BIT(ppu.ppu_ctrl, NAMETABLE_ADDR1));
+			SET_BIT_TO(ppu.t, NAMETABLE_VERTICAL_BIT, GET_BIT(ppu.ppu_ctrl, NAMETABLE_ADDR2));
 			break;
 		case PPUMASK:
 			ppu.ppu_mask = value;
@@ -70,17 +70,17 @@ void ppu_write(word addr, byte value) {
 		case OAMDMA:
 			ppu.oam_dma = value;
 			for (int i = 0; i < TOTAL_SPRITE_NBR * 4; i++) {
-				byte byte = bus_read(make_word(value, i));
+				byte byte = bus_read(MAKE_WORD(value, i));
 				ppu_internal_oam_write(byte);
 			}
 			break;
 		case PPUSCROLL:
 			if (!ppu.w) {
-				ppu.x = get_pixel_offset(value);
-				set_coarse_x(ppu.t, get_coarse(value));
+				ppu.x = GET_PIXEL_OFFSET(value);
+				SET_COARSE_X(ppu.t, GET_COARSE(value));
 			} else {
-				set_fine_y(ppu.t, get_pixel_offset(value));
-				set_coarse_y(ppu.t, get_coarse(value));
+				SET_FINE_Y(ppu.t, GET_PIXEL_OFFSET(value));
+				SET_COARSE_Y(ppu.t, GET_COARSE(value));
 			}
 			ppu.w = !ppu.w;
 			break;
@@ -88,7 +88,7 @@ void ppu_write(word addr, byte value) {
 			if (!ppu.w) {
 				ppu.t = value;
 			} else {
-				ppu.t = make_word(ppu.t, value);
+				ppu.t = MAKE_WORD(ppu.t, value);
 				ppu.v = ppu.t;
 			}
 			ppu.w = !ppu.w;
@@ -109,7 +109,7 @@ byte ppu_read(word addr) {
 	switch (addr) {
 		case PPUSTATUS:
 			ret = ppu.ppu_status;
-			clear_bit(ppu.ppu_status, VBLANK);
+			CLEAR_BIT(ppu.ppu_status, VBLANK);
 			ppu.w = 0;
 			break;
 		case OAMDATA:
@@ -126,19 +126,19 @@ byte ppu_read(word addr) {
 }
 
 void fill_attr_latch(attr_latch *latch, byte attr, byte attr_low_bit) {
-	latch->attr_low = check_bit(attr, attr_low_bit);
-	latch->attr_high = check_bit(attr, (attr_low_bit + 1));
+	latch->attr_low = GET_BIT(attr, attr_low_bit);
+	latch->attr_high = GET_BIT(attr, (attr_low_bit + 1));
 }
 
 void fill_patt_latch(patt_latch *latch, byte tile, byte row, word patt_table_addr) {
-	word patt_addr = get_pattern_addr(patt_table_addr, tile, row);
+	word patt_addr = GET_PATTERN_ADDR(patt_table_addr, tile, row);
 	latch->patt_low = ppu_mem[patt_addr];
 	latch->patt_high = ppu_mem[patt_addr + 8];
 }
 
 void fill_shifter_high_bits(shifter *shifter, byte patt_low, byte patt_high) {
-	shifter->low_shift_reg = make_word(patt_low, shifter->low_shift_reg);
-	shifter->high_shift_reg = make_word(patt_high, shifter->high_shift_reg);
+	shifter->low_shift_reg = MAKE_WORD(patt_low, shifter->low_shift_reg);
+	shifter->high_shift_reg = MAKE_WORD(patt_high, shifter->high_shift_reg);
 }
 
 void fill_shifter_low_bits(shifter *shifter, byte patt_low, byte patt_high) {
@@ -147,7 +147,7 @@ void fill_shifter_low_bits(shifter *shifter, byte patt_low, byte patt_high) {
 }
 
 byte merge_plane_bits_shifter(shifter *shifter, byte bit) {
-	return (merge_plane_bits(shifter->high_shift_reg, shifter->low_shift_reg, bit));
+	return (MERGE_PLANE_BITS(shifter->high_shift_reg, shifter->low_shift_reg, bit));
 }
 
 void advance_shifter(shifter *shifter) {
@@ -161,18 +161,18 @@ void transfer_render_latch_to_bg_pixel_data(render_data_latch *render_dt_latch, 
 }
 
 void transfer_oam2_data_to_sp_pixel_data(sp_pixel_data *sp_pixel, byte sp_nbr) {
-	word patt_table = check_bit(ppu.ppu_ctrl, SP_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
-	byte row = scanline_nbr - ppu_oam2_mem[oam_offset(sp_nbr, SP_Y)];
-	word patt_addr = get_pattern_addr(
+	word patt_table = GET_BIT(ppu.ppu_ctrl, SP_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
+	byte row = scanline_nbr - ppu_oam2_mem[GET_OAM_INDEX(sp_nbr, SP_Y)];
+	word patt_addr = GET_PATTERN_ADDR(
 		patt_table,
-		ppu_oam2_mem[oam_offset(sp_nbr, SP_TILE)],
+		ppu_oam2_mem[GET_OAM_INDEX(sp_nbr, SP_TILE)],
 		row
 	);
 
-	sp_pixel->attr = ppu_oam2_mem[oam_offset(sp_nbr, SP_ATTR)];
-	sp_pixel->xcounter = ppu_oam2_mem[oam_offset(sp_nbr, SP_X)];
+	sp_pixel->attr = ppu_oam2_mem[GET_OAM_INDEX(sp_nbr, SP_ATTR)];
+	sp_pixel->xcounter = ppu_oam2_mem[GET_OAM_INDEX(sp_nbr, SP_X)];
 	fill_shifter_low_bits(&sp_pixel->patt_shifter, ppu_mem[patt_addr], ppu_mem[patt_addr + 8]);
-	if (check_bit(sp_pixel->attr, 6)) {
+	if (GET_BIT(sp_pixel->attr, 6)) {
 		sp_pixel->patt_shifter.low_shift_reg = mirror_hz_byte(sp_pixel->patt_shifter.low_shift_reg);
 		sp_pixel->patt_shifter.high_shift_reg = mirror_hz_byte(sp_pixel->patt_shifter.high_shift_reg);
 	}
@@ -191,7 +191,7 @@ byte get_sprite_pixel(sp_pixel_data *sprite_data) {
 		}
 		pixel_color = merge_plane_bits_shifter(&curr->patt_shifter, 7);
 		if (pixel_color != TRANSPARENT_PIXEL) {
-			sprite_pixel = make_pixel(sprite_attr_palette(curr->attr), pixel_color);
+			sprite_pixel = MAKE_PIXEL(SPRITE_PALETTE_INDEX(curr->attr), pixel_color);
 		}
 		advance_shifter(&curr->patt_shifter);
 	}
@@ -204,14 +204,14 @@ byte get_background_pixel(bg_pixel_data *bg_pixel_data) {
 
 	advance_shifter(&bg_pixel_data->patt_shifter);
 	advance_shifter(&bg_pixel_data->attr_shifter);
-	return (make_pixel(attr_index, pixel_color));
+	return (MAKE_PIXEL(attr_index, pixel_color));
 }
 
 // For now this function is not used but in future it will be
 void check_scroll_x() {
-	if (get_coarse_x(ppu.v) == TOTAL_TILES_IN_SCANLINE - 1) {
-		clear_coarse_x(ppu.v);
-		toggle_hz_nametable(ppu.v);
+	if (GET_COARSE_X(ppu.v) == TOTAL_TILES_IN_SCANLINE - 1) {
+		CLEAR_COARSE_X(ppu.v);
+		TOGGLE_BIT(ppu.v, NAMETABLE_HORIZONTAL_BIT);
 	} else {
 		ppu.v++;
 	}
@@ -219,15 +219,15 @@ void check_scroll_x() {
 
 void check_scroll_y() {
 	// Adavance/Reset the fine_y and coarse_y
-	if (get_fine_y(ppu.v) < 7) {
+	if (GET_FINE_Y(ppu.v) < 7) {
 		ppu.v += 0x1000;
 	} else {
-		clear_fine_y(ppu.v);
-		if (get_coarse_y(ppu.v) == TOTAL_ROWS_IN_SCANLINE - 1) {
-			clear_coarse_y(ppu.v);
-			toggle_vt_nametable(ppu.v);
-		} else if (get_coarse_y(ppu.v) == 31) {
-			clear_coarse_y(ppu.v);
+		CLEAR_FINE_Y(ppu.v);
+		if (GET_COARSE_Y(ppu.v) == TOTAL_ROWS_IN_SCANLINE - 1) {
+			CLEAR_COARSE_Y(ppu.v);
+			TOGGLE_BIT(ppu.v, NAMETABLE_VERTICAL_BIT);
+		} else if (GET_COARSE_Y(ppu.v) == 31) {
+			CLEAR_COARSE_Y(ppu.v);
 		} else {
 			ppu.v += 0x20;
 		}
@@ -255,12 +255,12 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 }
 
 void get_tile_data(render_data_latch *render_dt_latch) {
-	word pattern_data_addr = PATTERN_TABLE_0_ADDR; //check_bit(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
-	byte attr_side = merge_plane_bits(get_coarse_y(ppu.v), get_coarse_x(ppu.v), 1) * 2;
+	word pattern_data_addr = PATTERN_TABLE_0_ADDR; //GET_BIT(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
+	byte attr_side = MERGE_PLANE_BITS(GET_COARSE_Y(ppu.v), GET_COARSE_X(ppu.v), 1) * 2;
 
-	render_dt_latch->nametable = ppu_mem[get_nametable_addr(ppu.v)];
-	fill_attr_latch(&render_dt_latch->attr_latch, ppu_mem[get_attribute_addr(ppu.v)], attr_side);
-	fill_patt_latch(&render_dt_latch->patt_latch, render_dt_latch->nametable, get_fine_y(ppu.v), pattern_data_addr);
+	render_dt_latch->nametable = ppu_mem[GET_NAMETABLE_ADDR(ppu.v)];
+	fill_attr_latch(&render_dt_latch->attr_latch, ppu_mem[GET_ATTRIBUTE_ADDR(ppu.v)], attr_side);
+	fill_patt_latch(&render_dt_latch->patt_latch, render_dt_latch->nametable, GET_FINE_Y(ppu.v), pattern_data_addr);
 }
 
 void render_tile(const byte tile, bool render_flag) {
@@ -282,15 +282,15 @@ void sprite_evaluation() {
 
 	ppu.oam_addr = 0;
 	for (int i = 0; i < TOTAL_SPRITE_NBR; i++) {
-		byte y = ppu_oam1_mem[oam_offset(i, 0)];
+		byte y = ppu_oam1_mem[GET_OAM_INDEX(i, 0)];
 		int row = scanline_nbr - y;
 		if (row <= -1 || row >= 8 || oam2_addr == PPU_OAM2_MEM_SIZE) {
 			continue;
 		}
 		ppu_oam2_mem[oam2_addr++] = y;
-		ppu_oam2_mem[oam2_addr++] = ppu_oam1_mem[oam_offset(i, SP_TILE)];
-		ppu_oam2_mem[oam2_addr++] = ppu_oam1_mem[oam_offset(i, SP_ATTR)];
-		ppu_oam2_mem[oam2_addr++] = ppu_oam1_mem[oam_offset(i, SP_X)];
+		ppu_oam2_mem[oam2_addr++] = ppu_oam1_mem[GET_OAM_INDEX(i, SP_TILE)];
+		ppu_oam2_mem[oam2_addr++] = ppu_oam1_mem[GET_OAM_INDEX(i, SP_ATTR)];
+		ppu_oam2_mem[oam2_addr++] = ppu_oam1_mem[GET_OAM_INDEX(i, SP_X)];
 	}
 	for (int i = 0; i < oam2_addr / 4; i++) {
 		transfer_oam2_data_to_sp_pixel_data(&ppu.sprite_data[i], i);
@@ -298,17 +298,17 @@ void sprite_evaluation() {
 }
 
 void scanline() {
-	//set_bit_to(ppu.v, NAMETABLE_HORIZONTAL_BIT, check_bit(ppu.t, 10));
-	//set_bit_to(ppu.v, NAMETABLE_VERTICAL_BIT, check_bit(ppu.t, 11));
-	set_bit_to(ppu.v, NAMETABLE_HORIZONTAL_BIT, 0); // For now, always render the 0 (2000-2400) nametable
-	set_bit_to(ppu.v, NAMETABLE_VERTICAL_BIT, 0);
+	//SET_BIT_TO(ppu.v, NAMETABLE_HORIZONTAL_BIT, GET_BIT(ppu.t, 10));
+	//SET_BIT_TO(ppu.v, NAMETABLE_VERTICAL_BIT, GET_BIT(ppu.t, 11));
+	SET_BIT_TO(ppu.v, NAMETABLE_HORIZONTAL_BIT, 0); // For now, always render the 0 (2000-2400) nametable
+	SET_BIT_TO(ppu.v, NAMETABLE_VERTICAL_BIT, 0);
 
 	for (int tile = 0; tile < TOTAL_TILES_IN_SCANLINE; tile++) {
 		render_tile(tile, true);
 	}
 	ppu.v -= 3; // Decrement as it's supposed to finish 31 not 34
 	// Reset the coarse_x
-	clear_coarse_x(ppu.v);
+	CLEAR_COARSE_X(ppu.v);
 
 	check_scroll_y();
 
@@ -321,7 +321,7 @@ void scanline() {
 	memset(ppu_oam2_mem, 0xFF, sizeof(ppu_oam2_mem)); // Init the oam2 to 0xFF
 	sprite_evaluation();
 
-	toggle_hz_nametable(ppu.v);
+	TOGGLE_BIT(ppu.v, NAMETABLE_HORIZONTAL_BIT);
 }
 
 void clock_ppu(struct display *nes_dp, byte cycles) {
@@ -329,17 +329,17 @@ void clock_ppu(struct display *nes_dp, byte cycles) {
 	if (cpu_cycle_counter < 114) {
 		return;
 	}
-	if (check_bit(ppu.ppu_mask, BG_RND) && scanline_nbr >= 0 && scanline_nbr <= 239) {
+	if (GET_BIT(ppu.ppu_mask, BG_RND) && scanline_nbr >= 0 && scanline_nbr <= 239) {
 		scanline();
 	} else if (scanline_nbr == 241) {
-		set_bit(ppu.ppu_status, VBLANK);
-		if (check_bit(ppu.ppu_status, VBLANK) == 1 && check_bit(ppu.ppu_ctrl, VBLANK) == 1) {
+		SET_BIT(ppu.ppu_status, VBLANK);
+		if (GET_BIT(ppu.ppu_status, VBLANK) == 1 && GET_BIT(ppu.ppu_ctrl, VBLANK) == 1) {
 			nmi();
 		}
 	} else if (scanline_nbr == 260) {
-		clear_bit(ppu.ppu_status, VBLANK);
+		CLEAR_BIT(ppu.ppu_status, VBLANK);
 	} else if (scanline_nbr == 261) {
-		if (check_bit(ppu.ppu_mask, BG_RND)) {
+		if (GET_BIT(ppu.ppu_mask, BG_RND)) {
 			ppu.v = 0; // Perhaps the vertical scroll bits are reloaded in this step
 			render_tile(0, false);
 			render_tile(1, false);

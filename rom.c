@@ -31,13 +31,13 @@ static void parse_header(FILE *rom, struct nes_header *hd) {
 	if (header[0] == 'N' && header[1] == 'E' && header[2] == 'S' && header[3] == NES_EOF) {
 		hd->ines_format = true;
 	}
-	if (hd->ines_format == true && (check_bit(header[7], 3) && !check_bit(header[7], 2))) {
+	if (hd->ines_format == true && (GET_BIT(header[7], 3) && !GET_BIT(header[7], 2))) {
 		hd->nes2_format = true;
 	}
-	hd->trainer_area_flag = check_bit(header[6], 2);
+	hd->trainer_area_flag = GET_BIT(header[6], 2);
 	// Need to alter the low_byte and high_byte
-	hd->prg_rom_size = make_word(low_byte(header[9]), header[4]);
-	hd->chr_rom_size = make_word(high_byte(header[9]), header[5]);
+	hd->prg_rom_size = MAKE_WORD(GET_LOW_BYTE(header[9]), header[4]);
+	hd->chr_rom_size = MAKE_WORD(GET_HIGH_BYTE(header[9]), header[5]);
 	print_buff(header, sizeof(header));
 }
 

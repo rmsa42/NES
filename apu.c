@@ -27,7 +27,7 @@ void apu_write(word addr, byte value) {
 			break;
 
 		case TRIANGLE:
-			apu.triangle.control_flag = check_bit(value, 7);
+			apu.triangle.control_flag = GET_BIT(value, 7);
 			apu.triangle.lin_counter_load = get_lin_counter_load(value);
 			break;
 		case TRIANGLE + 2:

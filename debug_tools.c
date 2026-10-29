@@ -68,14 +68,14 @@ void general_debug_info(struct display *dp) {
 	text(dp, "IY: %02x", cpu.iy);
 	text(dp, "SP: %02x", cpu.sp);
 	text(dp, "Processor Status");
-	text(dp, "Negative: %d", check_bit(cpu.ps, NF));
-	text(dp, "Overflow: %d", check_bit(cpu.ps, VF));
+	text(dp, "Negative: %d", GET_BIT(cpu.ps, NF));
+	text(dp, "Overflow: %d", GET_BIT(cpu.ps, VF));
 	text(dp, "Unused: 0");
-	text(dp, "Break: %d", check_bit(cpu.ps, BF));
-	text(dp, "Decimal: %d", check_bit(cpu.ps, DF));
-	text(dp, "Interrupt: %d", check_bit(cpu.ps, IF));
-	text(dp, "Zero: %d", check_bit(cpu.ps, ZF));
-	text(dp, "Carry: %d", check_bit(cpu.ps, CF));
+	text(dp, "Break: %d", GET_BIT(cpu.ps, BF));
+	text(dp, "Decimal: %d", GET_BIT(cpu.ps, DF));
+	text(dp, "Interrupt: %d", GET_BIT(cpu.ps, IF));
+	text(dp, "Zero: %d", GET_BIT(cpu.ps, ZF));
+	text(dp, "Carry: %d", GET_BIT(cpu.ps, CF));
 	text(dp, "PPU VRAM: %04x", ppu.v);
 	text(dp, "Scanline: %d", scanline_nbr);
 
@@ -84,7 +84,7 @@ void general_debug_info(struct display *dp) {
 	text(dp, "Stack");
 	text_options(dp, NA);
 	for (size_t i = cpu.sp + 1; i <= 0xFF; i++) {
-		text(dp, "%02x,", bus_read(make_word(STACK_OFFSET, (byte)i)));
+		text(dp, "%02x,", bus_read(MAKE_WORD(STACK_OFFSET, (byte)i)));
 		text_options(dp, SAME_LINE);
 	}
 	end_panel(dp);

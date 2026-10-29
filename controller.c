@@ -10,7 +10,7 @@ void controller_init() {
 void controller_write(word addr, byte value) {
 	switch (addr) {
 		case JOY1_VECTOR:
-			joy1.poll = check_bit(value, 0);
+			joy1.poll = GET_BIT(value, 0);
 			if (joy1.poll) {
 				joy1.input_shift_reg = joy1.input_buffer;
 			}
@@ -26,7 +26,7 @@ byte controller_read(word addr) {
 
 	switch (addr) {
 		case JOY1_VECTOR:
-			input = check_bit(joy1.input_shift_reg, 0);
+			input = GET_BIT(joy1.input_shift_reg, 0);
 			joy1.input_shift_reg >>= 1;
 			return (input);
 
@@ -36,6 +36,6 @@ byte controller_read(word addr) {
 }
 
 void set_btn(byte btn, byte state) {
-	set_bit_to(joy1.input_buffer, btn, state);
+	SET_BIT_TO(joy1.input_buffer, btn, state);
 }
 
