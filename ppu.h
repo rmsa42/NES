@@ -153,7 +153,8 @@ void ppu_write_mem(word addr, byte value);
 byte ppu_read_mem(word addr);
 
 // Just for making tests
-void render_pattern_table(const int table_nbr, struct display *nes_dp);
+void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, bool render_flag);
+byte get_background_pixel(bg_pixel_data *bg_pixel_data);
 void scanline();
 
 #ifdef __cplusplus

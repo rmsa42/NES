@@ -7,6 +7,7 @@
 extern byte cpu_mem[CPU_MEM_SIZE];
 extern byte ppu_mem[PPU_MEM_SIZE];
 
+byte *chr_rom;
 byte pallete_rgb[PALLETE_SIZE];
 
 void print_buff(byte *buff, const size_t size) {
@@ -19,8 +20,8 @@ static void debug_header(struct nes_header *hd) {
 	printf("INES format: %d\n", hd->ines_format);
 	printf("NES2 format: %d\n", hd->nes2_format);
 	printf("Trainer flag: %d\n", hd->trainer_area_flag);
-	printf("PRG-ROM size: %dKiB\n", hd->prg_rom_size * 16);
-	printf("CHR-ROM size: %dKiB\n", hd->chr_rom_size * 8);
+	printf("PRG-ROM size: %dKiB\n", hd->prg_rom_size);
+	printf("CHR-ROM size: %dKiB\n", hd->chr_rom_size);
 }
 
 static void parse_header(FILE *rom, struct nes_header *hd) {
@@ -36,8 +37,9 @@ static void parse_header(FILE *rom, struct nes_header *hd) {
 	}
 	hd->trainer_area_flag = GET_BIT(header[6], 2);
 	// Need to alter the low_byte and high_byte
-	hd->prg_rom_size = MAKE_WORD(GET_LOW_BYTE(header[9]), header[4]);
+	hd->prg_rom_size = MAKE_WORD(GET_LOW_BYTE(header[9]), header[4]) * 16;
 	hd->chr_rom_size = MAKE_WORD(GET_HIGH_BYTE(header[9]), header[5]);
+	chr_rom = malloc(hd->chr_rom_size * 8 * 1024 * sizeof(byte));
 	print_buff(header, sizeof(header));
 }
 
@@ -57,10 +59,11 @@ static void parse_chr_rom(FILE *rom, size_t chr_size) {
 	size_t rsize = 0;
 	size_t size = 8192;
 
-	rsize = fread(&ppu_mem[0x0000], size, 1, rom);
+	rsize = fread(chr_rom, size, chr_size, rom);
+	//memcpy(ppu_mem, &chr_rom[size], size);
+	//print_buff(ppu_mem, size);
 	//rsize = fread(&ppu_mem[0x0000], size, 1, rom);
 	//printf("RSize: %zu\n", rsize);
-	//print_buff(&ppu_mem[0x0000], size);
 }
 
 static void parse_pallete() {

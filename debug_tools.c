@@ -3,6 +3,7 @@
 #include "ppu.h"
 #include "bus.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 extern struct cpu cpu;
 extern int cpu_cycles;

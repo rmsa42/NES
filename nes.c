@@ -4,6 +4,7 @@
 #include "apu.h"
 #include "rom.h"
 #include "controller.h"
+#include "MMC1.h"
 #include <stdio.h>
 
 extern byte pixels[256 * 240 * 4];
@@ -20,6 +21,7 @@ int nes_init(struct display *nes_dp, const char *rom_name) {
 	SDL_SetWindowPosition(nes_dp->window, 1000, 300);
 	cpu_init();
 	ppu_init();
+	MMC1_init();
 	if (read_rom(rom_name)) {
 		printf("Invalid ROM\n");
 		return (1);

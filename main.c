@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 extern struct cpu cpu;
+extern byte *chr_rom;
 
 void handle_events(struct display *nes_dp, struct display *debugger_dp) {
 	SDL_Event e;
@@ -60,6 +61,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	free(chr_rom);
+	chr_rom = NULL;
 	clean_display(&debug_dp);
 	clean_display(&nes_dp);
 	SDL_Quit();

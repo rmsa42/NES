@@ -3,6 +3,7 @@
 #include "ppu.h"
 #include "apu.h"
 #include "controller.h"
+#include "MMC1.h"
 
 void bus_write(word addr, byte value) {
 	if ((addr >= 0x2000 && addr <= 0x2007) || addr == 0x4014) {
@@ -11,6 +12,8 @@ void bus_write(word addr, byte value) {
 		apu_write(addr, value);
 	} else if (addr == 0x4016 || addr == 0x4017) {
 		controller_write(addr, value);
+	} else if (addr >= 0x8000) {
+		MMC1_write(addr, value);
 	} else {
 		cpu_write(addr, value);
 	}

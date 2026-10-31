@@ -255,7 +255,7 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 }
 
 void get_tile_data(render_data_latch *render_dt_latch) {
-	word pattern_data_addr = PATTERN_TABLE_0_ADDR; //GET_BIT(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
+	word pattern_data_addr = GET_BIT(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
 	byte attr_side = MERGE_PLANE_BITS(GET_COARSE_Y(ppu.v), GET_COARSE_X(ppu.v), 1) * 2;
 
 	render_dt_latch->nametable = ppu_mem[GET_NAMETABLE_ADDR(ppu.v)];
