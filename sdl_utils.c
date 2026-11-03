@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-int create_panel(panel **pl, const char *name, fpoint tlc, fpoint wh) {
-	*pl = calloc(1, sizeof(panel));
+int create_panel(Panel **pl, const char *name, fpoint tlc, fpoint wh) {
+	*pl = calloc(1, sizeof(Panel));
 	if (*pl == NULL) {
 		printf("Malloc Error\n");
 		return (1);
@@ -18,37 +18,37 @@ int create_panel(panel **pl, const char *name, fpoint tlc, fpoint wh) {
 	return (0);
 }
 
-void advc_panel_cursor_x_w_padding(panel *pan, float inc_x) {
+void advc_panel_cursor_x_w_padding(Panel *pan, float inc_x) {
 	pan->old_cursor.x = pan->in_cursor.x;
 	pan->in_cursor.x += inc_x;
 }
 
-void advc_panel_cursor_y_w_padding(panel *pan, float inc_y) {
+void advc_panel_cursor_y_w_padding(Panel *pan, float inc_y) {
 	pan->old_cursor.y = pan->in_cursor.y;
 	pan->in_cursor.y += inc_y;
 }
 
-void advc_panel_cursor_w_padding(panel *pan, float inc_x, float inc_y) {
+void advc_panel_cursor_w_padding(Panel *pan, float inc_x, float inc_y) {
 	advc_panel_cursor_x_w_padding(pan, inc_x);
 	advc_panel_cursor_y_w_padding(pan, inc_y);
 }
 
-void set_panel_cursor_x_pos(panel *pan, float xpos) {
+void set_panel_cursor_x_pos(Panel *pan, float xpos) {
 	pan->old_cursor.x = pan->in_cursor.x;
 	pan->in_cursor.x = xpos;
 }
 
-void set_panel_cursor_y_pos(panel *pan, float ypos) {
+void set_panel_cursor_y_pos(Panel *pan, float ypos) {
 	pan->old_cursor.y = pan->in_cursor.y;
 	pan->in_cursor.y = ypos;
 }
 
-void set_panel_cursor_pos(panel *pan, float xpos, float ypos) {
+void set_panel_cursor_pos(Panel *pan, float xpos, float ypos) {
 	set_panel_cursor_x_pos(pan, xpos);
 	set_panel_cursor_y_pos(pan, ypos);
 }
 
-void create_panel_border(struct display *dp, fpoint xy, fpoint wh) {
+void create_panel_border(struct Display *dp, fpoint xy, fpoint wh) {
 	SDL_FRect rect;
 
 	rect.x = xy.x;
@@ -58,7 +58,7 @@ void create_panel_border(struct display *dp, fpoint xy, fpoint wh) {
 	SDL_RenderRect(dp->renderer, &rect);
 }
 
-fpoint pass_panel_pos_to_screen_pos(panel *pan) {
+fpoint pass_panel_pos_to_screen_pos(Panel *pan) {
 	fpoint ret = pan->in_cursor;
 	
 	add_fpoint(&ret, pan->tlc);
@@ -66,13 +66,13 @@ fpoint pass_panel_pos_to_screen_pos(panel *pan) {
 	return (ret);
 }
 
-void pass_panel_wh_to_screen_wh(panel *pan, int *w, int *h) {
+void pass_panel_wh_to_screen_wh(Panel *pan, int *w, int *h) {
 	*w = pan->w * 8;
 	*h = pan->h * 8;
 }
 
-int start_panel(struct display *dp, const char *name, fpoint tlc, fpoint wh, panel_flags flags) {
-	panel *panel = NULL;
+int start_panel(struct Display *dp, const char *name, fpoint tlc, fpoint wh, panel_flags flags) {
+	Panel *panel = NULL;
 
 	if (dp->stack_i >= 10) {
 		return (1);
@@ -95,7 +95,7 @@ int start_panel(struct display *dp, const char *name, fpoint tlc, fpoint wh, pan
 	return (0);
 }
 
-void end_panel(struct display *dp) {
+void end_panel(struct Display *dp) {
 	if (dp->stack_i <= 1) {
 		return;
 	}
@@ -103,8 +103,8 @@ void end_panel(struct display *dp) {
 	dp->context = dp->panel_stack[dp->stack_i - 1];
 }
 
-void text(struct display *dp, const char *fmt, ...) {
-	panel *pan = dp->context;
+void text(struct Display *dp, const char *fmt, ...) {
+	Panel *pan = dp->context;
 	fpoint screen_pos;
 	int len = 0;
 
@@ -129,11 +129,11 @@ void text(struct display *dp, const char *fmt, ...) {
 	set_panel_cursor_x_pos(pan, 0);
 }
 
-void text_options(struct display *dp, text_opt opts) {
+void text_options(struct Display *dp, text_opt opts) {
 	dp->context->text_opts = opts;
 }
 
-void start_frame(struct display *dp) {
+void start_frame(struct Display *dp) {
 	for (int i = 1; i < 10; i++) {
 		free(dp->panel_stack[i]);
 		dp->panel_stack[i] = NULL;
@@ -143,9 +143,9 @@ void start_frame(struct display *dp) {
 	set_panel_cursor_pos(dp->context, 0, 0);
 }
 
-int create_display(const char *win_name, const int width, const int height, struct display *dp) {
+int create_display(const char *win_name, const int width, const int height, struct Display *dp) {
 
-	memset(dp, 0, sizeof(struct display));
+	memset(dp, 0, sizeof(struct Display));
 	if (start_panel(dp, win_name, (fpoint){0, 0}, (fpoint){width, height}, NORMAL)) {
 		return (1);
 	}
@@ -170,7 +170,7 @@ int create_display(const char *win_name, const int width, const int height, stru
 	return (0);
 }
 
-void clean_display(struct display *dp) {
+void clean_display(struct Display *dp) {
 	for (int i = 0; i < 10; i++) {
 		free(dp->panel_stack[i]);
 		dp->panel_stack[i] = NULL;

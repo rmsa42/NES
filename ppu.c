@@ -7,7 +7,7 @@
 
 extern byte pallete_rgb[PALLETE_SIZE];
 
-struct ppu ppu;
+struct Ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
 byte ppu_oam1_mem[PPU_OAM1_MEM_SIZE];
 byte ppu_oam2_mem[PPU_OAM2_MEM_SIZE];
@@ -16,7 +16,7 @@ float cpu_cycle_counter = 0;
 byte pixels[256 * 240 * 4];
 
 void ppu_init() {
-	memset(&ppu, 0, sizeof(struct ppu));
+	memset(&ppu, 0, sizeof(struct Ppu));
 	memset(ppu_mem, 0, sizeof(ppu_mem));
 	memset(ppu_oam1_mem, 0xFF, sizeof(ppu_oam1_mem));
 	memset(ppu_oam2_mem, 0, sizeof(ppu_oam2_mem));
@@ -125,42 +125,42 @@ byte ppu_read(word addr) {
 	return (ret);
 }
 
-void fill_attr_latch(attr_latch *latch, byte attr, byte attr_low_bit) {
+void fill_attr_latch(Attr_latch *latch, byte attr, byte attr_low_bit) {
 	latch->attr_low = GET_BIT(attr, attr_low_bit);
 	latch->attr_high = GET_BIT(attr, (attr_low_bit + 1));
 }
 
-void fill_patt_latch(patt_latch *latch, byte tile, byte row, word patt_table_addr) {
+void fill_patt_latch(Patt_latch *latch, byte tile, byte row, word patt_table_addr) {
 	word patt_addr = GET_PATTERN_ADDR(patt_table_addr, tile, row);
 	latch->patt_low = ppu_mem[patt_addr];
 	latch->patt_high = ppu_mem[patt_addr + 8];
 }
 
-void fill_shifter_high_bits(shifter *shifter, byte patt_low, byte patt_high) {
+void fill_shifter_high_bits(Shifter *shifter, byte patt_low, byte patt_high) {
 	shifter->low_shift_reg = MAKE_WORD(patt_low, shifter->low_shift_reg);
 	shifter->high_shift_reg = MAKE_WORD(patt_high, shifter->high_shift_reg);
 }
 
-void fill_shifter_low_bits(shifter *shifter, byte patt_low, byte patt_high) {
+void fill_shifter_low_bits(Shifter *shifter, byte patt_low, byte patt_high) {
 	shifter->low_shift_reg |= patt_low;
 	shifter->high_shift_reg |= patt_high;
 }
 
-byte merge_plane_bits_shifter(shifter *shifter, byte bit) {
+byte merge_plane_bits_shifter(Shifter *shifter, byte bit) {
 	return (MERGE_PLANE_BITS(shifter->high_shift_reg, shifter->low_shift_reg, bit));
 }
 
-void advance_shifter(shifter *shifter) {
+void advance_shifter(Shifter *shifter) {
 	shifter->low_shift_reg <<= 1;
 	shifter->high_shift_reg <<= 1;
 }
 
-void transfer_render_latch_to_bg_pixel_data(render_data_latch *render_dt_latch, bg_pixel_data *pixel_data) {
+void transfer_render_latch_to_bg_pixel_data(Render_data_latch *render_dt_latch, Bg_pixel_data *pixel_data) {
 	fill_shifter_low_bits(&pixel_data->patt_shifter, render_dt_latch->patt_latch.patt_low, render_dt_latch->patt_latch.patt_high);
 	fill_shifter_low_bits(&pixel_data->attr_shifter, render_dt_latch->attr_latch.attr_low * 0xFF, render_dt_latch->attr_latch.attr_high * 0xFF);
 }
 
-void transfer_oam2_data_to_sp_pixel_data(sp_pixel_data *sp_pixel, byte sp_nbr) {
+void transfer_oam2_data_to_sp_pixel_data(Sp_pixel_data *sp_pixel, byte sp_nbr) {
 	word patt_table = GET_BIT(ppu.ppu_ctrl, SP_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
 	byte row = scanline_nbr - ppu_oam2_mem[GET_OAM_INDEX(sp_nbr, SP_Y)];
 	word patt_addr = GET_PATTERN_ADDR(
@@ -178,11 +178,11 @@ void transfer_oam2_data_to_sp_pixel_data(sp_pixel_data *sp_pixel, byte sp_nbr) {
 	}
 }
 
-byte get_sprite_pixel(sp_pixel_data *sprite_data) {
+byte get_sprite_pixel(Sp_pixel_data *sprite_data) {
 	byte sprite_pixel = 0;
 
 	for (byte i = 0; i < TOTAL_SPRITE_IN_SCANLINE; i++) {
-		sp_pixel_data *curr = &sprite_data[i];
+		Sp_pixel_data *curr = &sprite_data[i];
 		byte pixel_color;
 		
 		if (curr->xcounter != 0) {
@@ -198,7 +198,7 @@ byte get_sprite_pixel(sp_pixel_data *sprite_data) {
 	return (sprite_pixel);
 }
 
-byte get_background_pixel(bg_pixel_data *bg_pixel_data) {
+byte get_background_pixel(Bg_pixel_data *bg_pixel_data) {
 	byte pixel_color = merge_plane_bits_shifter(&bg_pixel_data->patt_shifter, 15);
 	byte attr_index = merge_plane_bits_shifter(&bg_pixel_data->attr_shifter, 15);
 
@@ -254,7 +254,7 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 	}
 }
 
-void get_tile_data(render_data_latch *render_dt_latch) {
+void get_tile_data(Render_data_latch *render_dt_latch) {
 	word pattern_data_addr = GET_BIT(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
 	byte attr_side = MERGE_PLANE_BITS(GET_COARSE_Y(ppu.v), GET_COARSE_X(ppu.v), 1) * 2;
 
@@ -324,7 +324,7 @@ void scanline() {
 	TOGGLE_BIT(ppu.v, NAMETABLE_HORIZONTAL_BIT);
 }
 
-void clock_ppu(struct display *nes_dp, byte cycles) {
+void clock_ppu(struct Display *nes_dp, byte cycles) {
 	cpu_cycle_counter += cycles;
 	if (cpu_cycle_counter < 114) {
 		return;

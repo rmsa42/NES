@@ -8,17 +8,17 @@
 extern "C" {
 #endif
 
-typedef struct debugger {
+typedef struct Debugger {
 	word breakpoint;
 	bool step_into;
 	bool run;
 	bool until_bp;
 	byte panel;
-} debugger;
+} Debugger;
 
-int debugger_init(const char *bp, struct display *dp);
-void debugger_handle_event(struct display *dp, SDL_Event *e);
-void update_debugger(struct display *dp);
+int debugger_init(const char *bp, struct Display *dp);
+void debugger_handle_event(struct Display *dp, SDL_Event *e);
+void update_debugger(struct Display *dp);
 bool debug_block();
 
 #ifdef __cplusplus

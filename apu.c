@@ -4,7 +4,7 @@
 
 extern byte cpu_mem[CPU_MEM_SIZE];
 
-struct apu apu;
+struct Apu apu;
 float wave_phase = 0;
 float duty_table[4] = { 0.125f, 0.25f, 0.50f, 0.75f };
 int triangle_phases[32] = {
@@ -50,7 +50,7 @@ void pulse_debug(const int freq) {
 	//printf("Duty %f\n", apu.square1.duty);
 }
 
-void clock_apu(struct display *nes_dp) {
+void clock_apu(struct Display *nes_dp) {
 	int freq = 0;
 	int freqt = 0;
 

@@ -22,7 +22,7 @@ typedef enum {
 	CURR_POS	= 2,
 } panel_flags;
 
-typedef struct panel {
+typedef struct Panel {
 	const char *name;
 	fpoint in_cursor;
 	fpoint old_cursor;
@@ -32,12 +32,12 @@ typedef struct panel {
 	text_opt text_opts;
 	int w;
 	int h;
-} panel;
+} Panel;
 
-struct display {
+struct Display {
 	bool run;
-	panel *context;
-	panel *panel_stack[10];
+	Panel *context;
+	Panel *panel_stack[10];
 	int stack_i;
 
 	// Backend
@@ -46,14 +46,14 @@ struct display {
 	SDL_AudioStream *stream;
 };
 
-int create_display(const char *win_name, const int width, const int height, struct display *dp);
-void clean_display(struct display *dp);
+int create_display(const char *win_name, const int width, const int height, struct Display *dp);
+void clean_display(struct Display *dp);
 
-void start_frame(struct display *dp);
-int start_panel(struct display *dp, const char *name, fpoint xy, fpoint wh, panel_flags flags);
-void end_panel(struct display *dp);
-void text(struct display *dp, const char *fmt, ...);
-void text_options(struct display *dp, text_opt opts);
+void start_frame(struct Display *dp);
+int start_panel(struct Display *dp, const char *name, fpoint xy, fpoint wh, panel_flags flags);
+void end_panel(struct Display *dp);
+void text(struct Display *dp, const char *fmt, ...);
+void text_options(struct Display *dp, text_opt opts);
 
 #ifdef __cplusplus
 }

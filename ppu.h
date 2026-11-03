@@ -93,39 +93,39 @@ enum ppu_ctrl_bit {
 	BG_PATT_ADDR = 4
 };
 
-typedef struct shifter {
+typedef struct Shifter {
 	word low_shift_reg;
 	word high_shift_reg;
-} shifter;
+} Shifter;
 
-typedef struct patt_latch {
+typedef struct Patt_latch {
 	byte patt_low;
 	byte patt_high;
-} patt_latch;
+} Patt_latch;
 
-typedef struct attr_latch {
+typedef struct Attr_latch {
 	byte attr_low;
 	byte attr_high;
-} attr_latch;
+} Attr_latch;
 
-typedef struct bg_pixel_data {
-	shifter patt_shifter;
-	shifter attr_shifter;
-} bg_pixel_data;
+typedef struct Bg_pixel_data {
+	Shifter patt_shifter;
+	Shifter attr_shifter;
+} Bg_pixel_data;
 
-typedef struct render_data_latch {
+typedef struct Render_data_latch {
 	byte nametable;
-	attr_latch attr_latch;
-	patt_latch patt_latch;
-} render_data_latch;
+	Attr_latch attr_latch;
+	Patt_latch patt_latch;
+} Render_data_latch;
 
-typedef struct sp_pixel_data {
+typedef struct Sp_pixel_data {
 	byte attr;
 	byte xcounter;
-	shifter patt_shifter;
-} sp_pixel_data;
+	Shifter patt_shifter;
+} Sp_pixel_data;
 
-struct ppu {
+struct Ppu {
 	byte ppu_ctrl;
 	byte ppu_mask;
 	byte ppu_status;
@@ -140,21 +140,21 @@ struct ppu {
 	byte x;
 	bool w;
 
-	bg_pixel_data bg_pixel_data;
-	sp_pixel_data sprite_data[8];
-	render_data_latch render_dt_latch;
+	Bg_pixel_data bg_pixel_data;
+	Sp_pixel_data sprite_data[8];
+	Render_data_latch render_dt_latch;
 };
 
 void ppu_init();
 void ppu_write(word addr, byte value);
 byte ppu_read(word addr);
-void clock_ppu(struct display *nes_dp, byte cycles);
+void clock_ppu(struct Display *nes_dp, byte cycles);
 void ppu_write_mem(word addr, byte value);
 byte ppu_read_mem(word addr);
 
 // Just for making tests
 void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, bool render_flag);
-byte get_background_pixel(bg_pixel_data *bg_pixel_data);
+byte get_background_pixel(Bg_pixel_data *bg_pixel_data);
 void scanline();
 
 #ifdef __cplusplus

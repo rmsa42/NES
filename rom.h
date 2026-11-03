@@ -10,7 +10,7 @@ extern "C" {
 #define NES_EOF			0x1A
 #define PALLETE_SIZE	0xBD
 
-struct nes_header {
+struct Nes_header {
 	bool ines_format;
 	bool nes2_format;
 

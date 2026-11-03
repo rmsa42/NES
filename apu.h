@@ -19,7 +19,7 @@ extern "C" {
 #define get_len_counter_load(lth)	((lth & 0xF8) >> 3)
 #define get_lin_counter_load(cr)	(cr & 0x7F)
 
-typedef struct pulse {
+typedef struct Pulse {
 	float duty;
 	byte env_loop;
 	byte const_volume;
@@ -30,43 +30,43 @@ typedef struct pulse {
 	byte sweep_shift;
 	word timer;
 	byte len_counter_load;
-} pulse;
+} Pulse;
 
-typedef struct triangle {
+typedef struct Triangle {
 	byte control_flag; // Also is the length_counter_flag
 	byte lin_reload_flag;
 	byte lin_counter_load;
 	word timer;
 	byte len_counter_load;
 	byte unused;
-} triangle;
+} Triangle;
 
-typedef struct noise {
+typedef struct Noise {
 	byte lcv;
 	byte unused;
 	byte mp;
 	byte lc;
-} noise;
+} Noise;
 
-typedef struct dmc {
+typedef struct Dmc {
 	byte ilr;
 	byte d;
 	byte saddr;
 	byte slen;
-} dmc;
+} Dmc;
 
-struct apu {
-	pulse square1;
-	pulse square2;
-	triangle triangle;
-	noise noise;
-	dmc dmc;
+struct Apu {
+	Pulse square1;
+	Pulse square2;
+	Triangle triangle;
+	Noise noise;
+	Dmc dmc;
 	byte status;
 	byte frame_ct;
 };
 
 void apu_write(word addr, byte value);
-void clock_apu(struct display *nes_dp);
+void clock_apu(struct Display *nes_dp);
 
 #ifdef __cplusplus
 }

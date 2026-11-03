@@ -21,7 +21,7 @@ typedef enum {
 	RIGHT	= 7,
 } joy_btn;
 
-struct controller {
+struct Controller {
 	bool poll;
 	byte input_shift_reg;
 	byte input_buffer;

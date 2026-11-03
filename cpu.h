@@ -18,7 +18,7 @@ extern "C" {
 
 #define CARRY_6_MASK 0x7F
 
-struct cpu {
+struct Cpu {
 	word pc;
 	byte sp;
 	byte acc;
@@ -38,12 +38,12 @@ typedef enum {
 	NF
 } status;
 
-typedef struct inst {
+typedef struct Inst {
 	void (*run)(word);
 	word (*mode)();
 	byte byte_size;
 	byte cycles;
-} inst;
+} Inst;
 
 void cpu_init();
 void cpu_reset();
@@ -232,7 +232,7 @@ enum instr_type {
 //
 };
 
-inst get_inst_info(enum instr_type instr);
+Inst get_inst_info(enum instr_type instr);
 
 #ifdef __cplusplus
 }

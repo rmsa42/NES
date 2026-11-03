@@ -3,7 +3,7 @@
 int w_h = 480;
 int w_w = 640;
 
-void loop(struct display *dp) {
+void loop(struct Display *dp) {
 	SDL_Event e;
 
 	start_frame(dp);
@@ -43,7 +43,7 @@ void loop(struct display *dp) {
 }
 
 int main() {
-	struct display dp;
+	struct Display dp;
 
 	create_display("WIN", w_w, w_h, &dp);
 	dp.run = true;

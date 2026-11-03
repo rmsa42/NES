@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern struct cpu cpu;
+extern struct Cpu cpu;
 extern int cpu_cycles;
 extern int nbr_instr;
-extern struct ppu ppu;
+extern struct Ppu ppu;
 extern int scanline_nbr;
 
-debugger debug;
+Debugger debug;
 
 const char *instr_enum_to_str(const byte instr);
 
@@ -19,8 +19,8 @@ bool debug_block() {
 	return (debug.run);
 }
 
-int debugger_init(const char *bp_str, struct display *dp) {
-	memset(&debug, 0, sizeof(debugger));
+int debugger_init(const char *bp_str, struct Display *dp) {
+	memset(&debug, 0, sizeof(Debugger));
 	if (create_display("DebuggerNes", 640, 480, dp)) {
 		return (1);
 	}
@@ -32,9 +32,9 @@ int debugger_init(const char *bp_str, struct display *dp) {
 	return (0);
 }
 
-void print_debug_cpu_instr(struct display *dp, word *addr) {
+void print_debug_cpu_instr(struct Display *dp, word *addr) {
 	byte instr_byte = bus_read(*addr);
-	inst instr = get_inst_info(instr_byte);
+	Inst instr = get_inst_info(instr_byte);
 
 	//printf("Addr: %x, %d\n", *addr, instr.byte_size);
 	text(dp, "%04x:", *addr);
@@ -47,7 +47,7 @@ void print_debug_cpu_instr(struct display *dp, word *addr) {
 	*addr += instr.byte_size;
 }
 
-void general_debug_info(struct display *dp) {
+void general_debug_info(struct Display *dp) {
 	int win_width;
 	int win_height;
 	
@@ -97,7 +97,7 @@ void general_debug_info(struct display *dp) {
 
 }
 
-void memory_debug(struct display *dp) {
+void memory_debug(struct Display *dp) {
 	word addr = 0x2400;
 
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
@@ -134,7 +134,7 @@ void memory_debug(struct display *dp) {
 	end_panel(dp);
 }
 
-void debugger_handle_event(struct display *dp, SDL_Event *e) {
+void debugger_handle_event(struct Display *dp, SDL_Event *e) {
 	if (e->type == SDL_EVENT_KEY_DOWN) {
 		if (e->key.scancode == SDL_SCANCODE_RETURN) {
 			debug.step_into = true;
@@ -145,13 +145,11 @@ void debugger_handle_event(struct display *dp, SDL_Event *e) {
 			debug.panel = debug.panel % 2;
 		} else if (e->key.scancode == SDL_SCANCODE_R) {
 			debug.until_bp = true;
-		} else if (e->key.scancode == SDL_SCANCODE_P) {
-			nmi();
 		}
 	}
 }
 
-void update_debugger(struct display *dp) {
+void update_debugger(struct Display *dp) {
 	debug.run = debug.step_into | debug.until_bp;
 	if (debug.until_bp == true && cpu.pc == debug.breakpoint) {
 		debug.until_bp = false;
