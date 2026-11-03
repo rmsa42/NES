@@ -7,7 +7,7 @@
 
 extern byte pallete_rgb[PALLETE_SIZE];
 
-struct Ppu ppu;
+Ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
 byte ppu_oam1_mem[PPU_OAM1_MEM_SIZE];
 byte ppu_oam2_mem[PPU_OAM2_MEM_SIZE];
@@ -16,7 +16,7 @@ float cpu_cycle_counter = 0;
 byte pixels[256 * 240 * 4];
 
 void ppu_init() {
-	memset(&ppu, 0, sizeof(struct Ppu));
+	memset(&ppu, 0, sizeof(Ppu));
 	memset(ppu_mem, 0, sizeof(ppu_mem));
 	memset(ppu_oam1_mem, 0xFF, sizeof(ppu_oam1_mem));
 	memset(ppu_oam2_mem, 0, sizeof(ppu_oam2_mem));
@@ -324,7 +324,7 @@ void scanline() {
 	TOGGLE_BIT(ppu.v, NAMETABLE_HORIZONTAL_BIT);
 }
 
-void clock_ppu(struct Display *nes_dp, byte cycles) {
+void clock_ppu(Display *nes_dp, byte cycles) {
 	cpu_cycle_counter += cycles;
 	if (cpu_cycle_counter < 114) {
 		return;

@@ -10,7 +10,7 @@ extern "C" {
 #define NES_EOF			0x1A
 #define PALLETE_SIZE	0xBD
 
-struct Nes_header {
+typedef struct Nes_header {
 	bool ines_format;
 	bool nes2_format;
 
@@ -18,7 +18,7 @@ struct Nes_header {
 
 	word prg_rom_size;
 	word chr_rom_size;
-};
+} Nes_header;
 
 int read_rom(const char *rom_name);
 void print_buff(byte *buff, const size_t size);

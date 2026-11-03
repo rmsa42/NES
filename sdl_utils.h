@@ -24,17 +24,17 @@ typedef enum {
 
 typedef struct Panel {
 	const char *name;
-	fpoint in_cursor;
-	fpoint old_cursor;
-	fpoint padding;
-	fpoint tlc;
+	FPoint in_cursor;
+	FPoint old_cursor;
+	FPoint padding;
+	FPoint tlc;
 	char text_buff[50];
 	text_opt text_opts;
 	int w;
 	int h;
 } Panel;
 
-struct Display {
+typedef struct Display {
 	bool run;
 	Panel *context;
 	Panel *panel_stack[10];
@@ -44,16 +44,16 @@ struct Display {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_AudioStream *stream;
-};
+} Display;
 
-int create_display(const char *win_name, const int width, const int height, struct Display *dp);
-void clean_display(struct Display *dp);
+int create_display(const char *win_name, const int width, const int height, Display *dp);
+void clean_display(Display *dp);
 
-void start_frame(struct Display *dp);
-int start_panel(struct Display *dp, const char *name, fpoint xy, fpoint wh, panel_flags flags);
-void end_panel(struct Display *dp);
-void text(struct Display *dp, const char *fmt, ...);
-void text_options(struct Display *dp, text_opt opts);
+void start_frame(Display *dp);
+int start_panel(Display *dp, const char *name, FPoint xy, FPoint wh, panel_flags flags);
+void end_panel(Display *dp);
+void text(Display *dp, const char *fmt, ...);
+void text_options(Display *dp, text_opt opts);
 
 #ifdef __cplusplus
 }

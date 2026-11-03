@@ -16,9 +16,9 @@ typedef struct Debugger {
 	byte panel;
 } Debugger;
 
-int debugger_init(const char *bp, struct Display *dp);
-void debugger_handle_event(struct Display *dp, SDL_Event *e);
-void update_debugger(struct Display *dp);
+int debugger_init(const char *bp, Display *dp);
+void debugger_handle_event(Display *dp, SDL_Event *e);
+void update_debugger(Display *dp);
 bool debug_block();
 
 #ifdef __cplusplus

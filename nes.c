@@ -8,13 +8,13 @@
 #include <stdio.h>
 
 extern byte pixels[256 * 240 * 4];
-extern struct controller joy1;
+extern Controller joy1;
 
 int window_width = 512;
 int window_height = 480;
 SDL_Texture *texture;
 
-int nes_init(struct Display *nes_dp, const char *rom_name) {
+int nes_init(Display *nes_dp, const char *rom_name) {
 	if (create_display("NES", window_width, window_height, nes_dp)) {
 		return (1);
 	}
@@ -34,7 +34,7 @@ int nes_init(struct Display *nes_dp, const char *rom_name) {
 
 }
 
-void update_nes(struct Display *nes_dp, int curr_time, int *last_time) {
+void update_nes(Display *nes_dp, int curr_time, int *last_time) {
 	byte cycles = 0;
 	bool render = curr_time > *last_time + 16;
 
@@ -53,7 +53,7 @@ void update_nes(struct Display *nes_dp, int curr_time, int *last_time) {
 	}
 }
 
-void nes_handle_event(struct Display *nes_dp, SDL_Event *e) {
+void nes_handle_event(Display *nes_dp, SDL_Event *e) {
 	if (e->type == SDL_EVENT_KEY_DOWN) {
 		if (e->key.scancode == SDL_SCANCODE_Q) {
 			nes_dp->run = false;

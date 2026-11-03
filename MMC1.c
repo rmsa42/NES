@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
-struct MMC1 mmc1;
+MMC1 mmc1;
 extern byte *chr_rom;
 extern byte ppu_mem[PPU_MEM_SIZE];
 
 void MMC1_init() {
-	memset(&mmc1, 0, sizeof(struct MMC1));
+	memset(&mmc1, 0, sizeof(MMC1));
 }
 
 void MMC1_write(word addr, byte value) {

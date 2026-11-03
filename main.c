@@ -4,10 +4,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-extern struct cpu cpu;
 extern byte *chr_rom;
 
-void handle_events(struct Display *nes_dp, struct Display *debugger_dp) {
+void handle_events(Display *nes_dp, Display *debugger_dp) {
 	SDL_Event e;
 
 	while (SDL_PollEvent(&e)) {
@@ -24,7 +23,7 @@ void handle_events(struct Display *nes_dp, struct Display *debugger_dp) {
 	}
 }
 
-int aux_tools_init(const char *bp, struct Display *debug_dp) {
+int aux_tools_init(const char *bp, Display *debug_dp) {
 	if (debugger_init(bp, debug_dp)) {
 		return (1);
 	}
@@ -34,10 +33,10 @@ int aux_tools_init(const char *bp, struct Display *debug_dp) {
 }
 
 int main(int argc, char *argv[]) {
-	struct Display debug_dp;
-	struct Display nes_dp;
+	Display debug_dp;
+	Display nes_dp;
 
-	memset(&debug_dp, 0, sizeof(struct Display));
+	memset(&debug_dp, 0, sizeof(Display));
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		printf("SDL Init error\n");
 		return (1);

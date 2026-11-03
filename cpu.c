@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-struct Cpu cpu;
+Cpu cpu;
 Inst insts[INSTS_NBR];
 byte cpu_mem[CPU_MEM_SIZE];
 bool nmi_flip = false;
@@ -14,7 +14,7 @@ int nbr_instr;
 void fill_insts();
 
 void cpu_init() {
-	memset(&cpu, 0, sizeof(struct Cpu));
+	memset(&cpu, 0, sizeof(Cpu));
 	memset(cpu_mem, 0, sizeof(cpu_mem));
 	fill_insts();
 	cpu_cycles = 0;
@@ -23,7 +23,7 @@ void cpu_init() {
 }
 
 void cpu_reset() {
-	memset(&cpu, 0, sizeof(struct Cpu));
+	memset(&cpu, 0, sizeof(Cpu));
 	cpu.sp = STACK_VECTOR;
 }
 

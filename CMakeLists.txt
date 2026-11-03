@@ -102,6 +102,12 @@ if(TESTS)
 		bus.h
 		nes.c
 		nes.h
+		controller.c
+		controller.h
+		MMC1.c
+		MMC1.h
+		utils.c
+		utils.h
 		debug_tools.c
 		debug_tools.h
 		sdl_utils.c

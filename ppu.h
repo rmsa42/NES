@@ -125,7 +125,7 @@ typedef struct Sp_pixel_data {
 	Shifter patt_shifter;
 } Sp_pixel_data;
 
-struct Ppu {
+typedef struct Ppu {
 	byte ppu_ctrl;
 	byte ppu_mask;
 	byte ppu_status;
@@ -143,12 +143,12 @@ struct Ppu {
 	Bg_pixel_data bg_pixel_data;
 	Sp_pixel_data sprite_data[8];
 	Render_data_latch render_dt_latch;
-};
+} Ppu;
 
 void ppu_init();
 void ppu_write(word addr, byte value);
 byte ppu_read(word addr);
-void clock_ppu(struct Display *nes_dp, byte cycles);
+void clock_ppu(Display *nes_dp, byte cycles);
 void ppu_write_mem(word addr, byte value);
 byte ppu_read_mem(word addr);
 

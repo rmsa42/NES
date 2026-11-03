@@ -55,7 +55,7 @@ typedef struct Dmc {
 	byte slen;
 } Dmc;
 
-struct Apu {
+typedef struct Apu {
 	Pulse square1;
 	Pulse square2;
 	Triangle triangle;
@@ -63,10 +63,10 @@ struct Apu {
 	Dmc dmc;
 	byte status;
 	byte frame_ct;
-};
+} Apu;
 
 void apu_write(word addr, byte value);
-void clock_apu(struct Display *nes_dp);
+void clock_apu(Display *nes_dp);
 
 #ifdef __cplusplus
 }

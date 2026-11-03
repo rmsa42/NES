@@ -4,20 +4,20 @@
 extern "C" {
 #endif
 
-typedef struct fpoint {
+typedef struct FPoint {
 	float x;
 	float y;
-} fpoint;
+} FPoint;
 
-void add_fpoint(fpoint *fpt, fpoint add);
-void minus_fpoint(fpoint *fpt, fpoint minus);
-void multiply_fpoint(fpoint *fpt, const double scalar);
-void divide_fpoint(fpoint *fpt, const double scalar);
-double length_fpoint(fpoint *fpt);
-void normalize_fpoint(fpoint *fpt);
-void perp_fpoint(fpoint *fpt);
-void print_fpoint(fpoint *fpt);
-void copy_fpoint(fpoint *copy, fpoint *fpt);
+void add_fpoint(FPoint *fpt, FPoint add);
+void minus_fpoint(FPoint *fpt, FPoint minus);
+void multiply_fpoint(FPoint *fpt, const double scalar);
+void divide_fpoint(FPoint *fpt, const double scalar);
+double length_fpoint(FPoint *fpt);
+void normalize_fpoint(FPoint *fpt);
+void perp_fpoint(FPoint *fpt);
+void print_fpoint(FPoint *fpt);
+void copy_fpoint(FPoint *copy, FPoint *fpt);
 
 #ifdef __cplusplus
 }

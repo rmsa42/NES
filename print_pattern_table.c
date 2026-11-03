@@ -14,7 +14,7 @@ void map_patt_table(byte set) {
 	}
 }
 
-void render_pattern_table_tile(const int tile_x, const int tile_y, struct Display *nes_dp) {
+void render_pattern_table_tile(const int tile_x, const int tile_y, Display *nes_dp) {
 	const size_t addr = (tile_y * 16 + tile_x) * 16;
 	const size_t dp_row = tile_x * 8 + 7;
 	const size_t dp_height = (tile_y % 16) * 8;
@@ -47,7 +47,7 @@ void render_pattern_table_tile(const int tile_x, const int tile_y, struct Displa
 	//printf("\n");
 }
 
-void render_pattern_table(const int table_nbr, struct Display *nes_dp) {
+void render_pattern_table(const int table_nbr, Display *nes_dp) {
 	for (size_t tile_y = 0; tile_y < 16; tile_y++) {
 		for (size_t tile_x = 0; tile_x < 16; tile_x++) {
 			render_pattern_table_tile(tile_x, tile_y + (table_nbr * 16), nes_dp);
@@ -56,7 +56,7 @@ void render_pattern_table(const int table_nbr, struct Display *nes_dp) {
 }
 
 int main(int argc, char *argv[]) {
-	struct Display dp;
+	Display dp;
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	if (nes_init(&dp, argv[1])) {

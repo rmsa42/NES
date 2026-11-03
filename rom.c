@@ -16,7 +16,7 @@ void print_buff(byte *buff, const size_t size) {
 	}
 }
 
-static void debug_header(struct Nes_header *hd) {
+static void debug_header(Nes_header *hd) {
 	printf("INES format: %d\n", hd->ines_format);
 	printf("NES2 format: %d\n", hd->nes2_format);
 	printf("Trainer flag: %d\n", hd->trainer_area_flag);
@@ -24,7 +24,7 @@ static void debug_header(struct Nes_header *hd) {
 	printf("CHR-ROM size: %dKiB\n", hd->chr_rom_size);
 }
 
-static void parse_header(FILE *rom, struct Nes_header *hd) {
+static void parse_header(FILE *rom, Nes_header *hd) {
 	byte header[16];
 
 	memset(header, 0, sizeof(header));
@@ -43,7 +43,7 @@ static void parse_header(FILE *rom, struct Nes_header *hd) {
 	print_buff(header, sizeof(header));
 }
 
-static void parse_trainer_area(FILE *rom, struct Nes_header *hd) {}
+static void parse_trainer_area(FILE *rom, Nes_header *hd) {}
 
 static void parse_prg_rom(FILE *rom, size_t prg_size) {
 	size_t rsize = 0;
@@ -79,7 +79,7 @@ static void parse_pallete() {
 
 int read_rom(const char *rom_name) {
 	FILE *rom = NULL;
-	struct Nes_header hd;
+	Nes_header hd;
 
 	printf("Parsing Rom Name: %s\n", rom_name);
 	if (rom_name == NULL) {

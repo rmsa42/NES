@@ -1,7 +1,8 @@
 #include "controller.h"
+#include <string.h>
 #include <stdio.h>
 
-struct Controller joy1;
+Controller joy1;
 
 void controller_init() {
 	memset(&joy1, 0, sizeof(joy1));

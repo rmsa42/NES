@@ -5,10 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern struct Cpu cpu;
+extern Cpu cpu;
 extern int cpu_cycles;
 extern int nbr_instr;
-extern struct Ppu ppu;
+extern Ppu ppu;
 extern int scanline_nbr;
 
 Debugger debug;
@@ -19,7 +19,7 @@ bool debug_block() {
 	return (debug.run);
 }
 
-int debugger_init(const char *bp_str, struct Display *dp) {
+int debugger_init(const char *bp_str, Display *dp) {
 	memset(&debug, 0, sizeof(Debugger));
 	if (create_display("DebuggerNes", 640, 480, dp)) {
 		return (1);
@@ -32,7 +32,7 @@ int debugger_init(const char *bp_str, struct Display *dp) {
 	return (0);
 }
 
-void print_debug_cpu_instr(struct Display *dp, word *addr) {
+void print_debug_cpu_instr(Display *dp, word *addr) {
 	byte instr_byte = bus_read(*addr);
 	Inst instr = get_inst_info(instr_byte);
 
@@ -47,7 +47,7 @@ void print_debug_cpu_instr(struct Display *dp, word *addr) {
 	*addr += instr.byte_size;
 }
 
-void general_debug_info(struct Display *dp) {
+void general_debug_info(Display *dp) {
 	int win_width;
 	int win_height;
 	
@@ -62,7 +62,7 @@ void general_debug_info(struct Display *dp) {
 		print_debug_cpu_instr(dp, &addr);
 	}
 
-	start_panel(dp, "CPU Info", (fpoint){win_width / 4.0f, 0}, (fpoint){win_width - win_width / 4.0f, win_height}, NORMAL);
+	start_panel(dp, "CPU Info", (FPoint){win_width / 4.0f, 0}, (FPoint){win_width - win_width / 4.0f, win_height}, NORMAL);
 	text(dp, "PC: %02x", cpu.pc);
 	text(dp, "ACC: %02x", cpu.acc);
 	text(dp, "IX: %02x", cpu.ix);
@@ -80,7 +80,7 @@ void general_debug_info(struct Display *dp) {
 	text(dp, "PPU VRAM: %04x", ppu.v);
 	text(dp, "Scanline: %d", scanline_nbr);
 
-	start_panel(dp, "Stack", (fpoint){0, 0}, (fpoint){100, 50}, CURR_POS | WITH_BORDER);
+	start_panel(dp, "Stack", (FPoint){0, 0}, (FPoint){100, 50}, CURR_POS | WITH_BORDER);
 	text_options(dp, CENTERED);
 	text(dp, "Stack");
 	text_options(dp, NA);
@@ -94,16 +94,15 @@ void general_debug_info(struct Display *dp) {
 	text(dp, "CPU_Cycles: %d", cpu_cycles);
 	text(dp, "Instr: %d", nbr_instr);
 	end_panel(dp);
-
 }
 
-void memory_debug(struct Display *dp) {
+void memory_debug(Display *dp) {
 	word addr = 0x2400;
 
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 	SDL_SetRenderScale(dp->renderer, 1.5, 1.5);
 
-	start_panel(dp, "PPU Memory", (fpoint){0, 0}, (fpoint){640, 480}, NORMAL);
+	start_panel(dp, "PPU Memory", (FPoint){0, 0}, (FPoint){640, 480}, NORMAL);
 	text(dp, "PPU Memory");
 	if (ppu.v >= 0x2600){
 		addr = 0x2600;
@@ -134,7 +133,7 @@ void memory_debug(struct Display *dp) {
 	end_panel(dp);
 }
 
-void debugger_handle_event(struct Display *dp, SDL_Event *e) {
+void debugger_handle_event(Display *dp, SDL_Event *e) {
 	if (e->type == SDL_EVENT_KEY_DOWN) {
 		if (e->key.scancode == SDL_SCANCODE_RETURN) {
 			debug.step_into = true;
@@ -149,7 +148,7 @@ void debugger_handle_event(struct Display *dp, SDL_Event *e) {
 	}
 }
 
-void update_debugger(struct Display *dp) {
+void update_debugger(Display *dp) {
 	debug.run = debug.step_into | debug.until_bp;
 	if (debug.until_bp == true && cpu.pc == debug.breakpoint) {
 		debug.until_bp = false;

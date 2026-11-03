@@ -3,7 +3,7 @@
 int w_h = 480;
 int w_w = 640;
 
-void loop(struct Display *dp) {
+void loop(Display *dp) {
 	SDL_Event e;
 
 	start_frame(dp);
@@ -20,9 +20,9 @@ void loop(struct Display *dp) {
 	}
 	SDL_SetRenderScale(dp->renderer, 1, 1);
 	SDL_SetRenderDrawColor(dp->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-	start_panel(dp, "LOP", (fpoint){0, 0}, (fpoint){w_w, w_h}, CURR_POS | WITH_BORDER);
+	start_panel(dp, "LOP", (FPoint){0, 0}, (FPoint){w_w, w_h}, CURR_POS | WITH_BORDER);
 	text(dp, "Start");
-	start_panel(dp, "LOP", (fpoint){0, 50}, (fpoint){100, 200}, CURR_POS | WITH_BORDER);
+	start_panel(dp, "LOP", (FPoint){0, 50}, (FPoint){100, 200}, CURR_POS | WITH_BORDER);
 	text(dp, "LArp");
 	text(dp, "LArp");
 	text(dp, "LArp");
@@ -43,7 +43,7 @@ void loop(struct Display *dp) {
 }
 
 int main() {
-	struct Display dp;
+	Display dp;
 
 	create_display("WIN", w_w, w_h, &dp);
 	dp.run = true;

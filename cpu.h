@@ -18,14 +18,14 @@ extern "C" {
 
 #define CARRY_6_MASK 0x7F
 
-struct Cpu {
+typedef struct Cpu {
 	word pc;
 	byte sp;
 	byte acc;
 	byte ix;
 	byte iy;
 	byte ps;
-};
+} Cpu;
 
 typedef enum {
 	CF,

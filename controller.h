@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils.h"
-#include "sdl_utils.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,11 +21,11 @@ typedef enum {
 	RIGHT	= 7,
 } joy_btn;
 
-struct Controller {
+typedef struct Controller {
 	bool poll;
 	byte input_shift_reg;
 	byte input_buffer;
-};
+} Controller;
 
 void controller_write(word addr, byte value);
 byte controller_read(word addr);
