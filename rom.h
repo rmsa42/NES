@@ -21,7 +21,6 @@ typedef struct Nes_header {
 } Nes_header;
 
 int read_rom(const char *rom_name);
-void print_buff(byte *buff, const size_t size);
 
 #ifdef __cplusplus
 }

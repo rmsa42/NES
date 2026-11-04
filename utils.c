@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <stdio.h>
 
 byte mirror_hz_byte(byte b) {
 	byte ret = 0;
@@ -8,3 +9,10 @@ byte mirror_hz_byte(byte b) {
 	}
 	return (ret);
 }
+
+void print_buff(byte *buff, const size_t size) {
+	for (size_t i = 0; i < size; i++) {
+		printf("%zx: %x\n", i, buff[i]);
+	}
+}
+

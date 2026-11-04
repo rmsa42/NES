@@ -183,3 +183,55 @@ void clean_display(Display *dp) {
 	dp->stream = NULL;
 }
 
+Texture *create_texture(Display *dp, int w, int h) {
+	Texture *texture = malloc(sizeof(Texture));
+
+	if (texture == NULL) {
+		return (NULL);
+	}
+	texture->w = w;
+	texture->h = h;
+	texture->pitch = w * 4;
+	texture->pixels = calloc(h, texture->pitch);
+	if (texture->pixels == NULL) {
+		free(texture);
+		printf("Error Malloc\n");
+		return (NULL);
+	}
+	texture->sdl_texture = SDL_CreateTexture(dp->renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, w, h);
+	if (texture->sdl_texture == NULL) {
+		free(texture->pixels);
+		free(texture);
+		printf("Error SDL\n");
+		return (NULL);
+	}
+	texture->status = OK;
+	return (texture);
+}
+
+void render_texture(Display *dp, Texture *texture) {
+	if (texture->status == NEED_UPDATE) {
+		SDL_UpdateTexture(texture->sdl_texture, NULL, texture->pixels, texture->pitch);
+		texture->status = OK;
+	}
+	SDL_RenderTexture(dp->renderer, texture->sdl_texture, NULL, NULL);
+}
+
+void write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b, byte a) {
+	byte *p = texture->pixels;
+	int i = (y * texture->pitch) + (x * 4);
+
+	p[i++] = r;
+	p[i++] = g;
+	p[i++] = b;
+	p[i] = a;
+	texture->status = NEED_UPDATE;
+}
+
+void destroy_texture(Texture *texture) {
+	free(texture->pixels);
+	texture->pixels = NULL;
+	SDL_DestroyTexture(texture->sdl_texture);
+	free(texture);
+	texture = NULL;
+}

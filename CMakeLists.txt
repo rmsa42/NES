@@ -35,6 +35,8 @@ set(SOURCES
 
 set(SOURCES_UI
 	ui.c
+	utils.c
+	utils.h
 	sdl_utils.c
 	sdl_utils.h
 	fpoint.c

@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 extern byte pallete_rgb[PALLETE_SIZE];
+extern Texture *screen;
 
 Ppu ppu;
 byte ppu_mem[PPU_MEM_SIZE];
@@ -13,7 +14,6 @@ byte ppu_oam1_mem[PPU_OAM1_MEM_SIZE];
 byte ppu_oam2_mem[PPU_OAM2_MEM_SIZE];
 int scanline_nbr = 0;
 float cpu_cycle_counter = 0;
-byte pixels[256 * 240 * 4];
 
 void ppu_init() {
 	memset(&ppu, 0, sizeof(Ppu));
@@ -246,11 +246,15 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 	if (render_flag == true) {
 		// Get the RGB color from the loaded palette (2C03)
 		int pixel = ppu_mem[palette_addr] * 3;
-		int index = ((scanline_nbr * 256) + (tile_nbr * 8 + pixel_nbr)) * 4;
-		pixels[index] = pallete_rgb[pixel];
-		pixels[index + 1] = pallete_rgb[pixel + 1];
-		pixels[index + 2] = pallete_rgb[pixel + 2];
-		pixels[index + 3] = 255;
+		write_texture_pixel(
+			screen,
+			tile_nbr * 8 + pixel_nbr,
+			scanline_nbr,
+			pallete_rgb[pixel],
+			pallete_rgb[pixel + 1],
+			pallete_rgb[pixel + 2],
+			255
+		);
 	}
 }
 

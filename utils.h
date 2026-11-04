@@ -20,6 +20,7 @@ typedef uint16_t word;
 typedef uint32_t dword;
 
 byte mirror_hz_byte(byte b);
+void print_buff(byte *buff, const size_t size);
 
 #ifdef __cplusplus
 }

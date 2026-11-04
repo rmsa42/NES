@@ -10,12 +10,6 @@ extern byte ppu_mem[PPU_MEM_SIZE];
 byte *chr_rom;
 byte pallete_rgb[PALLETE_SIZE];
 
-void print_buff(byte *buff, const size_t size) {
-	for (size_t i = 0; i < size; i++) {
-		printf("%zx: %x\n", i, buff[i]);
-	}
-}
-
 static void debug_header(Nes_header *hd) {
 	printf("INES format: %d\n", hd->ines_format);
 	printf("NES2 format: %d\n", hd->nes2_format);

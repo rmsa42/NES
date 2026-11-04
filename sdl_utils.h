@@ -2,6 +2,7 @@
 
 #include "SDL3/SDL.h"
 #include "fpoint.h"
+#include "utils.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -22,6 +23,11 @@ typedef enum {
 	CURR_POS	= 2,
 } panel_flags;
 
+typedef enum {
+	OK,
+	NEED_UPDATE
+} texture_status;
+
 typedef struct Panel {
 	const char *name;
 	FPoint in_cursor;
@@ -33,6 +39,18 @@ typedef struct Panel {
 	int w;
 	int h;
 } Panel;
+
+typedef struct Texture {
+	int w;
+	int h;
+	int pitch;
+	void *pixels;
+
+	texture_status status;
+
+	// Backend
+	SDL_Texture *sdl_texture;
+} Texture;
 
 typedef struct Display {
 	bool run;
@@ -54,6 +72,12 @@ int start_panel(Display *dp, const char *name, FPoint xy, FPoint wh, panel_flags
 void end_panel(Display *dp);
 void text(Display *dp, const char *fmt, ...);
 void text_options(Display *dp, text_opt opts);
+
+// Texture
+Texture *create_texture(Display *dp, int w, int h);
+void render_texture(Display *dp, Texture *texture);
+void write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b, byte a);
+void destroy_texture(Texture *texture);
 
 #ifdef __cplusplus
 }

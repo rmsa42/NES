@@ -7,12 +7,11 @@
 #include "MMC1.h"
 #include <stdio.h>
 
-extern byte pixels[256 * 240 * 4];
 extern Controller joy1;
 
 int window_width = 512;
 int window_height = 480;
-SDL_Texture *texture;
+Texture *screen;
 
 int nes_init(Display *nes_dp, const char *rom_name) {
 	if (create_display("NES", window_width, window_height, nes_dp)) {
@@ -26,7 +25,7 @@ int nes_init(Display *nes_dp, const char *rom_name) {
 		printf("Invalid ROM\n");
 		return (1);
 	}
-	texture = SDL_CreateTexture(nes_dp->renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, 256, 240);
+	screen = create_texture(nes_dp, 256, 240);
 	cpu_start();
 	printf("Nes Init\n");
 	nes_dp->run = true;
@@ -46,8 +45,7 @@ void update_nes(Display *nes_dp, int curr_time, int *last_time) {
 	clock_ppu(nes_dp, cycles);
 	//clock_apu(nes_dp);
 	if (render) {
-		SDL_UpdateTexture(texture, NULL, (void *)pixels, 256 * 4);
-		SDL_RenderTexture(nes_dp->renderer, texture, NULL, NULL);
+		render_texture(nes_dp, screen);
 		SDL_RenderPresent(nes_dp->renderer);
 		*last_time = curr_time;
 	}
