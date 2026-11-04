@@ -1,10 +1,4 @@
 #include "nes.h"
-#include "cpu.h"
-#include "ppu.h"
-#include "apu.h"
-#include "rom.h"
-#include "controller.h"
-#include "MMC1.h"
 #include <stdio.h>
 
 extern Controller joy1;
@@ -26,7 +20,7 @@ int nes_init(Display *nes_dp, const char *rom_name) {
 		return (1);
 	}
 	screen = create_texture(nes_dp, 256, 240);
-	cpu_start();
+	cpu_start(); // Temporary until i stop using "cpu_mem[]" inside "read_rom()"
 	printf("Nes Init\n");
 	nes_dp->run = true;
 	return (0);

@@ -10,10 +10,17 @@ extern "C" {
 #define SET_BIT(byte, bit)			(byte = ((1 << bit) | byte))
 #define CLEAR_BIT(byte, bit)		(byte = (~(1 << bit) & byte))
 #define GET_BIT(byte, shift)		((byte >> shift) & 1)
+#define TOGGLE_BIT(byte, bit)		(byte ^= 1 << bit)
 #define MAKE_WORD(hb, lb)			((hb << 8) | lb)
 #define GET_HIGH_BYTE(word)			(word >> 8)
 #define GET_LOW_BYTE(word)			(word & 0xFF)
-#define TOGGLE_BIT(byte, bit)		(byte ^= 1 << bit)
+#define GET_HIGH_BITS(byte)			((byte & 0xF0) >> 4)
+#define GET_LOW_BITS(byte)			(byte & 0x0F)
+
+#define KIB4	4096
+#define KIB8	8192
+#define KIB16	16384
+#define KIB32	32768
 
 typedef uint8_t byte;
 typedef uint16_t word;

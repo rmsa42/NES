@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-extern byte *chr_rom;
 extern Texture *screen;
 
 void handle_events(Display *nes_dp, Display *debugger_dp) {
@@ -61,9 +60,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	free_rom();
 	destroy_texture(screen);
-	free(chr_rom);
-	chr_rom = NULL;
 	clean_display(&debug_dp);
 	clean_display(&nes_dp);
 	SDL_Quit();

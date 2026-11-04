@@ -1,6 +1,13 @@
 #pragma once
 
 #include "sdl_utils.h"
+#include "nes.h"
+#include "cpu.h"
+#include "ppu.h"
+#include "apu.h"
+#include "rom.h"
+#include "controller.h"
+#include "MMC1.h"
 
 #ifdef __cplusplus
 extern "C" {
