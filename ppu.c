@@ -199,15 +199,23 @@ byte get_sprite_pixel(Sp_pixel_data *sprite_data) {
 }
 
 byte get_background_pixel(Bg_pixel_data *bg_pixel_data) {
-	byte pixel_color = merge_plane_bits_shifter(&bg_pixel_data->patt_shifter, 15);
-	byte attr_index = merge_plane_bits_shifter(&bg_pixel_data->attr_shifter, 15);
+	byte pixel_color = merge_plane_bits_shifter(&bg_pixel_data->patt_shifter, 15 - ppu.x);
+	byte attr_index = merge_plane_bits_shifter(&bg_pixel_data->attr_shifter, 15 - ppu.x);
 
 	advance_shifter(&bg_pixel_data->patt_shifter);
 	advance_shifter(&bg_pixel_data->attr_shifter);
 	return (MAKE_PIXEL(attr_index, pixel_color));
 }
 
-// For now this function is not used but in future it will be
+void get_tile_data(Render_data_latch *render_dt_latch) {
+	word pattern_data_addr = GET_BIT(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
+	byte attr_side = MERGE_PLANE_BITS(GET_COARSE_Y(ppu.v), GET_COARSE_X(ppu.v), 1) * 2;
+
+	render_dt_latch->nametable = ppu_mem[GET_NAMETABLE_ADDR(ppu.v)];
+	fill_attr_latch(&render_dt_latch->attr_latch, ppu_mem[GET_ATTRIBUTE_ADDR(ppu.v)], attr_side);
+	fill_patt_latch(&render_dt_latch->patt_latch, render_dt_latch->nametable, GET_FINE_Y(ppu.v), pattern_data_addr);
+}
+
 void check_scroll_x() {
 	if (GET_COARSE_X(ppu.v) == TOTAL_TILES_IN_SCANLINE - 1) {
 		CLEAR_COARSE_X(ppu.v);
@@ -258,15 +266,6 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 	}
 }
 
-void get_tile_data(Render_data_latch *render_dt_latch) {
-	word pattern_data_addr = GET_BIT(ppu.ppu_ctrl, BG_PATT_ADDR) ? PATTERN_TABLE_1_ADDR : PATTERN_TABLE_0_ADDR;
-	byte attr_side = MERGE_PLANE_BITS(GET_COARSE_Y(ppu.v), GET_COARSE_X(ppu.v), 1) * 2;
-
-	render_dt_latch->nametable = ppu_mem[GET_NAMETABLE_ADDR(ppu.v)];
-	fill_attr_latch(&render_dt_latch->attr_latch, ppu_mem[GET_ATTRIBUTE_ADDR(ppu.v)], attr_side);
-	fill_patt_latch(&render_dt_latch->patt_latch, render_dt_latch->nametable, GET_FINE_Y(ppu.v), pattern_data_addr);
-}
-
 void render_tile(const byte tile, bool render_flag) {
 	byte sp_pixel;
 	byte bg_pixel;
@@ -278,7 +277,7 @@ void render_tile(const byte tile, bool render_flag) {
 		render_pixel(bg_pixel, sp_pixel, tile, pixel_nbr, render_flag);
 	}
 	transfer_render_latch_to_bg_pixel_data(&ppu.render_dt_latch, &ppu.bg_pixel_data);
-	ppu.v++;
+	check_scroll_x();
 }
 
 void sprite_evaluation() {
@@ -302,30 +301,26 @@ void sprite_evaluation() {
 }
 
 void scanline() {
-	//SET_BIT_TO(ppu.v, NAMETABLE_HORIZONTAL_BIT, GET_BIT(ppu.t, 10));
-	//SET_BIT_TO(ppu.v, NAMETABLE_VERTICAL_BIT, GET_BIT(ppu.t, 11));
-	SET_BIT_TO(ppu.v, NAMETABLE_HORIZONTAL_BIT, 0); // For now, always render the 0 (2000-2400) nametable
-	SET_BIT_TO(ppu.v, NAMETABLE_VERTICAL_BIT, 0);
-
+	// Cycles 1-256
 	for (int tile = 0; tile < TOTAL_TILES_IN_SCANLINE; tile++) {
 		render_tile(tile, true);
 	}
-	ppu.v -= 3; // Decrement as it's supposed to finish 31 not 34
-	// Reset the coarse_x
-	CLEAR_COARSE_X(ppu.v);
 
 	check_scroll_y();
 
+	// Cycle 257
+	//SET_BIT_TO(ppu.v, NAMETABLE_HORIZONTAL_BIT, GET_BIT(ppu.t, NAMETABLE_HORIZONTAL_BIT));
+	//SET_BIT_TO(ppu.v, NAMETABLE_VERTICAL_BIT, GET_BIT(ppu.t, NAMETABLE_VERTICAL_BIT));
+	SET_BIT_TO(ppu.v, NAMETABLE_HORIZONTAL_BIT, 0); // For now, always render the 0 (2000-2400) nametable
+	SET_COARSE_X(ppu.v, GET_COARSE_X(ppu.t));
+
 	// Render next 2 tiles
-	for (int i = 0; i < 2; i++) {
-		render_tile(i, false);
-	}
+	render_tile(0, false);
+	render_tile(1, false);
 
 	// OAM Process
 	memset(ppu_oam2_mem, 0xFF, sizeof(ppu_oam2_mem)); // Init the oam2 to 0xFF
 	sprite_evaluation();
-
-	TOGGLE_BIT(ppu.v, NAMETABLE_HORIZONTAL_BIT);
 }
 
 void clock_ppu(Display *nes_dp, byte cycles) {

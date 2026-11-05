@@ -42,15 +42,15 @@ extern "C" {
 #define GET_COARSE(scroll)						(scroll >> 3)
 #define GET_PIXEL_OFFSET(scroll)				(scroll & 0x07)
 
-#define SET_COARSE_X(v, coarse_x)				(v |= coarse_x)
+#define SET_COARSE_X(v, coarse_x)				(v = (v & ~(0x001F)) | coarse_x)
 #define GET_COARSE_X(v)							(v & 0x001F)
 #define CLEAR_COARSE_X(v)						(v &= ~(0x001F))
 
-#define SET_COARSE_Y(v, coarse_y)				(v |= coarse_y << 5)
+#define SET_COARSE_Y(v, coarse_y)				(v = (v & ~(0x03E0)) | (coarse_y << 5))
 #define GET_COARSE_Y(v)							((v & 0x03E0) >> 5)
 #define CLEAR_COARSE_Y(v) 						(v &= ~(0x03E0))
 
-#define SET_FINE_Y(v, fine_y)					(v |= fine_y << 12)
+#define SET_FINE_Y(v, fine_y)					(v = (v & ~(0x7000)) | (fine_y << 12))
 #define GET_FINE_Y(v)							(v >> 12)
 #define CLEAR_FINE_Y(v)							(v &= ~(0x7000))
 
