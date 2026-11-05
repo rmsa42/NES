@@ -148,7 +148,7 @@ typedef struct Ppu {
 void ppu_init();
 void ppu_write(word addr, byte value);
 byte ppu_read(word addr);
-void clock_ppu(Display *nes_dp, byte cycles);
+void clock_ppu(byte cycles);
 void ppu_write_mem(word addr, byte value);
 byte ppu_read_mem(word addr);
 

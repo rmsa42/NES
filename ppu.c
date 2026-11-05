@@ -323,7 +323,7 @@ void scanline() {
 	sprite_evaluation();
 }
 
-void clock_ppu(Display *nes_dp, byte cycles) {
+void clock_ppu(byte cycles) {
 	cpu_cycle_counter += cycles;
 	if (cpu_cycle_counter < 114) {
 		return;

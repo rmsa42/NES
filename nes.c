@@ -36,7 +36,7 @@ void update_nes(Display *nes_dp, int curr_time, int *last_time) {
 		SDL_RenderClear(nes_dp->renderer);
 	}
 	cycles = clock_cpu();
-	clock_ppu(nes_dp, cycles);
+	clock_ppu(cycles);
 	//clock_apu(nes_dp);
 	if (render) {
 		render_texture(nes_dp, screen);

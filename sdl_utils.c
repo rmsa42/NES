@@ -144,7 +144,6 @@ void start_frame(Display *dp) {
 }
 
 int create_display(const char *win_name, const int width, const int height, Display *dp) {
-
 	memset(dp, 0, sizeof(Display));
 	if (start_panel(dp, win_name, (FPoint){0, 0}, (FPoint){width, height}, NORMAL)) {
 		return (1);

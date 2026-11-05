@@ -48,7 +48,6 @@ static void parse_prg_rom(FILE *rom, size_t prg_size) {
 
 static void parse_chr_rom(FILE *rom, size_t chr_size) {
 	fread(chr_rom, KIB8, chr_size, rom);
-	//memcpy(ppu_mem, &chr_rom[size], size);
 }
 
 static void parse_pallete() {

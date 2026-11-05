@@ -36,7 +36,6 @@ int main(int argc, char *argv[]) {
 	Display debug_dp;
 	Display nes_dp;
 
-	memset(&debug_dp, 0, sizeof(Display));
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		printf("SDL Init error\n");
 		return (1);
