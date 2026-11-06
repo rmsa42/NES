@@ -13,8 +13,11 @@
 extern "C" {
 #endif
 
-int nes_init(Display *nes_dp, const char *rom_name);
-void update_nes(Display *nes_dp, int curr_time, int *last_time);
+int nes_init(const char *rom_name);
+void nes_update(int curr_time, int *last_time);
+void nes_run();
+Display *nes_get_display();
+void nes_quit();
 void nes_handle_event(Display *nes_dp, SDL_Event *e);
 
 #ifdef __cplusplus

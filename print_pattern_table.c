@@ -56,22 +56,23 @@ void render_pattern_table(const int table_nbr, Display *nes_dp) {
 }
 
 int main(int argc, char *argv[]) {
-	Display dp;
+	Display *dp;
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-	if (nes_init(&dp, argv[1])) {
+	if (nes_init(argv[1])) {
 		return (1);
 	}
+	dp = nes_get_display();
 
-	SDL_SetRenderDrawColor(dp.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(dp.renderer);
+	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderClear(dp->renderer);
 
 	map_patt_table(atoi(argv[2]));
-	render_pattern_table(0, &dp);
+	render_pattern_table(0, dp);
 
-	SDL_RenderPresent(dp.renderer);
+	SDL_RenderPresent(dp->renderer);
 	SDL_Delay(5000);
 
-	clean_display(&dp);
+	clean_display(dp);
 	SDL_Quit();
 }

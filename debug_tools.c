@@ -19,16 +19,18 @@ bool debug_block() {
 	return (debug.run);
 }
 
-int debugger_init(const char *bp_str, Display *dp) {
+int debugger_init(const char *bp_str) {
 	memset(&debug, 0, sizeof(Debugger));
-	if (create_display("DebuggerNes", 640, 480, dp)) {
+	if (create_display("DebuggerNes", 640, 480, &debug.dp)) {
 		return (1);
 	}
-	SDL_SetWindowPosition(dp->window, 200, 300);
+	SDL_SetWindowPosition(debug.dp.window, 200, 300);
 	if (bp_str != NULL) {
 		debug.breakpoint = strtoul(bp_str, NULL, 16);
 	}
 	debug.until_bp = true;
+	debug.dp.run = true;
+	printf("Debugger Init\n");
 	return (0);
 }
 
@@ -148,7 +150,7 @@ void debugger_handle_event(Display *dp, SDL_Event *e) {
 	}
 }
 
-void update_debugger(Display *dp) {
+void debugger_update() {
 	debug.run = debug.step_into | debug.until_bp;
 	if (debug.until_bp == true && cpu.pc == debug.breakpoint) {
 		debug.until_bp = false;
@@ -158,15 +160,21 @@ void update_debugger(Display *dp) {
 	if (debug.run == true) {
 		return;
 	}
-	SDL_SetRenderDrawColor(dp->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(dp->renderer);
-	start_frame(dp);
+	SDL_SetRenderDrawColor(debug.dp.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	SDL_RenderClear(debug.dp.renderer);
+	start_frame(&debug.dp);
 	if (debug.panel == 0) {
-		general_debug_info(dp);
+		general_debug_info(&debug.dp);
 	} else {
-		memory_debug(dp);
+		memory_debug(&debug.dp);
 	}
-	SDL_RenderPresent(dp->renderer);
+	SDL_RenderPresent(debug.dp.renderer);
+}
+
+Display *debugger_get_display() { return (&debug.dp); }
+
+void debugger_quit() {
+	clean_display(&debug.dp);
 }
 
 const char *instr_enum_to_str(const byte instr) {
