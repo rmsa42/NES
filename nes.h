@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sdl_utils.h"
+#include "zeus.h"
 #include "nes.h"
 #include "cpu.h"
 #include "ppu.h"

@@ -1,4 +1,4 @@
-#include "sdl_utils.h"
+#include "zeus.h"
 
 int w_h = 480;
 int w_w = 640;
@@ -45,12 +45,12 @@ void loop(Display *dp) {
 int main() {
 	Display dp;
 
-	create_display("WIN", w_w, w_h, &dp);
+	zeus_create_display("WIN", w_w, w_h, &dp);
 	dp.run = true;
 
 	while (dp.run) {
 		loop(&dp);
 	}
 
-	clean_display(&dp);
+	zeus_clean_display(&dp);
 }

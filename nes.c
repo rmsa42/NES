@@ -9,7 +9,7 @@ Display nes_dp;
 Texture *screen;
 
 int nes_init(const char *rom_name) {
-	if (create_display("NES", window_width, window_height, &nes_dp)) {
+	if (zeus_create_display("NES", window_width, window_height, &nes_dp)) {
 		return (1);
 	}
 	SDL_SetWindowPosition(nes_dp.window, 1000, 300);
@@ -20,7 +20,7 @@ int nes_init(const char *rom_name) {
 		printf("Invalid ROM\n");
 		return (1);
 	}
-	screen = create_texture(&nes_dp, 256, 240);
+	screen = zeus_create_texture(&nes_dp, 256, 240);
 	cpu_start(); // Temporary until i stop using "cpu_mem[]" inside "read_rom()"
 	printf("Nes Init\n");
 	nes_dp.run = true;
@@ -72,7 +72,7 @@ void nes_update(int curr_time, int *last_time) {
 	clock_ppu(cycles);
 	//clock_apu(nes_dp);
 	if (render) {
-		render_texture(&nes_dp, screen);
+		zeus_render_texture(&nes_dp, screen);
 		SDL_RenderPresent(nes_dp.renderer);
 		*last_time = curr_time;
 	}
@@ -82,8 +82,9 @@ Display *nes_get_display() { return (&nes_dp); }
 
 void nes_quit() {
 	free_rom();
-	destroy_texture(screen);
-	clean_display(&nes_dp);
+	zeus_destroy_texture(screen);
+	zeus_clean_display(&nes_dp);
+	printf("Nes Quit\n");
 }
 
 void nes_handle_event(Display *nes_dp, SDL_Event *e) {

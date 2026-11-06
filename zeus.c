@@ -1,4 +1,4 @@
-#include "sdl_utils.h"
+#include "zeus.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -143,7 +143,7 @@ void start_frame(Display *dp) {
 	set_panel_cursor_pos(dp->context, 0, 0);
 }
 
-int create_display(const char *win_name, const int width, const int height, Display *dp) {
+int zeus_create_display(const char *win_name, const int width, const int height, Display *dp) {
 	memset(dp, 0, sizeof(Display));
 	if (start_panel(dp, win_name, (FPoint){0, 0}, (FPoint){width, height}, NORMAL)) {
 		return (1);
@@ -169,7 +169,7 @@ int create_display(const char *win_name, const int width, const int height, Disp
 	return (0);
 }
 
-void clean_display(Display *dp) {
+void zeus_clean_display(Display *dp) {
 	for (int i = 0; i < 10; i++) {
 		free(dp->panel_stack[i]);
 		dp->panel_stack[i] = NULL;
@@ -182,7 +182,7 @@ void clean_display(Display *dp) {
 	dp->stream = NULL;
 }
 
-Texture *create_texture(Display *dp, int w, int h) {
+Texture *zeus_create_texture(Display *dp, int w, int h) {
 	Texture *texture = malloc(sizeof(Texture));
 
 	if (texture == NULL) {
@@ -208,7 +208,7 @@ Texture *create_texture(Display *dp, int w, int h) {
 	return (texture);
 }
 
-void render_texture(Display *dp, Texture *texture) {
+void zeus_render_texture(Display *dp, Texture *texture) {
 	if (texture->status == NEED_UPDATE) {
 		SDL_UpdateTexture(texture->sdl_texture, NULL, texture->pixels, texture->pitch);
 		texture->status = OK;
@@ -216,7 +216,7 @@ void render_texture(Display *dp, Texture *texture) {
 	SDL_RenderTexture(dp->renderer, texture->sdl_texture, NULL, NULL);
 }
 
-void write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b, byte a) {
+void zeus_write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b, byte a) {
 	byte *p = texture->pixels;
 	int i = (y * texture->pitch) + (x * 4);
 
@@ -227,7 +227,7 @@ void write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b,
 	texture->status = NEED_UPDATE;
 }
 
-void destroy_texture(Texture *texture) {
+void zeus_destroy_texture(Texture *texture) {
 	free(texture->pixels);
 	texture->pixels = NULL;
 	SDL_DestroyTexture(texture->sdl_texture);

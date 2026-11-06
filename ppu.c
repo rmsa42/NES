@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "rom.h"
 #include "bus.h"
+#include "zeus.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -254,7 +255,7 @@ void render_pixel(byte bg_pixel, byte sp_pixel, byte tile_nbr, byte pixel_nbr, b
 	if (render_flag == true) {
 		// Get the RGB color from the loaded palette (2C03)
 		int pixel = ppu_mem[palette_addr] * 3;
-		write_texture_pixel(
+		zeus_write_texture_pixel(
 			screen,
 			tile_nbr * 8 + pixel_nbr,
 			scanline_nbr,

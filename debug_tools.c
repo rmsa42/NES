@@ -21,7 +21,7 @@ bool debug_block() {
 
 int debugger_init(const char *bp_str) {
 	memset(&debug, 0, sizeof(Debugger));
-	if (create_display("DebuggerNes", 640, 480, &debug.dp)) {
+	if (zeus_create_display("DebuggerNes", 640, 480, &debug.dp)) {
 		return (1);
 	}
 	SDL_SetWindowPosition(debug.dp.window, 200, 300);
@@ -174,7 +174,8 @@ void debugger_update() {
 Display *debugger_get_display() { return (&debug.dp); }
 
 void debugger_quit() {
-	clean_display(&debug.dp);
+	zeus_clean_display(&debug.dp);
+	printf("Debugger Quit\n");
 }
 
 const char *instr_enum_to_str(const byte instr) {

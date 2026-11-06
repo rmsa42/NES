@@ -1,11 +1,10 @@
 #include "rom.h"
 #include "cpu.h"
-#include "ppu.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 extern byte cpu_mem[CPU_MEM_SIZE];
-extern byte ppu_mem[PPU_MEM_SIZE];
 
 byte *chr_rom;
 byte *prg_rom;

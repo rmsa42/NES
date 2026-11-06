@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils.h"
-#include "sdl_utils.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -73,6 +73,6 @@ int main(int argc, char *argv[]) {
 	SDL_RenderPresent(dp->renderer);
 	SDL_Delay(5000);
 
-	clean_display(dp);
+	nes_quit();
 	SDL_Quit();
 }

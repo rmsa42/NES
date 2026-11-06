@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils.h"
-#include "sdl_utils.h"
+#include "zeus.h"
 
 #ifdef __cplusplus
 extern "C" {

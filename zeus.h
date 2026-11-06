@@ -64,8 +64,8 @@ typedef struct Display {
 	SDL_AudioStream *stream;
 } Display;
 
-int create_display(const char *win_name, const int width, const int height, Display *dp);
-void clean_display(Display *dp);
+int zeus_create_display(const char *win_name, const int width, const int height, Display *dp);
+void zeus_clean_display(Display *dp);
 
 void start_frame(Display *dp);
 int start_panel(Display *dp, const char *name, FPoint xy, FPoint wh, panel_flags flags);
@@ -74,10 +74,10 @@ void text(Display *dp, const char *fmt, ...);
 void text_options(Display *dp, text_opt opts);
 
 // Texture
-Texture *create_texture(Display *dp, int w, int h);
-void render_texture(Display *dp, Texture *texture);
-void write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b, byte a);
-void destroy_texture(Texture *texture);
+Texture *zeus_create_texture(Display *dp, int w, int h);
+void zeus_render_texture(Display *dp, Texture *texture);
+void zeus_write_texture_pixel(Texture *texture, int x, int y, byte r, byte g, byte b, byte a);
+void zeus_destroy_texture(Texture *texture);
 
 #ifdef __cplusplus
 }
